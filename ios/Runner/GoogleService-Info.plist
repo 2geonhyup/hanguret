@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>344369404333-p6a71ka9o63etbodon3udl5qha3uqr4o.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.344369404333-p6a71ka9o63etbodon3udl5qha3uqr4o</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAsypGRfp7FsC2h2ukjULSFCv1-EN9wMeA</string>
+	<key>GCM_SENDER_ID</key>
+	<string>344369404333</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.hangeureut.hangeureut-beta</string>
+	<key>PROJECT_ID</key>
+	<string>hangeureut</string>
+	<key>STORAGE_BUCKET</key>
+	<string>hangeureut.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:344369404333:ios:03a2c313217dab7cfde924</string>
+</dict>
+</plist>

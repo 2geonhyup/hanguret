@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "344369404333",
+    "project_id": "hangeureut",
+    "storage_bucket": "hangeureut.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:344369404333:android:eed5c465c4dfc339fde924",
+        "android_client_info": {
+          "package_name": "com.example.hangeureut"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "344369404333-2ui4a6m4n67mstlmta0k6nk1hcv9e74e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAza9oWFjZ7pSY53zu3vUTLIAAG436dhWg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "344369404333-2ui4a6m4n67mstlmta0k6nk1hcv9e74e.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "344369404333-n9j89m7096d79som2v65v9rotdn6c62g.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "io.flutter.flutter.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
