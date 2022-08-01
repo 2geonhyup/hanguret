@@ -1,15 +1,20 @@
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hangeureut/constants.dart';
-import 'package:hangeureut/models/search_model.dart';
-import 'package:hangeureut/providers/menu/menu_provider.dart';
 import 'package:hangeureut/screens/location_select_screen/location_select_page.dart';
+import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
+import 'package:hangeureut/screens/profile_screen/profile_page.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/filter/filter_provider.dart';
-import '../../providers/menu/menu_state.dart';
+import '../../providers/profile/profile_provider.dart';
 import '../../widgets/floating_button.dart';
-import '../main_screen/main_screen_page.dart';
-import '../profile_screen/profile_page.dart';
+import '../../widgets/nav_custom_painter.dart';
+import '../main_screen/main_screen_view.dart';
+import 'basic_screen_view.dart';
 
 class BasicScreenPage extends StatefulWidget {
   static const String routeName = '/basic';
@@ -20,106 +25,57 @@ class BasicScreenPage extends StatefulWidget {
 }
 
 class _BasicScreenPageState extends State<BasicScreenPage> {
-  int _pageIndex = 0;
-
-  late PageController _pageController;
-  List<Widget> tabPages = [
-    MainScreenPage(),
-    Container(
-      width: 20,
-      height: 20,
-      color: Colors.white,
-      child: Center(
-        child: Text("second"),
-      ),
-    ),
-    ProfilePage(),
-    Container(
-      width: 20,
-      height: 20,
-      color: Colors.white,
-      child: Center(
-        child: Text("4"),
-      ),
-    ),
-  ];
+  late PersistentTabController _controller;
 
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-
-    _pageController = PageController(initialPage: _pageIndex);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+    _controller = PersistentTabController(initialIndex: 0);
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return WelcomeDialog(
+              onMoreTap: () {
+                _controller.index = 2;
+                setState(() {});
+              },
+            );
+          });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    _pageIndex = context.watch<MenuState>().index;
     return Scaffold(
-        resizeToAvoidBottomInset: false,
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-        floatingActionButton: Padding(
-            padding: const EdgeInsets.only(top: 38.0),
-            child: ReviewFloatingButton(buttonColor: Colors.black)),
-        backgroundColor: kBasicColor,
-        bottomNavigationBar: Container(
-          padding: const EdgeInsets.only(
-            left: 10,
-            right: 100,
+      floatingActionButton:
+          ReviewFloatingButton(buttonColor: kSecondaryTextColor),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      body: Padding(
+        padding: const EdgeInsets.only(bottom: 30.0),
+        child: PersistentTabView.custom(
+          context,
+          controller: _controller,
+          itemCount: 4,
+          screens: buildScreens(),
+          confineInSafeArea: false,
+          handleAndroidBackButtonPress: true,
+          backgroundColor: navBarColor[_controller.index],
+          customWidget: CustomNavBarWidget(
+            // Your custom widget goes here
+            items: navBarsItems(),
+            selectedIndex: _controller.index,
+            onItemSelected: (index) {
+              setState(() {
+                _controller.index =
+                    index; // NOTE: THIS IS CRITICAL!! Don't miss it!
+              });
+            },
           ),
-          color: Colors.white,
-          child: MainBottomNavigationBar(
-              index: _pageIndex,
-              onTap: onTabTapped,
-              items: bottomNavigatorBarItems),
         ),
-        body: PageView(
-          children: tabPages,
-          onPageChanged: onPageChanged,
-          controller: _pageController,
-        ));
-  }
-
-  void onPageChanged(int page) {
-    context.read<MenuProvider>().changeMenu(page);
-  }
-
-  void onTabTapped(int index) {
-    if (_pageIndex == 0 && index == 0) {
-      context
-          .read<SearchFilterProvider>()
-          .changeFilter(Filter(mainFilter: MainFilter.none));
-    }
-    this._pageController.jumpToPage(index);
-  }
-}
-
-class MainBottomNavigationBar extends StatelessWidget {
-  MainBottomNavigationBar(
-      {Key? key, required this.index, required this.onTap, required this.items})
-      : super(key: key);
-  int index;
-  void Function(int)? onTap;
-  List<BottomNavigationBarItem> items;
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: index,
-      onTap: onTap,
-      backgroundColor: Colors.white,
-      elevation: 0,
-      type: BottomNavigationBarType.fixed,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      selectedIconTheme: IconThemeData(size: 28, color: kBasicTextColor),
-      unselectedIconTheme:
-          IconThemeData(size: 28, color: kBasicTextColor.withOpacity(0.3)),
-      items: bottomNavigatorBarItems,
+      ),
     );
   }
 }

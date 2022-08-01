@@ -21,9 +21,15 @@ class _NickNameSettingState extends State<NickNameSetting> {
   String? originName = "";
 
   @override
-  Widget build(BuildContext context) {
-    name = context.watch<ProfileState>().user.name;
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    name = context.read<ProfileState>().user.name;
     originName = name;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     print("name${originName}");
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -51,7 +57,7 @@ class _NickNameSettingState extends State<NickNameSetting> {
             height: 47,
             child: Center(
                 child: Text(
-              "$name밥",
+              "$name",
               style: TextStyle(color: Colors.white, fontSize: 15),
             )),
             decoration: BoxDecoration(
@@ -81,7 +87,7 @@ class _NickNameSettingState extends State<NickNameSetting> {
                 },
                 onFieldSubmitted: (val) async {
                   print(name);
-                  name == "" || name == null ? originName : name;
+                  name == "" || name == null ? name = originName : null;
                   try {
                     await context.read<ProfileProvider>().setName(name: name);
                   } on CustomError catch (e) {

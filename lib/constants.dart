@@ -24,6 +24,11 @@ const kBorderGreenColor = Color(0xff868F7D);
 
 const tasteProfileIconPath = "images/icons/onboarding_icon";
 
+Icon kBasicBackIcon = Icon(
+  Icons.arrow_back_ios,
+  color: kBasicTextColor.withOpacity(0.8),
+);
+
 Map stationColor = {
   "안암역": Color(0xffcd7c2f),
   "회기역": Color(0xff0033a0),
@@ -38,11 +43,12 @@ List locationFilters = [
   LocationFilter(name: "고려대", station: "안암역"),
   LocationFilter(name: "경희대", station: "회기역"),
   LocationFilter(name: "한국외대", station: "외대앞역"),
+  LocationFilter(name: "서울대", station: "서울대입구역"),
+  LocationFilter(name: "카이스트", station: "회기역"),
   LocationFilter(name: "연세대", station: "신촌역"),
   LocationFilter(name: "이화여대", station: "신촌역"),
   LocationFilter(name: "성신여대", station: "성신여대입구역"),
   LocationFilter(name: "서강대", station: "광흥창역"),
-  LocationFilter(name: "서울대", station: "서울대입구역"),
 ];
 
 const keyWordList = [
@@ -103,18 +109,6 @@ const spicyLevelText = [
   "엽떡은 가장 매운맛이지"
 ];
 
-const bottomNavigatorBarItems = [
-  BottomNavigationBarItem(
-      icon: Icon(
-        Icons.home_outlined,
-      ),
-      label: 'Home'),
-  BottomNavigationBarItem(icon: Icon(Icons.photo_outlined), label: 'Picture'),
-  BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'User'),
-  BottomNavigationBarItem(
-      icon: Icon(Icons.notifications_outlined), label: 'Notification'),
-];
-
 const Map filterMap = {
   MainFilter.meal: {
     MainFilter.meal: ["images/filters/meal.png", "밥 한그릇"],
@@ -153,3 +147,84 @@ const Map filterMap = {
     CoffeeSubFilter.cheap: ["images/filters/coffee/cheap.png", "저렴한 가격"],
   }
 };
+
+const profileIcons = [
+  "🍕",
+  "🍔",
+  "🍟",
+  "🌮",
+  "🥗",
+  "🌯",
+  "🍜",
+  "🥘",
+  "🍝",
+  "🍲",
+  "🍛",
+  "🍣",
+  "🍎",
+  "🍑",
+  "🍰",
+  "🍱",
+  "🍤",
+  "🍙",
+  "🍏",
+  "🍐",
+  "🍊",
+  "🍚",
+  "🍘",
+  "🍥",
+  "🍋",
+  "🍉",
+  "🍌",
+  "🍢",
+  "🍡",
+  "🍧",
+  "🍇",
+  "🍓",
+  "🍈",
+  "🍨",
+  "🍦",
+  "🎂",
+  "🍍",
+  "🥝",
+  "🍅",
+  "🍮",
+  "🍭",
+  "🍬",
+  "🍆",
+  "🥑",
+  "🥒",
+  "🍫",
+  "🍿",
+  "🍩",
+  "🌶",
+  "🌽",
+  "🥕",
+  "🥜",
+  "🌰",
+  "🍯",
+  "🥔",
+  "🍠",
+  "🥐",
+  "🥛",
+  "🍼",
+  "☕",
+  "🍞",
+  "🥖",
+  "🧀",
+  "🍾",
+  "🍵",
+  "🍺",
+  "🍶",
+  "🍳",
+  "🥞",
+  "🍖",
+  "🥃",
+  "🍸",
+  "🍻",
+  "🍹",
+  "🥂",
+  "🍗",
+  "🥓",
+  "🌭",
+];

@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
+import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../widgets/bottom_navigation_bar.dart';
@@ -23,8 +24,17 @@ class _ReviewPageState extends State<ReviewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BasicBottomNavigationBar(
-          option1: "취소", option2: "게시", nav1: "back", nav2: "back"),
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 30),
+          child: GestureDetector(
+              onTap: () =>
+                  Navigator.popAndPushNamed(context, BasicScreenPage.routeName),
+              child: kBasicBackIcon),
+        ),
+      ),
       body: ListView(
         children: [
           searchCompleted
@@ -72,7 +82,8 @@ class _SearchRestaurantBarState extends State<SearchRestaurantBar> {
           height: 50,
           decoration: BoxDecoration(
               border: Border.all(
-                color: Color(0xFF928A7B),
+                color: kSecondaryTextColor,
+                width: 1,
               ),
               borderRadius: BorderRadius.all(Radius.circular(16.0))),
           child: Row(
@@ -85,13 +96,19 @@ class _SearchRestaurantBarState extends State<SearchRestaurantBar> {
                   decoration: InputDecoration(
                     contentPadding: EdgeInsets.all(0),
                     hintText: "가게 이름을 입력해주세요.",
+                    hintStyle: TextStyle(
+                        fontFamily: 'Suit',
+                        fontWeight: FontWeight.w400,
+                        color: kSecondaryTextColor.withOpacity(0.5),
+                        fontSize: 14),
                     border: OutlineInputBorder(borderSide: BorderSide.none),
                   ),
                 ),
               ),
               Icon(
                 Icons.search,
-                color: Color(0xFF928A7B),
+                color: kBasicColor,
+                size: 20,
               )
             ],
           ),

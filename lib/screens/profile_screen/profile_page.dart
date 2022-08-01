@@ -1,10 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/profile/profile_state.dart';
+import '../../widgets/profile_icon_box.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -24,104 +26,106 @@ class _ProfilePageState extends State<ProfilePage> {
   ModifyingField modifyingField = ModifyingField.none;
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: kBasicColor,
-        resizeToAvoidBottomInset: false,
-        body: SafeArea(
-          child: Container(
-            color: Colors.white,
-            child: ListView(
+        backgroundColor: Colors.white,
+        body: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            Stack(
               children: [
-                Stack(
-                  children: [
-                    Container(
-                      height: 188,
-                      color: kBasicColor,
-                    ),
-                    SizedBox(
-                      height: 260,
-                    ),
-                    Positioned(
-                      top: 53,
-                      left: 40,
-                      right: 40,
-                      child: Container(
-                          child: ProfileCard(
-                              onNameClicked: () {
-                                print(nameModify);
-                                setState(() {
-                                  nameModify = !nameModify;
-                                });
-                              },
-                              onIdClicked: () {
-                                setState(() {
-                                  idModify = !idModify;
-                                });
-                              },
-                              onModifyClicked: () {
-                                setState(() {
-                                  modifyClicked = !modifyClicked;
-                                  modifyingField = ModifyingField.none;
-                                });
-                              },
-                              nameModify: nameModify,
-                              idModify: idModify,
-                              modifyClicked: modifyClicked)),
-                    )
-                  ],
+                Container(
+                  height: 188,
+                  color: kBasicColor,
                 ),
                 SizedBox(
-                  height: 15,
+                  height: 260,
                 ),
-                ScoreBar(),
-                SizedBox(
-                  height: 28,
-                ),
-                TasteProfile(
-                  modifyClicked: modifyClicked,
-                  tasteAddClicked: tasteAddClicked,
-                  tasteAdd: () {
-                    setState(() {
-                      tasteAddClicked = !tasteAddClicked;
-                    });
-                    if (tasteAddClicked) {
-                      showModalBottomSheet(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return TasteAddModal();
-                          }).then((val) {
-                        setState(() {
-                          tasteAddClicked = false;
-                        });
-                      });
-                    }
-                  },
-                  modifyingField: modifyingField,
-                  onModifyingFieldChange: (val) {
-                    setState(() {
-                      modifyingField = val;
-                    });
-                  },
-                  alcoholAdd: () {
-                    setState(() {
-                      modifyingField = ModifyingField.alcohol;
-                    });
-
-                    showModalBottomSheet(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlcoholAddModal();
-                        }).then((val) {
-                      setState(() {
-                        modifyingField = ModifyingField.none;
-                      });
-                    });
-                  },
-                ),
+                Positioned(
+                  top: 53,
+                  left: 40,
+                  right: 40,
+                  child: Container(
+                      child: ProfileCard(
+                          onNameClicked: () {
+                            print(nameModify);
+                            setState(() {
+                              nameModify = !nameModify;
+                            });
+                          },
+                          onIdClicked: () {
+                            setState(() {
+                              idModify = !idModify;
+                            });
+                          },
+                          onModifyClicked: () {
+                            setState(() {
+                              modifyClicked = !modifyClicked;
+                              modifyingField = ModifyingField.none;
+                            });
+                          },
+                          nameModify: nameModify,
+                          idModify: idModify,
+                          modifyClicked: modifyClicked)),
+                )
               ],
             ),
-          ),
+            SizedBox(
+              height: 15,
+            ),
+            ScoreBar(),
+            SizedBox(
+              height: 28,
+            ),
+            TasteProfile(
+              modifyClicked: modifyClicked,
+              tasteAddClicked: tasteAddClicked,
+              tasteAdd: () {
+                setState(() {
+                  tasteAddClicked = !tasteAddClicked;
+                });
+                if (tasteAddClicked) {
+                  showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return TasteAddModal();
+                      }).then((val) {
+                    setState(() {
+                      tasteAddClicked = false;
+                    });
+                  });
+                }
+              },
+              modifyingField: modifyingField,
+              onModifyingFieldChange: (val) {
+                setState(() {
+                  modifyingField = val;
+                });
+              },
+              alcoholAdd: () {
+                setState(() {
+                  modifyingField = ModifyingField.alcohol;
+                });
+
+                showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlcoholAddModal();
+                    }).then((val) {
+                  setState(() {
+                    modifyingField = ModifyingField.none;
+                  });
+                });
+              },
+            ),
+          ],
         ));
   }
 }
@@ -168,28 +172,7 @@ class ProfileCard extends StatelessWidget {
           SizedBox(
             height: 24,
           ),
-          Container(
-            child: Center(
-                child: Text(
-              "🍎",
-              style: TextStyle(fontSize: 27),
-            )),
-            width: 53,
-            height: 53,
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(53),
-                boxShadow: [
-                  BoxShadow(
-                      color: Color(0xff000000).withOpacity(0.08),
-                      blurRadius: 6,
-                      spreadRadius: 0,
-                      offset: Offset(
-                        0,
-                        4,
-                      )),
-                ]),
-          ),
+          ProfileIconBox(content: "🍎"),
           SizedBox(
             height: 10,
           ),

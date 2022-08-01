@@ -40,15 +40,14 @@ class LocationFilter extends Equatable {
 class Filter extends Equatable {
   final MainFilter mainFilter;
   final List subFilterList;
-  final List locationFilterList;
+  LocationFilter? locationFilter;
 
-  Filter(
-      {required this.mainFilter,
-      this.subFilterList = const [],
-      this.locationFilterList = const []});
+  Filter({required this.mainFilter, this.locationFilter, List? subFilterList})
+      : subFilterList = subFilterList ?? [];
 
   @override
-  List<Object> get props => [mainFilter, subFilterList];
+  List<Object> get props =>
+      [mainFilter, subFilterList, locationFilter ?? "none"];
   @override
   bool get stringify => true;
 }

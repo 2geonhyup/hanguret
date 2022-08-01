@@ -12,7 +12,7 @@ class SearchFilterProvider extends StateNotifier<SearchFilterState>
   }
 
   get subFilters => state.filter.subFilterList;
-  get locationFilters => state.filter.locationFilterList;
+  get locationFilter => state.filter.locationFilter;
 
   void addSubFilter(newSubFilter) {
     Filter currentFilter = state.filter;
@@ -25,7 +25,7 @@ class SearchFilterProvider extends StateNotifier<SearchFilterState>
     Filter newFilter = Filter(
         mainFilter: currentFilter.mainFilter,
         subFilterList: currentSubFilters,
-        locationFilterList: currentFilter.locationFilterList);
+        locationFilter: currentFilter.locationFilter);
     state = state.copyWith(filter: newFilter);
     print(state);
   }

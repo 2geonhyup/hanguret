@@ -3,12 +3,16 @@ import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/repositories/friend_repository.dart';
 import 'package:hangeureut/screens/serching_screen/searching_page.dart';
+import 'package:hangeureut/widgets/profile_icon_box.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 import '../../models/search_model.dart';
 import '../../providers/filter/filter_provider.dart';
 import '../../providers/filter/filter_state.dart';
 import '../location_select_screen/location_select_page.dart';
+import 'main_screen_view.dart';
 
 class MainScreenPage extends StatefulWidget {
   static const String routeName = '/main';
@@ -20,6 +24,12 @@ class MainScreenPage extends StatefulWidget {
 
 class MainScreenPageState extends State<MainScreenPage> {
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final currentState = context.watch<SearchFilterState>();
     final mainFilter = currentState.filter.mainFilter;
@@ -30,249 +40,262 @@ class MainScreenPageState extends State<MainScreenPage> {
     }
 
     return Scaffold(
-        backgroundColor: selected ? kBackgroundColor2 : kBasicColor,
-        body: SafeArea(
-          child: ListView(
-              padding: EdgeInsets.zero,
-              physics: NeverScrollableScrollPhysics(),
-              children: [
-                !selected
-                    ? Padding(
-                        padding: EdgeInsets.only(top: 30, left: 40, right: 30),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        backgroundColor: kBackgroundColor2,
+        body: ListView(
+            padding: EdgeInsets.zero,
+            physics: NeverScrollableScrollPhysics(),
+            children: [
+              Container(
+                color: !selected ? kBasicColor : kBackgroundColor2,
+                child: Column(
+                  children: [
+                    !selected
+                        ? Padding(
+                            padding:
+                                EdgeInsets.only(top: 60, left: 40, right: 30),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "한그릇",
+                                  style: TextStyle(
+                                      fontFamily: "Cafe24",
+                                      color: Colors.white,
+                                      fontSize: 30),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 20.0),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        "저장",
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 10),
+                                      ),
+                                      Icon(
+                                        Icons.bookmark,
+                                        color: Colors.white,
+                                        size: 30,
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ))
+                        : Padding(
+                            padding: const EdgeInsets.only(
+                                top: 63, left: 30, right: 30),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    context
+                                        .read<SearchFilterProvider>()
+                                        .changeFilter(Filter(
+                                            mainFilter: MainFilter.none));
+                                  },
+                                  child: Icon(
+                                    Icons.arrow_back_ios,
+                                    color: kBasicTextColor.withOpacity(0.8),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                    AnimatedSize(
+                      duration: Duration(milliseconds: 200),
+                      child: Container(
+                        height: !selected ? 300 : 0,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Text(
-                              "한그릇",
-                              style: TextStyle(
-                                  fontFamily: "Cafe24",
-                                  color: Colors.white,
-                                  fontSize: 30),
+                            SizedBox(
+                              height: 135,
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 20.0),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    "저장",
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 10),
-                                  ),
-                                  Icon(
-                                    Icons.bookmark,
-                                    color: Colors.white,
-                                    size: 30,
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ))
-                    : Padding(
-                        padding:
-                            const EdgeInsets.only(top: 30, left: 30, right: 30),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                context
-                                    .read<SearchFilterProvider>()
-                                    .changeFilter(
-                                        Filter(mainFilter: MainFilter.none));
-                              },
-                              child: Icon(
-                                Icons.arrow_back_ios,
-                                color: kBasicTextColor.withOpacity(0.8),
-                              ),
-                            )
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 30.0),
+                                child: Container(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () async {
+                                              await context
+                                                  .read<FriendRepository>()
+                                                  .getKaKaoFriends();
+                                            },
+                                            child: Text(
+                                              "메뉴 이름으로 찾기",
+                                              style: TextStyle(
+                                                  color: kHintTextColor
+                                                      .withOpacity(0.6),
+                                                  fontSize: 14),
+                                            ),
+                                          ),
+                                          Image.asset(
+                                            "images/icons/search.png",
+                                            width: 20,
+                                            height: 20,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(50)),
+                                    )))
                           ],
                         ),
                       ),
-                AnimatedSize(
-                  duration: Duration(milliseconds: 200),
-                  child: Container(
-                    height: !selected ? 300 : 0,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SizedBox(
-                          height: 135,
-                        ),
-                        Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 30.0),
-                            child: Container(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () async {
-                                          await context
-                                              .read<FriendRepository>()
-                                              .getFriends();
-                                        },
-                                        child: Text(
-                                          "메뉴 이름으로 찾기",
-                                          style: TextStyle(
-                                              color: kHintTextColor
-                                                  .withOpacity(0.6),
-                                              fontSize: 14),
-                                        ),
-                                      ),
-                                      Image.asset(
-                                        "images/icons/search.png",
-                                        width: 20,
-                                        height: 20,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(50)),
-                                )))
-                      ],
                     ),
-                  ),
+                  ],
                 ),
-                Container(
-                    height: MediaQuery.of(context).size.height,
-                    color: kBackgroundColor2,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 28.0),
-                      child: Column(children: [
-                        SizedBox(
-                          height: 50,
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            mainFilterButton(
-                                context, MainFilter.meal, mainFilter),
-                            mainFilterButton(
-                                context, MainFilter.alcohol, mainFilter),
-                            mainFilterButton(
-                                context, MainFilter.coffee, mainFilter)
-                          ],
-                        ),
-                        selected
-                            ? SizedBox(
-                                height: 50,
-                                child: Divider(
-                                  color: Color(0xff8B867D),
+              ),
+              Container(
+                  color: kBackgroundColor2,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 33.0),
+                    child: Column(children: [
+                      SizedBox(
+                        height: 50,
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          mainFilterButton(
+                              context, MainFilter.meal, mainFilter),
+                          mainFilterButton(
+                              context, MainFilter.alcohol, mainFilter),
+                          mainFilterButton(
+                              context, MainFilter.coffee, mainFilter)
+                        ],
+                      ),
+                      selected
+                          ? SizedBox(
+                              height: 50,
+                              child: Divider(
+                                color: Color(0xff8B867D),
+                              ),
+                            )
+                          : SizedBox.shrink(),
+                      selected
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    SubFilterButton(
+                                      mainFilter: mainFilter,
+                                      subFilter: subOptions![1],
+                                    ),
+                                    SubFilterButton(
+                                      mainFilter: mainFilter,
+                                      subFilter: subOptions[2],
+                                    ),
+                                    SubFilterButton(
+                                      mainFilter: mainFilter,
+                                      subFilter: subOptions[3],
+                                    ),
+                                  ],
                                 ),
-                              )
-                            : SizedBox.shrink(),
-                        selected
-                            ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      SubFilterButton(
-                                        mainFilter: mainFilter,
-                                        subFilter: subOptions![1],
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    SubFilterButton(
+                                      mainFilter: mainFilter,
+                                      subFilter: subOptions[4],
+                                    ),
+                                    SubFilterButton(
+                                      mainFilter: mainFilter,
+                                      subFilter: subOptions[5],
+                                    ),
+                                    SubFilterButton(
+                                      mainFilter: mainFilter,
+                                      subFilter: subOptions[6],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )
+                          : SizedBox.shrink(),
+                      SizedBox(
+                        height: 120,
+                      ),
+                      selected
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        pushNewScreenWithRouteSettings(
+                                          context,
+                                          settings: RouteSettings(
+                                              name:
+                                                  LocationSelectPage.routeName),
+                                          screen: LocationSelectPage(),
+                                          withNavBar: true,
+                                          pageTransitionAnimation:
+                                              PageTransitionAnimation.cupertino,
+                                        );
+                                      },
+                                      child: Text(
+                                        "위치 선택하기 >",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: kSecondaryTextColor),
                                       ),
-                                      SubFilterButton(
-                                        mainFilter: mainFilter,
-                                        subFilter: subOptions[2],
-                                      ),
-                                      SubFilterButton(
-                                        mainFilter: mainFilter,
-                                        subFilter: subOptions[3],
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 15,
-                                  ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      SubFilterButton(
-                                        mainFilter: mainFilter,
-                                        subFilter: subOptions[4],
-                                      ),
-                                      SubFilterButton(
-                                        mainFilter: mainFilter,
-                                        subFilter: subOptions[5],
-                                      ),
-                                      SubFilterButton(
-                                        mainFilter: mainFilter,
-                                        subFilter: subOptions[6],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              )
-                            : SizedBox.shrink(),
-                        SizedBox(
-                          height: 110,
-                        ),
-                        selected
-                            ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () {
-                                          Navigator.pushNamed(context,
-                                              LocationSelectPage.routeName);
-                                        },
-                                        child: Text(
-                                          "위치 선택하기 >",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: kSecondaryTextColor),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 13,
-                                  ),
-                                  GestureDetector(
-                                    child: Container(
-                                      width: 114,
-                                      height: 44,
-                                      decoration: BoxDecoration(
-                                          color: kBasicColor,
-                                          borderRadius:
-                                              BorderRadius.circular(50)),
-                                      child: Center(
-                                        child: Text(
-                                          "바로 찾기",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15),
-                                        ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 13,
+                                ),
+                                GestureDetector(
+                                  child: Container(
+                                    width: 114,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                        color: kBasicColor,
+                                        borderRadius:
+                                            BorderRadius.circular(50)),
+                                    child: Center(
+                                      child: Text(
+                                        "바로 찾기",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15),
                                       ),
                                     ),
                                   ),
-                                ],
-                              )
-                            : SizedBox.shrink(),
-                      ]),
-                    )),
-              ]),
-        ));
+                                ),
+                              ],
+                            )
+                          : SizedBox.shrink(),
+                    ]),
+                  )),
+            ]));
   }
 }
 

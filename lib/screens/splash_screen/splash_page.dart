@@ -1,12 +1,16 @@
 // auth에 따라 분기시키는 역할을 하는 페이지
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:flutter/material.dart';
+import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding1_page.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/custom_error.dart';
 import '../../providers/profile/profile_provider.dart';
+import '../../providers/signup/signup_provider.dart';
+import '../../widgets/error_dialog.dart';
 import '../basic_screen/basic_screen_page.dart';
 
 class SplashPage extends StatefulWidget {
@@ -18,40 +22,61 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-  void _getProfile() async {
-    //stream provider로 위젯트리에 제공한 user정보 이용한 것 이용한 것
+  bool completed = false;
+  Future<void> _login() async {
+    try {
+      //signup 후 리턴값 받아옴
+      //리턴값은 이름, firebase uid임
+      await context.read<SignupProvider>().signup();
+    } on CustomError catch (e) {
+      errorDialog(context, e);
+    }
     final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
     // init state에서 async함수를 호출하는 것은 ui의 inconsistency를 야기시킬 수 있음
     await context.read<ProfileProvider>().getProfile(uid: uid);
+    completed = true;
   }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _getProfile();
+    _login();
   }
 
   @override
   Widget build(BuildContext context) {
-    final onboardingState =
-        context.read<ProfileState>().user.onboarding["level"];
-    print("onboardingstate${onboardingState}");
-
-    if (onboardingState == 3) {
-      // build 내에서 네비게이션을 하기 때문에, safe한 동작을 위해 addpostframecallback을 사용
-      // 이렇게 하면, 현재 build 작업이 끝난 후에 해당 동작을 실행할 수 있음
-      WidgetsBinding.instance!.addPostFrameCallback((_) {
+    final onBoardingState = context.watch<ProfileState>().user.onboarding;
+    print("hereisproblem$onBoardingState");
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      if (onBoardingState["level"] == 3) {
         Navigator.pushNamed(context, BasicScreenPage.routeName);
-      });
-    } else {
-      WidgetsBinding.instance!.addPostFrameCallback((_) {
+      } else if (onBoardingState["level"] == 2) {
         Navigator.pushNamed(context, OnBoarding1Page.routeName);
-      });
-    }
+      } else if (onBoardingState.length == 0 && completed) {
+        Navigator.pushNamed(context, OnBoarding1Page.routeName);
+      }
+    });
+
     return Scaffold(
         body: Center(
-      child: CircularProgressIndicator(),
+      child: Stack(
+        children: [
+          Center(
+              child: Image.asset(
+            "images/fork.png",
+            width: 50,
+          )),
+          Center(
+            child: SizedBox(
+                width: 114,
+                height: 114,
+                child: CircularProgressIndicator(
+                  color: kBasicColor,
+                )),
+          ),
+        ],
+      ),
     ));
   }
 }

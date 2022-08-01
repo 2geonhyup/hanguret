@@ -44,10 +44,12 @@ class AuthRepository {
         // userRef: user 콜렉션 경로
         final DocumentSnapshot userDoc =
             await usersRef.doc(signedInUser.uid).get();
+        print("authrepooooo$userDoc");
         if (!userDoc.exists) {
           await usersRef.doc(signedInUser.uid).set({
             'name': signedInUser.displayName!.substring(1),
             'email': signedInUser.email,
+            'first-login': true,
           });
         }
       } catch (e) {
