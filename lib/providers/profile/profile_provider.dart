@@ -12,7 +12,6 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
   //editName -> 이름 정보 업데이트(firestore)
 
   Future<void> getProfile({required String uid}) async {
-    print("profileprovuid${uid}");
     state = state.copyWith(profileStatus: ProfileStatus.loading);
     try {
       final User user = await read<ProfileRepository>().getProfile(uid: uid);
@@ -21,6 +20,28 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
       state = state.copyWith(profileStatus: ProfileStatus.error, error: e);
       rethrow;
     }
+  }
+
+  Future<void> setLogin() async {
+    try {
+      await read<ProfileRepository>().setLogin();
+    } on CustomError catch (e) {
+      state = state.copyWith(profileStatus: ProfileStatus.error, error: e);
+      throw CustomError(
+        code: 'Exception',
+        message: e.toString(),
+        plugin: 'flutter_error/server_error',
+      );
+    }
+    User newUser = User(
+        id: state.user.id,
+        name: state.user.name,
+        email: state.user.email,
+        onboarding: state.user.onboarding,
+        friends: state.user.friends,
+        icon: state.user.icon,
+        first: false);
+    state = state.copyWith(user: newUser);
   }
 
   Future<void> setName({required String? name}) async {
@@ -41,11 +62,13 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
       );
     }
     User newUser = User(
-      id: state.user.id,
-      name: name,
-      email: state.user.email,
-      onboarding: state.user.onboarding,
-    );
+        id: state.user.id,
+        name: name,
+        email: state.user.email,
+        onboarding: state.user.onboarding,
+        friends: state.user.friends,
+        icon: state.user.icon,
+        first: state.user.first);
     state = state.copyWith(user: newUser);
   }
 
@@ -65,6 +88,9 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
       name: state.user.name,
       email: state.user.email,
       onboarding: onboarding,
+      friends: state.user.friends,
+      icon: state.user.icon,
+      first: state.user.first,
     );
     state = state.copyWith(user: newUser);
   }

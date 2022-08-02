@@ -1,9 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../constants.dart';
+import '../models/custom_error.dart';
+import '../models/friend.dart';
+
+Future<List<MealFriend>> getFriendsDoc(friendsId) async {
+  List<MealFriend> friendsList = [];
+  print("asyncOne start");
+  for (String element in friendsId) {
+    final DocumentSnapshot userDoc = await usersRef.doc(element).get();
+    Map? data = userDoc.data() as Map<String, dynamic>?;
+    MealFriend newFriend = MealFriend(
+        id: userDoc.id, name: data!["name"], icon: data["icon"] ?? 1);
+    friendsList.add(newFriend);
+  }
+  return friendsList;
+}
 
 class FriendRepository {
   final FirebaseFirestore firebaseFirestore;
@@ -11,22 +24,24 @@ class FriendRepository {
   FriendRepository({
     required this.firebaseFirestore,
   });
-  Future<List?> getKaKaoFriends() async {
+  Future<List<MealFriend>?> getKaKaoFriends() async {
     try {
       Friends friends = await TalkApi.instance.friends();
-      List? fridndsId =
+      List? friendsId =
           friends.elements?.map((friend) => "kakao:${friend.id}").toList();
-      List friendsList = [];
-      if (fridndsId == null) {
+      List<MealFriend> friendsList = [];
+      if (friendsId == null) {
       } else {
-        fridndsId.forEach((element) async {
-          final DocumentSnapshot userDoc = await usersRef.doc(element).get();
-          friendsList.add(userDoc.data());
-        });
+        friendsList = await getFriendsDoc(friendsId);
+        print("friend_repo$friendsList");
         return friendsList;
       }
-    } catch (error) {
-      print('카카오톡 친구 목록 받기 실패 $error');
+    } catch (e) {
+      throw CustomError(
+        code: '카카오친구받아오기 오류',
+        message: e.toString(),
+        plugin: 'flutter_error/server_error',
+      );
     }
   }
 }

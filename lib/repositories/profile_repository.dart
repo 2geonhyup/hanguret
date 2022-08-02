@@ -43,6 +43,25 @@ class ProfileRepository {
     }
   }
 
+  Future<void> setLogin() async {
+    final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
+    try {
+      await usersRef.doc(uid).update({'first-login': false});
+    } on FirebaseException catch (e) {
+      throw CustomError(
+        code: e.code,
+        message: e.message!,
+        plugin: e.plugin,
+      );
+    } catch (e) {
+      throw CustomError(
+        code: 'Exception',
+        message: e.toString(),
+        plugin: 'flutter_error/server_error',
+      );
+    }
+  }
+
 //onboarding1에서 활용할 setName함수
   Future<void> setName({required String name}) async {
     print("setname");

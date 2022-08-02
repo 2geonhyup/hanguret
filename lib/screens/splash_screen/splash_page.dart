@@ -2,6 +2,7 @@
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
+import 'package:hangeureut/providers/friend/recommend_friend_provider.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding1_page.dart';
@@ -25,15 +26,22 @@ class _SplashPageState extends State<SplashPage> {
   bool completed = false;
   Future<void> _login() async {
     try {
-      //signup 후 리턴값 받아옴
-      //리턴값은 이름, firebase uid임
       await context.read<SignupProvider>().signup();
     } on CustomError catch (e) {
       errorDialog(context, e);
     }
     final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
-    // init state에서 async함수를 호출하는 것은 ui의 inconsistency를 야기시킬 수 있음
-    await context.read<ProfileProvider>().getProfile(uid: uid);
+    try {
+      await context.read<ProfileProvider>().getProfile(uid: uid);
+    } on CustomError catch (e) {
+      errorDialog(context, e);
+    }
+    try {
+      await context.read<RecommendFriendProvider>().getRecommendFriends();
+    } on CustomError catch (e) {
+      errorDialog(context, e);
+    }
+
     completed = true;
   }
 

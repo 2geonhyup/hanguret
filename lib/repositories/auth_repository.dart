@@ -8,6 +8,7 @@ import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 
 import '../constants.dart';
 import 'auth_repositories_functions.dart';
+import 'dart:math';
 
 class AuthRepository {
   final FirebaseFirestore firebaseFirestore;
@@ -50,6 +51,8 @@ class AuthRepository {
             'name': signedInUser.displayName!.substring(1),
             'email': signedInUser.email,
             'first-login': true,
+            'friends': [],
+            'icon': Random().nextInt(78),
           });
         }
       } catch (e) {

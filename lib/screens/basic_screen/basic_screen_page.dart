@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hangeureut/constants.dart';
+import 'package:hangeureut/providers/profile/profile_state.dart';
+import 'package:hangeureut/screens/friend_screen/friend_recommend_page.dart';
 import 'package:hangeureut/screens/location_select_screen/location_select_page.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/profile_screen/profile_page.dart';
@@ -18,7 +20,8 @@ import 'basic_screen_view.dart';
 
 class BasicScreenPage extends StatefulWidget {
   static const String routeName = '/basic';
-  BasicScreenPage({Key? key}) : super(key: key);
+  BasicScreenPage({Key? key, this.initialIndex = 0}) : super(key: key);
+  final initialIndex;
 
   @override
   State<BasicScreenPage> createState() => _BasicScreenPageState();
@@ -32,19 +35,25 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
     // TODO: implement initState
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
-    _controller = PersistentTabController(initialIndex: 0);
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      showDialog(
-          context: context,
-          builder: (context) {
-            return WelcomeDialog(
-              onMoreTap: () {
-                _controller.index = 2;
-                setState(() {});
-              },
-            );
-          });
-    });
+    _controller = PersistentTabController(initialIndex: widget.initialIndex);
+    if (context.read<ProfileState>().user.first) {
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return WelcomeDialog(
+                onMoreTap: () {
+                  _controller.index = 2;
+                  setState(() {});
+                  Navigator.pop(context);
+                },
+              );
+            }).then((value) {
+          context.read<ProfileProvider>().setLogin();
+          Navigator.pop(context);
+        });
+      });
+    }
   }
 
   @override
@@ -68,6 +77,16 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
             items: navBarsItems(),
             selectedIndex: _controller.index,
             onItemSelected: (index) {
+              if (_controller.index == index) {
+                pushNewScreen(
+                  context,
+                  screen: BasicScreenPage(
+                    initialIndex: index,
+                  ),
+                  withNavBar: true, // OPTIONAL VALUE. True by default.
+                  pageTransitionAnimation: PageTransitionAnimation.fade,
+                );
+              }
               setState(() {
                 _controller.index =
                     index; // NOTE: THIS IS CRITICAL!! Don't miss it!

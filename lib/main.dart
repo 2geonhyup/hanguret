@@ -4,8 +4,8 @@ import 'package:hangeureut/providers/auth/auth_provider.dart';
 import 'package:hangeureut/providers/auth/auth_state.dart';
 import 'package:hangeureut/providers/filter/filter_provider.dart';
 import 'package:hangeureut/providers/filter/filter_state.dart';
-import 'package:hangeureut/providers/menu/menu_provider.dart';
-import 'package:hangeureut/providers/menu/menu_state.dart';
+import 'package:hangeureut/providers/friend/recommend_friend_provider.dart';
+import 'package:hangeureut/providers/friend/recommend_friend_state.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/providers/signup/signup_provider.dart';
@@ -14,6 +14,8 @@ import 'package:hangeureut/repositories/auth_repository.dart';
 import 'package:hangeureut/repositories/friend_repository.dart';
 import 'package:hangeureut/repositories/profile_repository.dart';
 import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
+import 'package:hangeureut/screens/friend_screen/friend_recommend_page.dart';
+import 'package:hangeureut/screens/friend_screen/friends_page.dart';
 import 'package:hangeureut/screens/location_select_screen/location_select_page.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding1_page.dart';
@@ -78,8 +80,9 @@ class Hangeureut extends StatelessWidget {
         StateNotifierProvider<SearchFilterProvider, SearchFilterState>(
           create: (context) => SearchFilterProvider(),
         ),
-        StateNotifierProvider<MenuProvider, MenuState>(
-            create: (context) => MenuProvider())
+        StateNotifierProvider<RecommendFriendProvider, RecommendFriendState>(
+          create: (context) => RecommendFriendProvider(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -94,7 +97,9 @@ class Hangeureut extends StatelessWidget {
           SearchResult.routeName: (context) => SearchResult(),
           BasicScreenPage.routeName: (context) => BasicScreenPage(),
           SplashPage.routeName: (context) => SplashPage(),
-          LocationSelectPage.routeName: (context) => LocationSelectPage()
+          LocationSelectPage.routeName: (context) => LocationSelectPage(),
+          FriendRecommendPage.routeName: (context) => FriendRecommendPage(),
+          FriendsPage.routeName: (context) => FriendsPage()
         },
         theme: ThemeData(
             textTheme: TextTheme(

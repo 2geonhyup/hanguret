@@ -150,7 +150,6 @@ class ProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final profile = context.watch<ProfileState>().user;
-    print(nameModify);
     return Container(
       decoration: BoxDecoration(
           color: Colors.white,

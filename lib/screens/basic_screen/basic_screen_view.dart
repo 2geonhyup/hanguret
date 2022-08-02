@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hangeureut/constants.dart';
+import 'package:hangeureut/screens/friend_screen/friend_recommend_page.dart';
 import 'package:hangeureut/screens/location_select_screen/location_select_page.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/profile_screen/profile_page.dart';
@@ -10,15 +11,23 @@ import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 import '../../widgets/floating_button.dart';
 import '../../widgets/nav_custom_painter.dart';
+import '../friend_screen/friends_page.dart';
 
 List<Widget> buildScreens() {
   return [
     MainScreenPage(),
     Center(child: Text("2")),
-    ProfilePage(),
+    FriendsPage(),
     Center(child: Text("4")),
   ];
 }
+
+List<Widget> initialScreens = [
+  MainScreenPage(),
+  Center(child: Text("2")),
+  FriendsPage(),
+  Center(child: Text("4")),
+];
 
 List<Color> navBarColor = [
   kBackgroundColor2,
