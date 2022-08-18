@@ -29,6 +29,31 @@ Icon kBasicBackIcon = Icon(
   color: kBasicTextColor.withOpacity(0.8),
 );
 
+Map onboarding_initial = {
+  "alcoholType": {
+    alcoholTypeList[0]: false,
+    alcoholTypeList[1]: false,
+    alcoholTypeList[2]: false,
+    alcoholTypeList[3]: false,
+    alcoholTypeList[4]: false,
+    alcoholTypeList[5]: false,
+  },
+  "tasteKeyword": {
+    keyWordList[0]: false,
+    keyWordList[1]: false,
+    keyWordList[2]: false,
+    keyWordList[3]: false,
+    keyWordList[4]: false,
+    keyWordList[5]: false,
+    keyWordList[6]: false,
+    keyWordList[7]: false,
+    keyWordList[8]: false,
+    keyWordList[9]: false,
+    keyWordList[10]: false,
+    keyWordList[11]: false,
+  }
+};
+
 Map stationColor = {
   "안암역": Color(0xffcd7c2f),
   "회기역": Color(0xff0033a0),
@@ -60,7 +85,19 @@ const keyWordList = [
   ["taste_visual", "눈으로 먹어요"],
   ["taste_raw", "날 것 좋아"],
   ["taste_meat", "고기 좋아"],
-  ["taste_diet", "다이어트"],
+  ["taste_diet", "건강 챙겨"],
+  ["taste_spicy1", "맵찔이"],
+  ["taste_spicy2", "맵고수"],
+  ["taste_sweet", "달달구리 좋아"],
+];
+
+const alcoholTypeList2 = [
+  ["alcohol_beer", "소주"],
+  ["alcohol_soju", "맥주"],
+  ["alcohol_liquor", "양주"],
+  ["alcohol_traditional", "전통주"],
+  ["alcohol_wine", "와인"],
+  ["alcohol_cocktail", "칵테일"],
 ];
 
 const alcoholTypeList = [
@@ -112,26 +149,26 @@ const spicyLevelText = [
 const Map filterMap = {
   MainFilter.meal: {
     MainFilter.meal: ["images/filters/meal.png", "밥 한그릇"],
-    MealSubFilter.spicy: ["images/filters/meal/spicy.png", "매운게 땡겨"],
     MealSubFilter.cheap: ["images/filters/meal/cheap.png", "값싸게 먹을래"],
     MealSubFilter.vibe: ["images/filters/meal/vibe.png", "분위기 챙길래"],
     MealSubFilter.light: ["images/filters/meal/light.png", "가볍게 먹을래"],
-    MealSubFilter.alone: ["images/filters/meal/alone.png", "혼밥할거야"],
+    MealSubFilter.warm: ["images/filters/meal/warm.png", "따듯한 한상"],
+    MealSubFilter.spicy: ["images/filters/meal/spicy.png", "매운게 땡겨"],
     MealSubFilter.greasy: ["images/filters/meal/greasy.png", "배에 기름칠"],
   },
   MainFilter.alcohol: {
     MainFilter.alcohol: ["images/filters/alcohol.png", "술 한잔"],
-    AlcoholSubFilter.beer: ["images/filters/alcohol/beer.png", "가볍게 맥주"],
-    AlcoholSubFilter.soju: ["images/filters/alcohol/soju.png", "진지한 소주"],
-    AlcoholSubFilter.wineCocktail: [
-      "images/filters/alcohol/wineCocktail.png",
-      "와인 칵테일"
-    ],
+    AlcoholSubFilter.cheap: ["images/filters/alcohol/cheap.png", "값싸게 마실래"],
+    AlcoholSubFilter.beer: ["images/filters/alcohol/beer.png", "소주랑 맥주"],
     AlcoholSubFilter.makgeoli: [
       "images/filters/alcohol/makgeoli.png",
       "파전에 막걸리"
     ],
-    AlcoholSubFilter.turnUp: ["images/filters/alcohol/turnUp.png", "신나게 마실래"],
+    AlcoholSubFilter.taste: ["images/filters/alcohol/taste.png", "안주가 맛집"],
+    AlcoholSubFilter.wineCocktail: [
+      "images/filters/alcohol/cocktail.png",
+      "분위기 챙길래"
+    ],
     AlcoholSubFilter.turnDown: [
       "images/filters/alcohol/turnDown.png",
       "조용히 마실래"
@@ -143,7 +180,7 @@ const Map filterMap = {
     CoffeeSubFilter.talk: ["images/filters/coffee/talk.png", "도란도란 대화"],
     CoffeeSubFilter.vibe: ["images/filters/coffee/vibe.png", "감성 분위기"],
     CoffeeSubFilter.desert: ["images/filters/coffee/desert.png", "달달한 디저트"],
-    CoffeeSubFilter.notebook: ["images/filters/coffee/notebook.png", "노트북 가능"],
+    CoffeeSubFilter.coffee: ["images/filters/coffee/coffee.png", "커피가 맛있는"],
     CoffeeSubFilter.cheap: ["images/filters/coffee/cheap.png", "저렴한 가격"],
   }
 };

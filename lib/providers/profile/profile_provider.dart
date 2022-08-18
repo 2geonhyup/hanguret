@@ -22,6 +22,16 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
     }
   }
 
+  Future<User?> getOthersProfile({required String uid}) async {
+    try {
+      final User user = await read<ProfileRepository>().getProfile(uid: uid);
+      print(user);
+      return user;
+    } on CustomError catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> setLogin() async {
     try {
       await read<ProfileRepository>().setLogin();
@@ -41,6 +51,61 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
         friends: state.user.friends,
         icon: state.user.icon,
         first: false);
+    state = state.copyWith(user: newUser);
+  }
+
+  Future<void> setFriends(String id, String name, int icon) async {
+    List newFriends = state.user.friends;
+    newFriends.add({"id": id, "name": name, "icon": icon});
+    try {
+      await read<ProfileRepository>().setFriends(friends: newFriends);
+    } on CustomError catch (e) {
+      state = state.copyWith(profileStatus: ProfileStatus.error, error: e);
+      throw CustomError(
+        code: 'Exception',
+        message: e.toString(),
+        plugin: 'flutter_error/server_error',
+      );
+    }
+
+    User newUser = User(
+        id: state.user.id,
+        name: state.user.name,
+        email: state.user.email,
+        onboarding: state.user.onboarding,
+        friends: newFriends,
+        icon: state.user.icon,
+        first: state.user.first);
+    state = state.copyWith(user: newUser);
+  }
+
+  Future<void> removeFriends(String id, String name, int icon) async {
+    List newFriends = state.user.friends;
+    for (var friend in newFriends) {
+      if (id == friend["id"]) {
+        newFriends.remove(friend);
+      }
+    }
+
+    try {
+      await read<ProfileRepository>().setFriends(friends: newFriends);
+    } on CustomError catch (e) {
+      state = state.copyWith(profileStatus: ProfileStatus.error, error: e);
+      throw CustomError(
+        code: 'Exception',
+        message: e.toString(),
+        plugin: 'flutter_error/server_error',
+      );
+    }
+
+    User newUser = User(
+        id: state.user.id,
+        name: state.user.name,
+        email: state.user.email,
+        onboarding: state.user.onboarding,
+        friends: newFriends,
+        icon: state.user.icon,
+        first: state.user.first);
     state = state.copyWith(user: newUser);
   }
 
@@ -73,6 +138,21 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
   }
 
   Future<void> setOnboarding({required Map onboarding}) async {
+    final tasteCnt = onboarding["tasteKeyword"]
+        .entries
+        .where((e) => e.value == true)
+        .toList()
+        .length;
+    final alcoholCnt = onboarding["alcoholType"]
+        .entries
+        .where((e) => e.value == true)
+        .toList()
+        .length;
+    if (tasteCnt < 2) {
+      throw CustomError(message: "입맛 키워드는 2개 이상 선택해주세요");
+    } else if (alcoholCnt == 0) {
+      throw CustomError(message: "주종은 1개 이상 선택해주세요");
+    }
     try {
       await read<ProfileRepository>().setOnboarding(onboarding: onboarding);
     } on CustomError catch (e) {

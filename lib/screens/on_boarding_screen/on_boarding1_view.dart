@@ -9,7 +9,16 @@ import '../../providers/profile/profile_state.dart';
 import '../../widgets/error_dialog.dart';
 
 class NickNameSetting extends StatefulWidget {
-  const NickNameSetting({Key? key}) : super(key: key);
+  NickNameSetting(
+      {Key? key,
+      required this.name,
+      required this.originName,
+      required this.changeName})
+      : super(key: key);
+
+  String? name;
+  String? originName = "";
+  Function changeName;
 
   @override
   State<NickNameSetting> createState() => _NickNameSettingState();
@@ -17,20 +26,12 @@ class NickNameSetting extends StatefulWidget {
 
 class _NickNameSettingState extends State<NickNameSetting> {
   final _formkey = GlobalKey<FormState>();
-  String? name = "";
-  String? originName = "";
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    name = context.read<ProfileState>().user.name;
-    originName = name;
-  }
+  bool change = false;
 
   @override
   Widget build(BuildContext context) {
-    print("name${originName}");
+    print("name${widget.originName}");
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -57,11 +58,11 @@ class _NickNameSettingState extends State<NickNameSetting> {
             height: 47,
             child: Center(
                 child: Text(
-              "$name",
+              "${widget.name}",
               style: TextStyle(color: Colors.white, fontSize: 15),
             )),
             decoration: BoxDecoration(
-              color: kBasicColor,
+              color: change ? Color(0xffc7c7c0) : kBasicColor,
               borderRadius: BorderRadius.circular(12),
             ),
           ),
@@ -69,36 +70,40 @@ class _NickNameSettingState extends State<NickNameSetting> {
         SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 33.0),
-          child: Container(
-            height: 47,
-            child: Form(
-              key: _formkey,
-              child: TextFormField(
-                textAlign: TextAlign.center,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "직접 입력",
-                  hintStyle: TextStyle(color: Colors.grey, fontSize: 15),
+          child: Focus(
+            onFocusChange: (focus) {
+              if (focus) {
+                setState(() {
+                  change = true;
+                });
+              } else {
+                setState(() {
+                  change = false;
+                });
+              }
+            },
+            child: Container(
+              height: 47,
+              child: Form(
+                key: _formkey,
+                child: TextFormField(
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "직접 입력",
+                    hintStyle: TextStyle(
+                        color: change ? Colors.transparent : Colors.grey,
+                        fontSize: 15),
+                  ),
+                  onChanged: (val) {
+                    widget.changeName(val);
+                  },
                 ),
-                onChanged: (String? value) {
-                  setState(() {
-                    name = value;
-                  });
-                },
-                onFieldSubmitted: (val) async {
-                  print(name);
-                  name == "" || name == null ? name = originName : null;
-                  try {
-                    await context.read<ProfileProvider>().setName(name: name);
-                  } on CustomError catch (e) {
-                    errorDialog(context, e);
-                  }
-                },
               ),
-            ),
-            decoration: BoxDecoration(
-              color: Color(0xFFE1E1D5).withOpacity(0.39),
-              borderRadius: BorderRadius.circular(12),
+              decoration: BoxDecoration(
+                color: kBasicColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
         ),

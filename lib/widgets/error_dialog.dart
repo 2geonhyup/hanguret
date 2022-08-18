@@ -11,7 +11,7 @@ void errorDialog(BuildContext context, CustomError e) {
         context: context,
         builder: (context) {
           return CupertinoAlertDialog(
-            title: Text(e.code),
+            title: e.code == '' ? null : Text(e.code),
             content: Text(e.plugin + '\n' + e.message),
             actions: [
               CupertinoDialogAction(

@@ -7,20 +7,16 @@ import 'package:hangeureut/widgets/progress_bar.dart';
 import 'package:provider/provider.dart';
 import '../../providers/profile/profile_state.dart';
 import '../../widgets/bottom_navigation_bar.dart';
-import 'on_boarding1_page.dart';
-import 'on_boarding2_view.dart';
 
-import 'on_boarding3_page.dart';
-
-class OnBoarding2Page extends StatefulWidget {
-  const OnBoarding2Page({Key? key}) : super(key: key);
+class ModifyTaste extends StatefulWidget {
+  const ModifyTaste({Key? key}) : super(key: key);
   static const String routeName = '/onboarding2';
 
   @override
-  State<OnBoarding2Page> createState() => OnBoarding2PageState();
+  State<ModifyTaste> createState() => ModifyTasteState();
 }
 
-const keyWordList = [
+const _keyWordList = [
   "taste_baby",
   "taste_grandmother",
   "taste_daddy",
@@ -46,7 +42,7 @@ const alcoholTypeList = [
 
 //우선 온보딩 정보를 프로바이더를 통해 가져온다음, 그것을 업데이트하는 코드를 짜야함
 //온보딩 정보가 null이거나 빈 map일 경우에는 새로등록
-class OnBoarding2PageState extends State<OnBoarding2Page> {
+class ModifyTasteState extends State<ModifyTaste> {
   Map alcoholType = {};
   Map tasteKeyword = {};
   Map onboarding = {};
@@ -69,15 +65,12 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        bottomNavigationBar: BasicBottomNavigationBar(
+        bottomNavigationBar: BasicBottomPopBar(
           option1: "취소",
-          option2: "다음",
-          nav1: OnBoarding1Page.routeName,
-          nav2: OnBoarding3Page.routeName,
+          option2: "완료",
           withNav2: () async {
             onboarding["alcoholType"] = alcoholType;
             onboarding["tasteKeyword"] = tasteKeyword;
-            onboarding["level"] = 2;
             try {
               await context
                   .read<ProfileProvider>()
@@ -136,39 +129,39 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[0]}.png",
+                                  "${tasteProfileIconPath}/${_keyWordList[0]}.png",
                               text: "애기입맛",
                               onTap: () {
                                 setState(() {
-                                  tasteKeyword[keyWordList[0]] =
-                                      !tasteKeyword[keyWordList[0]];
+                                  tasteKeyword[_keyWordList[0]] =
+                                      !tasteKeyword[_keyWordList[0]];
                                 });
                               },
-                              selected: tasteKeyword[keyWordList[0]]),
+                              selected: tasteKeyword[_keyWordList[0]]),
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[1]}.png",
+                                  "${tasteProfileIconPath}/${_keyWordList[1]}.png",
                               text: "할매입맛",
                               onTap: () {
                                 setState(() {
-                                  tasteKeyword[keyWordList[1]] =
-                                      !tasteKeyword[keyWordList[1]];
+                                  tasteKeyword[_keyWordList[1]] =
+                                      !tasteKeyword[_keyWordList[1]];
                                 });
                               },
-                              selected: tasteKeyword[keyWordList[1]]),
+                              selected: tasteKeyword[_keyWordList[1]]),
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[2]}.png",
+                                  "${tasteProfileIconPath}/${_keyWordList[2]}.png",
                               text: "아재입맛",
                               onTap: () {
                                 setState(() {
-                                  tasteKeyword[keyWordList[2]] =
-                                      !tasteKeyword[keyWordList[2]];
+                                  tasteKeyword[_keyWordList[2]] =
+                                      !tasteKeyword[_keyWordList[2]];
                                 });
                               },
-                              selected: tasteKeyword[keyWordList[2]]),
+                              selected: tasteKeyword[_keyWordList[2]]),
                         ],
                       ),
                       Row(
@@ -177,39 +170,39 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[3]}.png",
+                                  "${tasteProfileIconPath}/${_keyWordList[3]}.png",
                               text: "빵순이",
                               onTap: () {
                                 setState(() {
-                                  tasteKeyword[keyWordList[3]] =
-                                      !tasteKeyword[keyWordList[3]];
+                                  tasteKeyword[_keyWordList[3]] =
+                                      !tasteKeyword[_keyWordList[3]];
                                 });
                               },
-                              selected: tasteKeyword[keyWordList[3]]),
+                              selected: tasteKeyword[_keyWordList[3]]),
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[4]}.png",
+                                  "${tasteProfileIconPath}/${_keyWordList[4]}.png",
                               text: "밥순이",
                               onTap: () {
                                 setState(() {
-                                  tasteKeyword[keyWordList[4]] =
-                                      !tasteKeyword[keyWordList[4]];
+                                  tasteKeyword[_keyWordList[4]] =
+                                      !tasteKeyword[_keyWordList[4]];
                                 });
                               },
-                              selected: tasteKeyword[keyWordList[4]]),
+                              selected: tasteKeyword[_keyWordList[4]]),
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[5]}.png",
+                                  "${tasteProfileIconPath}/${_keyWordList[5]}.png",
                               text: "눈으로 먹어요",
                               onTap: () {
                                 setState(() {
-                                  tasteKeyword[keyWordList[5]] =
-                                      !tasteKeyword[keyWordList[5]];
+                                  tasteKeyword[_keyWordList[5]] =
+                                      !tasteKeyword[_keyWordList[5]];
                                 });
                               },
-                              selected: tasteKeyword[keyWordList[5]]),
+                              selected: tasteKeyword[_keyWordList[5]]),
                         ],
                       ),
                       Row(
@@ -218,39 +211,39 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[6]}.png",
+                                  "${tasteProfileIconPath}/${_keyWordList[6]}.png",
                               text: "날 것 좋아",
                               onTap: () {
                                 setState(() {
-                                  tasteKeyword[keyWordList[6]] =
-                                      !tasteKeyword[keyWordList[6]];
+                                  tasteKeyword[_keyWordList[6]] =
+                                      !tasteKeyword[_keyWordList[6]];
                                 });
                               },
-                              selected: tasteKeyword[keyWordList[6]]),
+                              selected: tasteKeyword[_keyWordList[6]]),
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[7]}.png",
+                                  "${tasteProfileIconPath}/${_keyWordList[7]}.png",
                               text: "고기 좋아",
                               onTap: () {
                                 setState(() {
-                                  tasteKeyword[keyWordList[7]] =
-                                      !tasteKeyword[keyWordList[7]];
+                                  tasteKeyword[_keyWordList[7]] =
+                                      !tasteKeyword[_keyWordList[7]];
                                 });
                               },
-                              selected: tasteKeyword[keyWordList[7]]),
+                              selected: tasteKeyword[_keyWordList[7]]),
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[8]}.png",
+                                  "${tasteProfileIconPath}/${_keyWordList[8]}.png",
                               text: "건강 챙겨",
                               onTap: () {
                                 setState(() {
-                                  tasteKeyword[keyWordList[8]] =
-                                      !tasteKeyword[keyWordList[8]];
+                                  tasteKeyword[_keyWordList[8]] =
+                                      !tasteKeyword[_keyWordList[8]];
                                 });
                               },
-                              selected: tasteKeyword[keyWordList[8]]),
+                              selected: tasteKeyword[_keyWordList[8]]),
                         ],
                       ),
                       Row(
@@ -259,39 +252,39 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[9]}.png",
+                                  "${tasteProfileIconPath}/${_keyWordList[9]}.png",
                               text: "맵찔이",
                               onTap: () {
                                 setState(() {
-                                  tasteKeyword[keyWordList[9]] =
-                                      !tasteKeyword[keyWordList[9]];
+                                  tasteKeyword[_keyWordList[9]] =
+                                      !tasteKeyword[_keyWordList[9]];
                                 });
                               },
-                              selected: tasteKeyword[keyWordList[9]]),
+                              selected: tasteKeyword[_keyWordList[9]]),
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[10]}.png",
+                                  "${tasteProfileIconPath}/${_keyWordList[10]}.png",
                               text: "맵고수",
                               onTap: () {
                                 setState(() {
-                                  tasteKeyword[keyWordList[10]] =
-                                      !tasteKeyword[keyWordList[10]];
+                                  tasteKeyword[_keyWordList[10]] =
+                                      !tasteKeyword[_keyWordList[10]];
                                 });
                               },
-                              selected: tasteKeyword[keyWordList[10]]),
+                              selected: tasteKeyword[_keyWordList[10]]),
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[11]}.png",
+                                  "${tasteProfileIconPath}/${_keyWordList[11]}.png",
                               text: "달달구리 좋아",
                               onTap: () {
                                 setState(() {
-                                  tasteKeyword[keyWordList[11]] =
-                                      !tasteKeyword[keyWordList[11]];
+                                  tasteKeyword[_keyWordList[11]] =
+                                      !tasteKeyword[_keyWordList[11]];
                                 });
                               },
-                              selected: tasteKeyword[keyWordList[11]]),
+                              selected: tasteKeyword[_keyWordList[11]]),
                         ],
                       ),
                     ],
@@ -398,11 +391,187 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                 )
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 24.0),
-              child: ProgressBar(level: 2),
-            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+Widget subTitleRow(iconPath, text, subText) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Row(
+        children: [
+          Image.asset(
+            iconPath,
+            height: 22,
+          ),
+          SizedBox(
+            width: 5,
+          ),
+          Text(
+            text,
+            style: TextStyle(
+                fontFamily: 'Suit', fontWeight: FontWeight.w400, fontSize: 14),
+          ),
+        ],
+      ),
+      Padding(
+        padding: const EdgeInsets.only(top: 5.0),
+        child: Text(
+          subText,
+          style: TextStyle(
+              fontFamily: 'Suit',
+              fontWeight: FontWeight.w400,
+              fontSize: 8.5,
+              color: kSecondaryTextColor),
+        ),
+      ),
+    ],
+  );
+}
+
+class RoundedButton extends StatelessWidget {
+  const RoundedButton(
+      {Key? key,
+      required this.iconPath,
+      required this.text,
+      required this.onTap,
+      required this.selected,
+      required double this.height})
+      : super(key: key);
+  final iconPath;
+  final text;
+  final onTap;
+  final selected;
+  final height;
+  int _flexWidth(num) {
+    if (num <= 3) {
+      return 94;
+    } else if (4 <= num && num <= 5) {
+      return 104;
+    } else {
+      return 122;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      flex: _flexWidth(text.length),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: height,
+            decoration: BoxDecoration(
+              color: selected ? kBasicColor : Colors.white,
+              boxShadow: [
+                BoxShadow(
+                    color: kBasicColor.withOpacity(0.3),
+                    blurRadius: 3,
+                    spreadRadius: 0,
+                    offset: Offset(
+                      0,
+                      1,
+                    )),
+              ],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    iconPath,
+                    height: 18,
+                  ),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    text,
+                    style: TextStyle(
+                        fontFamily: 'Suit',
+                        fontWeight:
+                            selected ? FontWeight.w500 : FontWeight.w300,
+                        fontSize: 13,
+                        color: selected ? Colors.white : Colors.black),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class RoundedAlcoholButton extends StatelessWidget {
+  const RoundedAlcoholButton(
+      {Key? key,
+      required this.iconPath,
+      required this.text,
+      required this.onTap,
+      required this.selected,
+      required double this.height})
+      : super(key: key);
+  final iconPath;
+  final text;
+  final onTap;
+  final selected;
+  final height;
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4, vertical: 5),
+          child: Container(
+            height: height,
+            decoration: BoxDecoration(
+              color: selected ? kBasicColor : Colors.white,
+              boxShadow: [
+                BoxShadow(
+                    color: kBasicColor.withOpacity(0.3),
+                    blurRadius: 3,
+                    spreadRadius: 0,
+                    offset: Offset(
+                      0,
+                      1,
+                    )),
+              ],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    iconPath,
+                    height: 15,
+                  ),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    text,
+                    style: TextStyle(
+                        fontFamily: 'Suit',
+                        fontWeight:
+                            selected ? FontWeight.w500 : FontWeight.w300,
+                        fontSize: 13,
+                        color: selected ? Colors.white : Colors.black),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

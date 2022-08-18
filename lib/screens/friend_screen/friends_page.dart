@@ -79,122 +79,121 @@ class _FriendsPageState extends State<FriendsPage> {
                     builder: (BuildContext context,
                         ScrollController scrollController) {
                       return Container(
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(48),
-                                  topRight: Radius.circular(48)),
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.black.withOpacity(0.08),
-                                    blurRadius: 17,
-                                    spreadRadius: 0,
-                                    offset: Offset(0, -4))
-                              ]),
-                          child: MediaQuery.removePadding(
-                            context: context,
-                            removeTop: true,
-                            child: ListView(
-                              controller: scrollController,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 30.0, right: 30.0, top: 29),
-                                  child: Container(
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: kSecondaryTextColor,
-                                          width: 0.5,
-                                        ),
-                                        borderRadius:
-                                            BorderRadius.circular(25)),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 24.0, right: 15),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: TextFormField(
-                                              decoration: InputDecoration(
-                                                  hintText: '친구 이름',
-                                                  hintStyle: TextStyle(
-                                                      fontFamily: 'Suit',
-                                                      fontWeight:
-                                                          FontWeight.w300,
-                                                      fontSize: 14,
-                                                      color: kSecondaryTextColor
-                                                          .withOpacity(0.4)),
-                                                  border: InputBorder.none),
-                                            ),
-                                          ),
-                                          Icon(
-                                            Icons.search,
-                                            color: kBasicColor,
-                                            size: 20,
-                                          ),
-                                        ],
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(48),
+                                topRight: Radius.circular(48)),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 17,
+                                  spreadRadius: 0,
+                                  offset: Offset(0, -4))
+                            ]),
+                        child: MediaQuery.removePadding(
+                          context: context,
+                          removeTop: true,
+                          child: ListView(
+                            controller: scrollController,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 30.0, right: 30.0, top: 29),
+                                child: Container(
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: kSecondaryTextColor,
+                                        width: 0.5,
                                       ),
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 31.0, top: 36),
-                                  child: Text(
-                                    "밥친구 ${myProfile.friends.length}",
-                                    style: TextStyle(
-                                        color: kBasicTextColor.withOpacity(0.6),
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 13,
-                                        fontFamily: 'Suit'),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 18,
-                                ),
-                                Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 33,
-                                    ),
-                                    FriendIconBox(
-                                        content: profileIcons[
-                                            myProfile.friends[0]["icon"]]),
-                                    SizedBox(
-                                      width: 12,
-                                    ),
-                                    Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      borderRadius: BorderRadius.circular(25)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 24.0, right: 15),
+                                    child: Row(
                                       children: [
-                                        Text(
-                                          myProfile.friends[0]["name"],
-                                          style: TextStyle(
-                                              color: kSecondaryTextColor,
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w600,
-                                              fontFamily: 'Suit'),
+                                        Expanded(
+                                          child: TextFormField(
+                                            decoration: InputDecoration(
+                                                hintText: '친구 이름',
+                                                hintStyle: TextStyle(
+                                                    fontFamily: 'Suit',
+                                                    fontWeight: FontWeight.w300,
+                                                    fontSize: 14,
+                                                    color: kSecondaryTextColor
+                                                        .withOpacity(0.4)),
+                                                border: InputBorder.none),
+                                          ),
                                         ),
-                                        SizedBox(
-                                          height: 3,
+                                        Icon(
+                                          Icons.search,
+                                          color: kBasicColor,
+                                          size: 20,
                                         ),
-                                        Text(
-                                          "@${myProfile.friends[0]["id"]}",
-                                          style: TextStyle(
-                                              color: kSecondaryTextColor,
-                                              fontFamily: 'Suit',
-                                              fontWeight: FontWeight.w400,
-                                              fontSize: 11),
-                                        )
                                       ],
-                                    )
-                                  ],
-                                )
-                              ],
-                            ),
-                          ));
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 31.0, top: 36),
+                                child: Text(
+                                  "밥친구 ${myProfile.friends.length}",
+                                  style: TextStyle(
+                                      color: kBasicTextColor.withOpacity(0.6),
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 13,
+                                      fontFamily: 'Suit'),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 18,
+                              ),
+                              Row(
+                                children: [
+                                  SizedBox(
+                                    width: 33,
+                                  ),
+                                  FriendIconBox(
+                                      content: profileIcons[myProfile.friends[0]
+                                          ["icon"]]),
+                                  SizedBox(
+                                    width: 12,
+                                  ),
+                                  Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        myProfile.friends[0]["name"],
+                                        style: TextStyle(
+                                            color: kSecondaryTextColor,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: 'Suit'),
+                                      ),
+                                      SizedBox(
+                                        height: 3,
+                                      ),
+                                      Text(
+                                        "@${myProfile.friends[0]["id"]}",
+                                        style: TextStyle(
+                                            color: kSecondaryTextColor,
+                                            fontFamily: 'Suit',
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 11),
+                                      )
+                                    ],
+                                  )
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ),

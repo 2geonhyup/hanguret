@@ -24,6 +24,7 @@ class SplashPage extends StatefulWidget {
 
 class _SplashPageState extends State<SplashPage> {
   bool completed = false;
+  late bool ready;
   Future<void> _login() async {
     try {
       await context.read<SignupProvider>().signup();
@@ -42,7 +43,9 @@ class _SplashPageState extends State<SplashPage> {
       errorDialog(context, e);
     }
 
-    completed = true;
+    setState(() {
+      completed = true;
+    });
   }
 
   @override
@@ -50,19 +53,28 @@ class _SplashPageState extends State<SplashPage> {
     // TODO: implement initState
     super.initState();
     _login();
+    ready = false;
   }
 
   @override
   Widget build(BuildContext context) {
     final onBoardingState = context.watch<ProfileState>().user.onboarding;
     print("hereisproblem$onBoardingState");
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      if (onBoardingState["level"] == 3) {
-        Navigator.pushNamed(context, BasicScreenPage.routeName);
-      } else if (onBoardingState["level"] == 2) {
-        Navigator.pushNamed(context, OnBoarding1Page.routeName);
-      } else if (onBoardingState.length == 0 && completed) {
-        Navigator.pushNamed(context, OnBoarding1Page.routeName);
+
+    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+      //여기서 ready를 체크안해주면 무한루프가 발생함
+      if (completed & !ready) {
+        setState(() {
+          ready = true;
+        });
+        await Future.delayed(Duration(milliseconds: 1500));
+        if (onBoardingState["level"] == 3) {
+          Navigator.pushNamed(context, BasicScreenPage.routeName);
+        } else if (onBoardingState["level"] == 2) {
+          Navigator.pushNamed(context, OnBoarding1Page.routeName);
+        } else {
+          Navigator.pushNamed(context, OnBoarding1Page.routeName);
+        }
       }
     });
 
@@ -74,12 +86,14 @@ class _SplashPageState extends State<SplashPage> {
               child: Image.asset(
             "images/fork.png",
             width: 50,
+            color: ready ? kBasicColor : kBasicColor.withOpacity(0.6),
           )),
           Center(
             child: SizedBox(
                 width: 114,
                 height: 114,
                 child: CircularProgressIndicator(
+                  value: ready ? 1 : null,
                   color: kBasicColor,
                 )),
           ),

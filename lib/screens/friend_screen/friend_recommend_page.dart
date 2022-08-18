@@ -2,26 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/models/friend.dart';
 import 'package:hangeureut/providers/friend/recommend_friend_state.dart';
+import 'package:hangeureut/providers/profile/profile_provider.dart';
+import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
 import 'package:hangeureut/screens/friend_screen/friends_page.dart';
 import 'package:hangeureut/widgets/profile_icon_box.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
-import 'friend_recommend_view.dart';
+import '../../providers/profile/profile_state.dart';
+import '../profile_screen/profile_page.dart';
 
-class FriendRecommendPage extends StatelessWidget {
+class FriendRecommendPage extends StatefulWidget {
   const FriendRecommendPage({Key? key}) : super(key: key);
   static const String routeName = '/friend-recommend';
 
   @override
+  State<FriendRecommendPage> createState() => _FriendRecommendPageState();
+}
+
+class _FriendRecommendPageState extends State<FriendRecommendPage> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     List<MealFriend> recommendFriends =
-        context.watch<RecommendFriendState>().recommendFriends;
-    // recommendFriends = [
-    //   recommendFriends[0],
-    //   recommendFriends[0],
-    //   recommendFriends[0],
-    // ];
+        context.read<RecommendFriendState>().recommendFriends;
+    List realFriends = context.watch<ProfileState>().user.friends;
+    List realFriendsId = [];
+    for (var friend in realFriends) {
+      realFriendsId.add(friend["id"]);
+    }
+    recommendFriends.removeWhere((e) => realFriendsId.contains(e.id));
+    final myName = context.watch<ProfileState>().user.name;
     bool odd = false;
     List<Widget> friendsContainers = recommendFriends.map((e) {
       odd = !odd;
@@ -80,18 +96,17 @@ class FriendRecommendPage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 27),
                 child: GestureDetector(
                     onTap: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) {
-                            return FriendRequestDialog(friend: e);
-                          });
+                      context
+                          .read<ProfileProvider>()
+                          .setFriends(e.id, e.name, e.icon);
+                      setState(() {});
                     },
                     child: Container(
                       width: double.infinity,
                       height: 28,
                       child: Center(
                           child: Text(
-                        "친구 맺기",
+                        "찜하기",
                         style: TextStyle(
                             fontFamily: 'Suit',
                             color: Colors.white,
@@ -116,12 +131,11 @@ class FriendRecommendPage extends StatelessWidget {
           Row(
             children: [
               GestureDetector(
-                onTap: () {
+                onTap: () async {
+                  await context.read<ProfileProvider>().setLogin();
+                  Navigator.pop;
                   pushNewScreen(context,
-                      screen: FriendsPage(),
-                      withNavBar: true,
-                      pageTransitionAnimation:
-                          PageTransitionAnimation.slideRight);
+                      screen: ProfilePage(), withNavBar: true);
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(left: 34.0, top: 53),
@@ -133,8 +147,38 @@ class FriendRecommendPage extends StatelessWidget {
           SizedBox(
             height: 36,
           ),
-          Text("밥친구를 맺으면 서로의 플레이스를 확인하고,"),
-          Text("친구의 식사 기록을 구경할 수 있습니다."),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "${myName}",
+                style: TextStyle(
+                    fontFamily: 'Suit',
+                    color: kSecondaryTextColor,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12),
+              ),
+              Text(
+                "님이 알 수도 잇는 친구들이에요.",
+                style: TextStyle(
+                    fontFamily: 'Suit',
+                    color: kSecondaryTextColor,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 12),
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 3,
+          ),
+          Text(
+            "찜하고 친구의 기록을 계속 받아보세요!",
+            style: TextStyle(
+                fontFamily: 'Suit',
+                color: kSecondaryTextColor,
+                fontWeight: FontWeight.w400,
+                fontSize: 12),
+          ),
           Expanded(
             child: GridView.count(
               childAspectRatio: 0.85,

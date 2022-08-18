@@ -9,19 +9,18 @@ import '../../providers/profile/profile_state.dart';
 import '../../widgets/bottom_navigation_bar.dart';
 import '../../widgets/error_dialog.dart';
 import '../../widgets/progress_bar.dart';
-import 'on_boarding2_page.dart';
 
-class OnBoarding3Page extends StatefulWidget {
-  const OnBoarding3Page({Key? key}) : super(key: key);
-  static String routeName = '/onboarding3';
+class ModifyLocation extends StatefulWidget {
+  const ModifyLocation({Key? key}) : super(key: key);
+  static String routeName = '/modify_location';
 
   @override
-  State<OnBoarding3Page> createState() => _OnBoarding3PageState();
+  State<ModifyLocation> createState() => _ModifyLocationState();
 }
 
 enum MainLocation { none, yonsei, ewha, sogang }
 
-class _OnBoarding3PageState extends State<OnBoarding3Page> {
+class _ModifyLocationState extends State<ModifyLocation> {
   Map onboarding = {};
   int? mainLocationIndex;
   late MainLocation mainLocation;
@@ -57,14 +56,11 @@ class _OnBoarding3PageState extends State<OnBoarding3Page> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BasicBottomNavigationBar(
+      bottomNavigationBar: BasicBottomPopBar(
         option1: "취소",
         option2: "완료",
-        nav1: OnBoarding2Page.routeName,
-        nav2: BasicScreenPage.routeName,
         withNav2: () async {
           onboarding["mainLocation"] = mainLocation.index;
-          onboarding["level"] = 3;
           try {
             await context
                 .read<ProfileProvider>()
@@ -289,10 +285,6 @@ class _OnBoarding3PageState extends State<OnBoarding3Page> {
                 ),
               ),
             ],
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 24.0),
-            child: ProgressBar(level: 3),
           ),
         ],
       ),

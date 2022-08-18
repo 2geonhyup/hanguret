@@ -102,4 +102,24 @@ class ProfileRepository {
       );
     }
   }
+
+  //
+  Future<void> setFriends({required List friends}) async {
+    final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
+    try {
+      await usersRef.doc(uid).update({'friends': friends});
+    } on FirebaseException catch (e) {
+      throw CustomError(
+        code: e.code,
+        message: e.message!,
+        plugin: e.plugin,
+      );
+    } catch (e) {
+      throw CustomError(
+        code: 'Exception',
+        message: e.toString(),
+        plugin: 'flutter_error/server_error',
+      );
+    }
+  }
 }

@@ -6,6 +6,7 @@ import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/screens/friend_screen/friend_recommend_page.dart';
 import 'package:hangeureut/screens/location_select_screen/location_select_page.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
+import 'package:hangeureut/screens/profile_screen/modify_loction.dart';
 import 'package:hangeureut/screens/profile_screen/profile_page.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
@@ -13,11 +14,13 @@ import '../../widgets/floating_button.dart';
 import '../../widgets/nav_custom_painter.dart';
 import '../friend_screen/friends_page.dart';
 
+import 'package:provider/provider.dart';
+
 List<Widget> buildScreens() {
   return [
     MainScreenPage(),
     Center(child: Text("2")),
-    FriendsPage(),
+    ProfilePage(),
     Center(child: Text("4")),
   ];
 }
@@ -25,7 +28,7 @@ List<Widget> buildScreens() {
 List<Widget> initialScreens = [
   MainScreenPage(),
   Center(child: Text("2")),
-  FriendsPage(),
+  ProfilePage(),
   Center(child: Text("4")),
 ];
 
@@ -39,18 +42,19 @@ List<Color> navBarColor = [
 List<PersistentBottomNavBarItem> navBarsItems() {
   return [
     PersistentBottomNavBarItem(
-        icon: Icon(
-          Icons.home_outlined,
-          size: 27,
-        ),
-        title: ("Home"),
-        activeColorPrimary: kBasicTextColor,
-        inactiveColorPrimary: kBasicTextColor.withOpacity(0.3),
-        routeAndNavigatorSettings: RouteAndNavigatorSettings(
-            initialRoute: MainScreenPage.routeName,
-            routes: {
-              LocationSelectPage.routeName: (context) => LocationSelectPage(),
-            })),
+      icon: Icon(
+        Icons.home_outlined,
+        size: 27,
+      ),
+      title: ("Home"),
+      activeColorPrimary: kBasicTextColor,
+      inactiveColorPrimary: kBasicTextColor.withOpacity(0.3),
+      routeAndNavigatorSettings: RouteAndNavigatorSettings(
+          initialRoute: MainScreenPage.routeName,
+          routes: {
+            LocationSelectPage.routeName: (context) => LocationSelectPage(),
+          }),
+    ),
     PersistentBottomNavBarItem(
       icon: Icon(
         Icons.photo_outlined,

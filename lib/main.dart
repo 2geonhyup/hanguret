@@ -19,8 +19,10 @@ import 'package:hangeureut/screens/friend_screen/friends_page.dart';
 import 'package:hangeureut/screens/location_select_screen/location_select_page.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding1_page.dart';
+
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding2_page.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding3_page.dart';
+import 'package:hangeureut/screens/profile_screen/modify_loction.dart';
 import 'package:hangeureut/screens/result_screen/search_result.dart';
 import 'package:hangeureut/screens/review_screen/review_page.dart';
 import 'package:hangeureut/screens/serching_screen/searching_page.dart';
@@ -99,7 +101,8 @@ class Hangeureut extends StatelessWidget {
           SplashPage.routeName: (context) => SplashPage(),
           LocationSelectPage.routeName: (context) => LocationSelectPage(),
           FriendRecommendPage.routeName: (context) => FriendRecommendPage(),
-          FriendsPage.routeName: (context) => FriendsPage()
+          FriendsPage.routeName: (context) => FriendsPage(),
+          ModifyLocation.routeName: (context) => ModifyLocation(),
         },
         theme: ThemeData(
             textTheme: TextTheme(

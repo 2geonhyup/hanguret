@@ -61,7 +61,12 @@ class MyProfileCard extends StatelessWidget {
           Center(
             child: GestureDetector(
               onTap: () {
-                pushNewScreen(context, screen: ProfilePage(), withNavBar: true);
+                pushNewScreenWithRouteSettings(
+                  context,
+                  screen: ProfilePage(),
+                  settings: RouteSettings(name: ProfilePage.routeName),
+                  withNavBar: true,
+                );
               },
               child: Container(
                 width: 220,

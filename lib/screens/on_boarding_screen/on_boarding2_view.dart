@@ -1,163 +1,183 @@
 import 'package:flutter/material.dart';
-import 'package:hangeureut/constants.dart';
+
+import '../../constants.dart';
 
 Widget subTitleRow(iconPath, text, subText) {
   return Row(
-    mainAxisSize: MainAxisSize.max,
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Image.asset(
-        iconPath,
-        height: 22,
+      Row(
+        children: [
+          Image.asset(
+            iconPath,
+            height: 22,
+          ),
+          SizedBox(
+            width: 5,
+          ),
+          Text(
+            text,
+            style: TextStyle(
+                fontFamily: 'Suit', fontWeight: FontWeight.w400, fontSize: 14),
+          ),
+        ],
       ),
-      SizedBox(
-        width: 10,
-      ),
-      Text(
-        text,
-        style: TextStyle(
-            fontFamily: 'Suit', fontWeight: FontWeight.w400, fontSize: 14),
-      ),
-      SizedBox(
-        width: 13,
-      ),
-      Text(
-        subText,
-        style: TextStyle(
-            fontFamily: 'Suit',
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-            color: kBasicColor),
+      Padding(
+        padding: const EdgeInsets.only(top: 5.0),
+        child: Text(
+          subText,
+          style: TextStyle(
+              fontFamily: 'Suit',
+              fontWeight: FontWeight.w400,
+              fontSize: 8.5,
+              color: kSecondaryTextColor),
+        ),
       ),
     ],
   );
 }
 
-class FoodInputField extends StatefulWidget {
-  FoodInputField(
+class RoundedButton extends StatelessWidget {
+  const RoundedButton(
       {Key? key,
-      required this.title,
-      this.initialVal,
-      required this.hintText,
-      required this.onSubmit})
+      required this.iconPath,
+      required this.text,
+      required this.onTap,
+      required this.selected,
+      required double this.height})
       : super(key: key);
-  final String title;
-  final String hintText;
-  final String? initialVal;
-  final void Function(String?) onSubmit;
+  final iconPath;
+  final text;
+  final onTap;
+  final selected;
+  final height;
+  int _flexWidth(num) {
+    if (num <= 3) {
+      return 94;
+    } else if (4 <= num && num <= 5) {
+      return 104;
+    } else {
+      return 122;
+    }
+  }
 
-  @override
-  State<FoodInputField> createState() => _FoodInputFieldState();
-}
-
-class _FoodInputFieldState extends State<FoodInputField> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
+      flex: _flexWidth(text.length),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-        child: Column(
-          children: [
-            subTitleRow("images/icons/emoji-happy.png", widget.title, ""),
-            SizedBox(
-              height: 14,
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: height,
+            decoration: BoxDecoration(
+              color: selected ? kBasicColor : Colors.white,
+              boxShadow: [
+                BoxShadow(
+                    color: kBasicColor.withOpacity(0.3),
+                    blurRadius: 3,
+                    spreadRadius: 0,
+                    offset: Offset(
+                      0,
+                      1,
+                    )),
+              ],
+              borderRadius: BorderRadius.circular(12),
             ),
-            Container(
-              height: 45,
-              child: TextFormField(
-                initialValue: widget.initialVal,
-                style: TextStyle(
-                    fontFamily: 'Suit',
-                    fontWeight: FontWeight.w300,
-                    fontSize: 13),
-                onFieldSubmitted: widget.onSubmit,
-                onChanged: widget.onSubmit,
-                textInputAction: TextInputAction.done,
-                textAlign: TextAlign.left,
-                textAlignVertical: TextAlignVertical.center,
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.all(15.5),
-                  border: InputBorder.none,
-                  focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Color(0xff3c3e24).withOpacity(0.3),
-                          width: 0.5),
-                      borderRadius: BorderRadius.circular(17)),
-                  hintText: widget.hintText,
-                  hintStyle: TextStyle(
-                      fontFamily: 'Suit',
-                      fontWeight: FontWeight.w300,
-                      color: Colors.grey.withOpacity(0.7),
-                      fontSize: 13),
-                ),
-              ),
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                      color: kBasicColor.withOpacity(0.3),
-                      blurRadius: 6,
-                      spreadRadius: 0,
-                      offset: Offset(
-                        0,
-                        1,
-                      )),
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    iconPath,
+                    height: 18,
+                  ),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    text,
+                    style: TextStyle(
+                        fontFamily: 'Suit',
+                        fontWeight:
+                            selected ? FontWeight.w500 : FontWeight.w300,
+                        fontSize: 13,
+                        color: selected ? Colors.white : Colors.black),
+                  ),
                 ],
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(17),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-class SpicyLevelButton extends StatelessWidget {
-  SpicyLevelButton(
+class RoundedAlcoholButton extends StatelessWidget {
+  const RoundedAlcoholButton(
       {Key? key,
-      required this.image,
+      required this.iconPath,
       required this.text,
-      required this.onPressed,
-      required this.clicked})
+      required this.onTap,
+      required this.selected,
+      required double this.height})
       : super(key: key);
-  final String image;
-  final String text;
-  final Function() onPressed;
-  final bool clicked;
-
+  final iconPath;
+  final text;
+  final onTap;
+  final selected;
+  final height;
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-        onPressed: onPressed,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned(
-                top: 22,
-                left: 0,
-                right: 0,
-                child: Image.asset(
-                  image,
-                  height: 15,
-                )),
-            Positioned(
-              top: 42,
-              child: Text(
-                text,
-                style: TextStyle(
-                    fontSize: 13,
-                    fontFamily: "Suit",
-                    color: clicked ? Colors.white : Colors.black,
-                    fontWeight: FontWeight.w300),
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4, vertical: 5),
+          child: Container(
+            height: height,
+            decoration: BoxDecoration(
+              color: selected ? kBasicColor : Colors.white,
+              boxShadow: [
+                BoxShadow(
+                    color: kBasicColor.withOpacity(0.3),
+                    blurRadius: 3,
+                    spreadRadius: 0,
+                    offset: Offset(
+                      0,
+                      1,
+                    )),
+              ],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    iconPath,
+                    height: 15,
+                  ),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    text,
+                    style: TextStyle(
+                        fontFamily: 'Suit',
+                        fontWeight:
+                            selected ? FontWeight.w500 : FontWeight.w300,
+                        fontSize: 13,
+                        color: selected ? Colors.white : Colors.black),
+                  ),
+                ],
               ),
-            )
-          ],
+            ),
+          ),
         ),
-        style: ElevatedButton.styleFrom(
-            fixedSize: Size(76, 76),
-            shadowColor: kBasicColor.withOpacity(0.3),
-            elevation: 5,
-            shape: CircleBorder(),
-            primary: clicked ? kBasicColor : Colors.white));
+      ),
+    );
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
 
-import 'package:hangeureut/screens/on_boarding_screen/on_boarding2_page.dart';
 import 'package:hangeureut/widgets/progress_bar.dart';
 import 'package:provider/provider.dart';
 import '../../models/custom_error.dart';
@@ -12,6 +11,8 @@ import 'package:hangeureut/widgets/bottom_navigation_bar.dart';
 
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 
+import 'on_boarding2_page.dart';
+
 class OnBoarding1Page extends StatefulWidget {
   static const String routeName = '/onboarding1';
 
@@ -20,10 +21,14 @@ class OnBoarding1Page extends StatefulWidget {
 }
 
 class _OnBoarding1PageState extends State<OnBoarding1Page> {
+  String? name = "";
+  String? originName = "";
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    name = context.read<ProfileState>().user.name;
+    originName = name;
   }
 
   @override
@@ -37,6 +42,15 @@ class _OnBoarding1PageState extends State<OnBoarding1Page> {
           option2: "다음",
           nav1: OnBoarding1Page.routeName,
           nav2: OnBoarding2Page.routeName,
+          withNav2: () async {
+            try {
+              await context.read<ProfileProvider>().setName(name: name);
+              return true;
+            } on CustomError catch (e) {
+              errorDialog(context, e);
+              return false;
+            }
+          },
         ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -48,7 +62,19 @@ class _OnBoarding1PageState extends State<OnBoarding1Page> {
                 SizedBox(
                   height: 84,
                 ),
-                NickNameSetting(),
+                NickNameSetting(
+                  name: name,
+                  originName: originName,
+                  changeName: (val) {
+                    setState(() {
+                      if (val == "" || val == null) {
+                        name = originName;
+                      } else {
+                        name = val;
+                      }
+                    });
+                  },
+                ),
               ],
             ),
             Padding(

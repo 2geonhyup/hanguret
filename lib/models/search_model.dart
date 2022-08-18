@@ -9,20 +9,20 @@ enum MealSubFilter {
   cheap, // 값싸게 먹을래
   vibe, // 분위기 챙길래
   light, // 가볍게 먹을래
-  alone, // 혼밥할거야
+  warm, // 혼밥할거야
   greasy // 배에 기름칠
 }
 
 enum AlcoholSubFilter {
+  cheap,
   beer, // 맥주
-  soju, // 소주
   wineCocktail,
   makgeoli,
-  turnUp, // 신나는
+  taste,
   turnDown // 조용한
 }
 
-enum CoffeeSubFilter { study, talk, vibe, desert, notebook, cheap }
+enum CoffeeSubFilter { study, talk, vibe, desert, coffee, cheap }
 
 class LocationFilter extends Equatable {
   final String name;

@@ -15,11 +15,13 @@ dependencies:
   flutter:
     sdk: flutter
 
+
+
   firebase_analytics: ^9.1.5
   firebase_auth: ^3.3.14
   firebase_core: ^1.14.1
   cupertino_icons: ^1.0.2
-  kakao_flutter_sdk: ^1.1.0
+  kakao_flutter_sdk: ^1.2.1
   provider: ^6.0.2
   validators: ^3.0.0
   state_notifier: ^0.7.2+1
@@ -31,6 +33,7 @@ dependencies:
   cloud_functions: ^3.2.17
   persistent_bottom_nav_bar: ^4.0.2
   curved_navigation_bar: ^1.0.3
+  flutter_share: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -75,6 +78,8 @@ flutter:
             weight: 600
           - asset: assets/fonts/SUIT-ttf/SUIT-Bold.ttf
             weight: 700
+          - asset: assets/fonts/SUIT-ttf/SUIT-ExtraBold.ttf
+            weight: 800
 
   # To add assets to your application, add an assets section, like this:
   # assets:
