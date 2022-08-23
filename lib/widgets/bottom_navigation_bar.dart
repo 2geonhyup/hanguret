@@ -4,9 +4,6 @@ import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
 import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
-import '../models/custom_error.dart';
-import '../screens/profile_screen/profile_page.dart';
-
 class BasicBottomNavigationBar extends StatelessWidget {
   BasicBottomNavigationBar({
     required this.option1,

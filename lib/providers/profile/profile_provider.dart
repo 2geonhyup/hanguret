@@ -25,7 +25,7 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
   Future<User?> getOthersProfile({required String uid}) async {
     try {
       final User user = await read<ProfileRepository>().getProfile(uid: uid);
-      print(user);
+
       return user;
     } on CustomError catch (e) {
       rethrow;
@@ -48,17 +48,35 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
         name: state.user.name,
         email: state.user.email,
         onboarding: state.user.onboarding,
-        friends: state.user.friends,
+        followings: state.user.followings,
+        followers: state.user.followers,
         icon: state.user.icon,
         first: false);
     state = state.copyWith(user: newUser);
   }
 
   Future<void> setFriends(String id, String name, int icon) async {
-    List newFriends = state.user.friends;
+    List newFriends = state.user.followings;
     newFriends.add({"id": id, "name": name, "icon": icon});
     try {
-      await read<ProfileRepository>().setFriends(friends: newFriends);
+      await read<ProfileRepository>().setFollowings(
+        id: id,
+        name: name,
+        icon: icon,
+      );
+      await read<ProfileRepository>()
+          .setFollowers(followingId: id, currentUser: state.user);
+      User newUser = User(
+          id: state.user.id,
+          name: state.user.name,
+          email: state.user.email,
+          onboarding: state.user.onboarding,
+          followings: newFriends,
+          followers: state.user.followers,
+          icon: state.user.icon,
+          first: state.user.first);
+      state = state.copyWith(user: newUser);
+      print("profileproviderrrr${state.user}");
     } on CustomError catch (e) {
       state = state.copyWith(profileStatus: ProfileStatus.error, error: e);
       throw CustomError(
@@ -67,28 +85,29 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
         plugin: 'flutter_error/server_error',
       );
     }
-
-    User newUser = User(
-        id: state.user.id,
-        name: state.user.name,
-        email: state.user.email,
-        onboarding: state.user.onboarding,
-        friends: newFriends,
-        icon: state.user.icon,
-        first: state.user.first);
-    state = state.copyWith(user: newUser);
   }
 
   Future<void> removeFriends(String id, String name, int icon) async {
-    List newFriends = state.user.friends;
-    for (var friend in newFriends) {
-      if (id == friend["id"]) {
-        newFriends.remove(friend);
+    List newFriends = [];
+    for (var friend in state.user.followings) {
+      if (id != friend["id"]) {
+        newFriends.add(friend);
       }
     }
 
     try {
-      await read<ProfileRepository>().setFriends(friends: newFriends);
+      await read<ProfileRepository>()
+          .setFollowings(id: id, name: name, icon: icon, remove: true);
+      User newUser = User(
+          id: state.user.id,
+          name: state.user.name,
+          email: state.user.email,
+          onboarding: state.user.onboarding,
+          followings: newFriends,
+          followers: state.user.followers,
+          icon: state.user.icon,
+          first: state.user.first);
+      state = state.copyWith(user: newUser);
     } on CustomError catch (e) {
       state = state.copyWith(profileStatus: ProfileStatus.error, error: e);
       throw CustomError(
@@ -97,16 +116,6 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
         plugin: 'flutter_error/server_error',
       );
     }
-
-    User newUser = User(
-        id: state.user.id,
-        name: state.user.name,
-        email: state.user.email,
-        onboarding: state.user.onboarding,
-        friends: newFriends,
-        icon: state.user.icon,
-        first: state.user.first);
-    state = state.copyWith(user: newUser);
   }
 
   Future<void> setName({required String? name}) async {
@@ -131,7 +140,8 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
         name: name,
         email: state.user.email,
         onboarding: state.user.onboarding,
-        friends: state.user.friends,
+        followings: state.user.followings,
+        followers: state.user.followers,
         icon: state.user.icon,
         first: state.user.first);
     state = state.copyWith(user: newUser);
@@ -168,7 +178,8 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
       name: state.user.name,
       email: state.user.email,
       onboarding: onboarding,
-      friends: state.user.friends,
+      followings: state.user.followings,
+      followers: state.user.followers,
       icon: state.user.icon,
       first: state.user.first,
     );

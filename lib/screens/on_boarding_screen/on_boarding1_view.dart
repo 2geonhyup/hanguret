@@ -30,8 +30,6 @@ class _NickNameSettingState extends State<NickNameSetting> {
 
   @override
   Widget build(BuildContext context) {
-    print("name${widget.originName}");
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

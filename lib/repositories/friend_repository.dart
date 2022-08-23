@@ -7,7 +7,7 @@ import '../models/friend.dart';
 
 Future<List<MealFriend>> getFriendsDoc(friendsId) async {
   List<MealFriend> friendsList = [];
-  print("asyncOne start");
+
   for (String element in friendsId) {
     final DocumentSnapshot userDoc = await usersRef.doc(element).get();
     Map? data = userDoc.data() as Map<String, dynamic>?;
@@ -33,7 +33,7 @@ class FriendRepository {
       if (friendsId == null) {
       } else {
         friendsList = await getFriendsDoc(friendsId);
-        print("friend_repo$friendsList");
+
         return friendsList;
       }
     } catch (e) {

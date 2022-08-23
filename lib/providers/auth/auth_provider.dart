@@ -19,7 +19,7 @@ class AuthProvider extends StateNotifier<AuthState> with LocatorMixin {
     } else {
       state = state.copyWith(authStatus: AuthStatus.unauthenticated);
     }
-    print('authState: $state');
+
     super.update(watch);
   }
 

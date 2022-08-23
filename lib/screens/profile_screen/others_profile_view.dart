@@ -15,7 +15,7 @@ import '../friend_screen/friend_recommend_page.dart';
 
 enum ModifyingField { none, favorite, hate, alcohol, spicy }
 
-class ProfileCard extends StatelessWidget {
+class ProfileCard extends StatefulWidget {
   ProfileCard(
       {Key? key,
       required this.icon,
@@ -33,6 +33,11 @@ class ProfileCard extends StatelessWidget {
   //내가 이 사람을 찜 하는지
   bool following;
 
+  @override
+  State<ProfileCard> createState() => _ProfileCardState();
+}
+
+class _ProfileCardState extends State<ProfileCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -56,7 +61,7 @@ class ProfileCard extends StatelessWidget {
           SizedBox(
             height: 24,
           ),
-          ProfileIconBox(content: profileIcons[icon]),
+          ProfileIconBox(content: profileIcons[widget.icon]),
           SizedBox(
             height: 10,
           ),
@@ -64,7 +69,7 @@ class ProfileCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                name,
+                widget.name,
                 style: TextStyle(
                     color: kBasicColor,
                     fontFamily: 'Suit',
@@ -84,7 +89,7 @@ class ProfileCard extends StatelessWidget {
           SizedBox(
             height: 3,
           ),
-          Text("@${id}",
+          Text("@${widget.id}",
               style: TextStyle(
                   color: kBasicTextColor,
                   fontSize: 11,
@@ -93,23 +98,81 @@ class ProfileCard extends StatelessWidget {
           SizedBox(
             height: 20,
           ),
-          Container(
-            width: 220,
-            height: 28,
-            decoration: BoxDecoration(
-                color: Color(0xffe5e5e5),
-                borderRadius: BorderRadius.circular(6)),
-            child: Center(
-              child: Text(
-                "찜하기",
-                style: TextStyle(
-                    color: Colors.black,
-                    fontFamily: 'Suit',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400),
-              ),
-            ),
-          ),
+          widget.following
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 105,
+                      height: 28,
+                      decoration: BoxDecoration(
+                          color: Color(0xffe5e5e5),
+                          borderRadius: BorderRadius.circular(6)),
+                      child: Center(
+                        child: Text(
+                          "구독 중",
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: 'Suit',
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        await context
+                            .read<ProfileProvider>()
+                            .removeFriends(widget.id, widget.name, widget.icon);
+                      },
+                      child: Container(
+                        width: 105,
+                        height: 28,
+                        decoration: BoxDecoration(
+                            color: Color(0xffe5e5e5).withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(6)),
+                        child: Center(
+                          child: Text(
+                            "구독 끊기",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Suit',
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () async {
+                    await context
+                        .read<ProfileProvider>()
+                        .setFriends(widget.id, widget.name, widget.icon);
+                  },
+                  child: Container(
+                    width: 220,
+                    height: 28,
+                    decoration: BoxDecoration(
+                        color: Color(0xffe5e5e5),
+                        borderRadius: BorderRadius.circular(6)),
+                    child: Center(
+                      child: Text(
+                        widget.followed ? "나도 찜하기" : "찜하기",
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontFamily: 'Suit',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400),
+                      ),
+                    ),
+                  ),
+                ),
           SizedBox(
             height: 24,
           ),
@@ -120,13 +183,8 @@ class ProfileCard extends StatelessWidget {
 }
 
 class ScoreBar extends StatelessWidget {
-  ScoreBar(
-      {Key? key,
-      required this.tapped,
-      required this.followerCnt,
-      required this.followingCnt})
+  ScoreBar({Key? key, required this.followerCnt, required this.followingCnt})
       : super(key: key);
-  bool tapped;
   int followerCnt;
   int followingCnt;
 //TODO: 진짜 데이터로 바꿔야 함!!!!!!!!!

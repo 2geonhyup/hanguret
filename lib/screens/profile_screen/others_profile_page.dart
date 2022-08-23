@@ -26,7 +26,6 @@ class OthersProfilePage extends StatefulWidget {
 class _OthersProfilePageState extends State<OthersProfilePage> {
   //option이 false면 남긴기록, true 면 저장한 곳
   bool option = false;
-  bool watchFollow = false;
   User? profile;
 
   Future<User?> _getProfile(userId) async {
@@ -50,152 +49,176 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    User curUser = context.watch<ProfileState>().user;
+    print(curUser);
+
+    print("line54$profile");
     return FutureBuilder(
         future: _getProfile(widget.userId),
         builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
-          final following = context.watch<ProfileState>().user.friends;
-          final follower = [];
-          return Scaffold(
-              backgroundColor: Colors.white,
-              body: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  Stack(
-                    children: [
-                      Container(
-                        height: 200,
-                        color: kBasicColor,
-                      ),
-                      SizedBox(
-                        height: 320,
-                      ),
-                      Positioned(
-                          top: 80,
-                          left: 0,
-                          right: 0,
-                          child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  watchFollow = true;
-                                });
-                              },
-                              child: ScoreBar(
-                                tapped: watchFollow,
-                                followingCnt: following.length,
-                                followerCnt: 0,
-                              ))),
-                      Positioned(
-                          top: 111,
-                          left: 40,
-                          right: 40,
-                          child: Container(
-                            child: ProfileCard(
-                              icon: profile != null ? profile!.icon : 0,
-                              name: profile != null ? profile!.name : "",
-                              id: profile != null ? profile!.id : "",
-                              followed: false,
-                              following: false,
-                            ),
-                          ))
-                    ],
-                  ),
-                  SizedBox(
-                    height: 26,
-                  ),
-                  TasteProfile(
-                    tasteKeyword: profile != null
-                        ? profile!.onboarding["tasteKeyword"]
-                        : [],
-                    alcoholType: profile != null
-                        ? profile!.onboarding["alcoholType"]
-                        : [],
-                  ),
-                  SizedBox(
-                    height: 49,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                        border: Border(
-                            bottom: BorderSide(
-                                color: kBorderGreenColor.withOpacity(0.5),
-                                width: 0.5))),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+          if (snapshot.hasData) {
+            final followings = profile == null ? [] : profile!.followings;
+            final followers = profile == null ? [] : profile!.followers;
+
+            List curFollowings = curUser.followings;
+            List curFollowers = curUser.followers;
+            print("curFollowers$curFollowers");
+            List followingsId = [];
+            for (var friend in curFollowings) {
+              followingsId.add(friend["id"]);
+            }
+            List followersId = [];
+            for (var friend in curFollowers) {
+              followersId.add(friend["id"]);
+            }
+
+            //상대가 나를 팔로우 하는지
+            bool followed = followersId.contains(widget.userId);
+            //내가 상대를 팔로우 하는지
+            bool following = followingsId.contains(widget.userId);
+            return Scaffold(
+                backgroundColor: Colors.white,
+                body: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    Stack(
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              option = false;
-                            });
-                          },
-                          child: Container(
-                            width: 152,
-                            decoration: BoxDecoration(
-                                border: Border(
-                                    bottom: option
-                                        ? BorderSide.none
-                                        : BorderSide(
-                                            color: kSecondaryTextColor,
-                                            width: 1))),
-                            child: Column(
-                              children: [
-                                Text(
-                                  "남긴 기록",
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: option
-                                          ? FontWeight.w400
-                                          : FontWeight.w700,
-                                      color: kSecondaryTextColor
-                                          .withOpacity(option ? 0.5 : 1)),
-                                ),
-                                SizedBox(
-                                  height: 8,
-                                )
-                              ],
-                            ),
-                          ),
+                        Container(
+                          height: 200,
+                          color: kBasicColor,
                         ),
-                        SizedBox(width: 26),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              option = true;
-                            });
-                          },
-                          child: Container(
-                            width: 152,
-                            decoration: BoxDecoration(
-                                border: Border(
-                                    bottom: option
-                                        ? BorderSide(
-                                            color: kSecondaryTextColor,
-                                            width: 1)
-                                        : BorderSide.none)),
-                            child: Column(
-                              children: [
-                                Text(
-                                  "저장한 곳",
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: option
-                                          ? FontWeight.w700
-                                          : FontWeight.w400,
-                                      color: kSecondaryTextColor
-                                          .withOpacity(option ? 1 : 0.5)),
-                                ),
-                                SizedBox(
-                                  height: 8,
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
+                        SizedBox(
+                          height: 320,
+                        ),
+                        Positioned(
+                            top: 80,
+                            left: 0,
+                            right: 0,
+                            child: ScoreBar(
+                              followingCnt: followings.length,
+                              followerCnt: followers.length,
+                            )),
+                        Positioned(
+                            top: 111,
+                            left: 40,
+                            right: 40,
+                            child: Container(
+                              child: ProfileCard(
+                                icon: profile != null ? profile!.icon : 0,
+                                name: profile != null ? profile!.name : "",
+                                id: profile != null ? profile!.id : "",
+                                followed: followed,
+                                following: following,
+                              ),
+                            ))
                       ],
                     ),
-                  ),
-                ],
-              ));
+                    SizedBox(
+                      height: 26,
+                    ),
+                    TasteProfile(
+                      tasteKeyword: profile != null
+                          ? profile!.onboarding["tasteKeyword"]
+                          : [],
+                      alcoholType: profile != null
+                          ? profile!.onboarding["alcoholType"]
+                          : [],
+                    ),
+                    SizedBox(
+                      height: 49,
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                          border: Border(
+                              bottom: BorderSide(
+                                  color: kBorderGreenColor.withOpacity(0.5),
+                                  width: 0.5))),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                option = false;
+                              });
+                            },
+                            child: Container(
+                              width: 152,
+                              decoration: BoxDecoration(
+                                  border: Border(
+                                      bottom: option
+                                          ? BorderSide.none
+                                          : BorderSide(
+                                              color: kSecondaryTextColor,
+                                              width: 1))),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "남긴 기록",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: option
+                                            ? FontWeight.w400
+                                            : FontWeight.w700,
+                                        color: kSecondaryTextColor
+                                            .withOpacity(option ? 0.5 : 1)),
+                                  ),
+                                  SizedBox(
+                                    height: 8,
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 26),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                option = true;
+                              });
+                            },
+                            child: Container(
+                              width: 152,
+                              decoration: BoxDecoration(
+                                  border: Border(
+                                      bottom: option
+                                          ? BorderSide(
+                                              color: kSecondaryTextColor,
+                                              width: 1)
+                                          : BorderSide.none)),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "저장한 곳",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: option
+                                            ? FontWeight.w700
+                                            : FontWeight.w400,
+                                        color: kSecondaryTextColor
+                                            .withOpacity(option ? 1 : 0.5)),
+                                  ),
+                                  SizedBox(
+                                    height: 8,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ));
+          } else {
+            return Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(
+                  backgroundColor: Colors.white,
+                ),
+              ),
+            );
+          }
         });
   }
 }

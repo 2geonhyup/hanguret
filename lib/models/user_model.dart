@@ -12,7 +12,8 @@ class User extends Equatable {
   final String name;
   final String email;
   final Map onboarding;
-  final List friends;
+  final List followings;
+  final List followers;
   final int icon;
   final bool first;
 
@@ -21,12 +22,14 @@ class User extends Equatable {
     required this.name,
     required this.email,
     required this.onboarding,
-    required this.friends,
+    required this.followings,
+    required this.followers,
     required this.icon,
     required this.first,
   });
 
-  factory User.fromDoc(DocumentSnapshot userDoc) {
+  factory User.fromDoc(
+      DocumentSnapshot userDoc, List followers, List followings) {
     final userData = userDoc.data() as Map<String, dynamic>?;
 
     //onboarding은 가입할 당시에는 null일 수 있다. 나머지는 정해진다.
@@ -35,7 +38,8 @@ class User extends Equatable {
         name: userData!['name'],
         email: userData['email'],
         onboarding: userData['onboarding'] ?? {},
-        friends: userData['friends'] ?? [],
+        followings: followings,
+        followers: followers,
         icon: userData['icon'],
         first: userData['first-login']);
   }
@@ -51,14 +55,15 @@ class User extends Equatable {
         name: '',
         email: '',
         onboarding: {},
-        friends: [],
+        followings: [],
+        followers: [],
         icon: 0,
         first: false);
   }
 
   @override
   List<Object> get props {
-    return [id, name, email, onboarding, friends, icon, first];
+    return [id, name, email, onboarding, followings, followers, icon, first];
   }
 
   @override

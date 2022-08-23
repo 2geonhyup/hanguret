@@ -8,6 +8,7 @@ import 'package:hangeureut/screens/location_select_screen/location_select_page.d
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/profile_screen/modify_loction.dart';
 import 'package:hangeureut/screens/profile_screen/profile_page.dart';
+import 'package:hangeureut/screens/review_screen/search_for_review_page.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 import '../../widgets/floating_button.dart';
@@ -16,9 +17,9 @@ import '../friend_screen/friends_page.dart';
 
 import 'package:provider/provider.dart';
 
-List<Widget> buildScreens() {
+List<Widget> buildScreens(reviewing) {
   return [
-    MainScreenPage(),
+    reviewing ? SearchForReviewPage() : MainScreenPage(),
     Center(child: Text("2")),
     ProfilePage(),
     Center(child: Text("4")),
@@ -32,7 +33,7 @@ List<Widget> initialScreens = [
   Center(child: Text("4")),
 ];
 
-List<Color> navBarColor = [
+List<Color> navBackgroundColor = [
   kBackgroundColor2,
   kBackgroundColor,
   kBackgroundColor,

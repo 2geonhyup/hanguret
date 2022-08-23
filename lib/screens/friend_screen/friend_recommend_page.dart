@@ -31,7 +31,7 @@ class _FriendRecommendPageState extends State<FriendRecommendPage> {
   Widget build(BuildContext context) {
     List<MealFriend> recommendFriends =
         context.read<RecommendFriendState>().recommendFriends;
-    List realFriends = context.watch<ProfileState>().user.friends;
+    List realFriends = context.watch<ProfileState>().user.followings;
     List realFriendsId = [];
     for (var friend in realFriends) {
       realFriendsId.add(friend["id"]);
@@ -124,69 +124,72 @@ class _FriendRecommendPageState extends State<FriendRecommendPage> {
       );
     }).toList();
 
-    return Container(
-      color: Colors.white,
-      child: Column(
-        children: [
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () async {
-                  await context.read<ProfileProvider>().setLogin();
-                  Navigator.pop;
-                  pushNewScreen(context,
-                      screen: ProfilePage(), withNavBar: true);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 34.0, top: 53),
-                  child: Icon(Icons.arrow_back_ios),
+    return Scaffold(
+      body: Container(
+        color: Colors.white,
+        child: Column(
+          children: [
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () async {
+                    await context.read<ProfileProvider>().setLogin();
+                    pushNewScreen(context,
+                        screen: BasicScreenPage(
+                          initialIndex: 2,
+                        ));
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 34.0, top: 53),
+                    child: Icon(Icons.arrow_back_ios),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 36,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "${myName}",
-                style: TextStyle(
-                    fontFamily: 'Suit',
-                    color: kSecondaryTextColor,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12),
-              ),
-              Text(
-                "님이 알 수도 잇는 친구들이에요.",
-                style: TextStyle(
-                    fontFamily: 'Suit',
-                    color: kSecondaryTextColor,
-                    fontWeight: FontWeight.w400,
-                    fontSize: 12),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 3,
-          ),
-          Text(
-            "찜하고 친구의 기록을 계속 받아보세요!",
-            style: TextStyle(
-                fontFamily: 'Suit',
-                color: kSecondaryTextColor,
-                fontWeight: FontWeight.w400,
-                fontSize: 12),
-          ),
-          Expanded(
-            child: GridView.count(
-              childAspectRatio: 0.85,
-              crossAxisCount: 2,
-              children: friendsContainers,
+              ],
             ),
-          ),
-        ],
+            SizedBox(
+              height: 36,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "${myName}",
+                  style: TextStyle(
+                      fontFamily: 'Suit',
+                      color: kSecondaryTextColor,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12),
+                ),
+                Text(
+                  "님이 알 수도 잇는 친구들이에요.",
+                  style: TextStyle(
+                      fontFamily: 'Suit',
+                      color: kSecondaryTextColor,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 12),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 3,
+            ),
+            Text(
+              "찜하고 친구의 기록을 계속 받아보세요!",
+              style: TextStyle(
+                  fontFamily: 'Suit',
+                  color: kSecondaryTextColor,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 12),
+            ),
+            Expanded(
+              child: GridView.count(
+                childAspectRatio: 0.85,
+                crossAxisCount: 2,
+                children: friendsContainers,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

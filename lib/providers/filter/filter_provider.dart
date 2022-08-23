@@ -27,6 +27,5 @@ class SearchFilterProvider extends StateNotifier<SearchFilterState>
         subFilterList: currentSubFilters,
         locationFilter: currentFilter.locationFilter);
     state = state.copyWith(filter: newFilter);
-    print(state);
   }
 }

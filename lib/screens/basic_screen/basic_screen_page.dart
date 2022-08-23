@@ -10,6 +10,7 @@ import 'package:hangeureut/screens/friend_screen/friends_page.dart';
 import 'package:hangeureut/screens/location_select_screen/location_select_page.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/profile_screen/profile_page.dart';
+import 'package:hangeureut/screens/review_screen/search_for_review_page.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
@@ -33,6 +34,7 @@ class BasicScreenPage extends StatefulWidget {
 
 class _BasicScreenPageState extends State<BasicScreenPage> {
   late PersistentTabController _controller;
+  bool reviewing = false;
 
   @override
   void initState() {
@@ -63,21 +65,32 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton:
-          ReviewFloatingButton(buttonColor: kSecondaryTextColor),
+      floatingActionButton: ReviewFloatingButton(
+        onTap: () {
+          setState(() {
+            _controller.index = 0;
+            reviewing = true;
+          });
+        },
+        buttonColor: kSecondaryTextColor,
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       body: Padding(
         padding: const EdgeInsets.only(bottom: 30.0),
         child: PersistentTabView.custom(
           context,
-          routeAndNavigatorSettings: CutsomWidgetRouteAndNavigatorSettings(
-              routes: {ProfilePage.routeName: (context) => ProfilePage()}),
+          routeAndNavigatorSettings:
+              CutsomWidgetRouteAndNavigatorSettings(routes: {
+            ProfilePage.routeName: (context) => ProfilePage(),
+            MainScreenPage.routeName: (context) => MainScreenPage(),
+          }),
           controller: _controller,
           itemCount: 4,
-          screens: buildScreens(),
+          screens: buildScreens(reviewing),
           confineInSafeArea: false,
           handleAndroidBackButtonPress: true,
-          backgroundColor: navBarColor[_controller.index],
+          backgroundColor:
+              reviewing ? Colors.white : navBackgroundColor[_controller.index],
           hideNavigationBarWhenKeyboardShows: true,
           customWidget: CustomNavBarWidget(
             // Your custom widget goes here
@@ -96,7 +109,6 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
                     initialIndex: index,
                   ),
                   withNavBar: true, // OPTIONAL VALUE. True by default.
-                  //pageTransitionAnimation: PageTransitionAnimation.fade,
                 );
               }
               setState(() {

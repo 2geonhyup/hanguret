@@ -14,15 +14,25 @@ class ProfileRepository {
 
   Future<User> getProfile({required String uid}) async {
     try {
+      List followingList = [];
+      List followerList = [];
       final DocumentSnapshot userDoc = await usersRef.doc(uid).get();
-      print(userDoc.exists);
 
+      final QuerySnapshot followings =
+          await usersRef.doc(uid).collection('followings').get();
+      if (followings.docs.isNotEmpty) {
+        followingList = followings.docs.map((e) => e.data()).toList();
+      }
+      final QuerySnapshot followers =
+          await usersRef.doc(uid).collection('followers').get();
+      if (followers.docs.isNotEmpty) {
+        followerList = followers.docs.map((e) => e.data()).toList();
+      }
       // 존재하는 uid를 입력받은 경우
       if (userDoc.exists) {
-        print("profilerepo${userDoc.data()}");
-        final User currentUser = User.fromDoc(userDoc);
+        final User currentUser =
+            User.fromDoc(userDoc, followerList, followingList);
 
-        print("Profilerepo21${currentUser}");
         return currentUser;
       }
 
@@ -34,7 +44,6 @@ class ProfileRepository {
         plugin: e.plugin,
       );
     } catch (e) {
-      print("profilerepo error");
       throw CustomError(
         code: 'Exception',
         message: e.toString(),
@@ -64,7 +73,6 @@ class ProfileRepository {
 
 //onboarding1에서 활용할 setName함수
   Future<void> setName({required String name}) async {
-    print("setname");
     final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
     try {
       await usersRef.doc(uid).update({'name': name});
@@ -103,11 +111,50 @@ class ProfileRepository {
     }
   }
 
-  //
-  Future<void> setFriends({required List friends}) async {
-    final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
+  Future<void> setFollowings(
+      {required String id,
+      required String name,
+      required int icon,
+      bool? remove}) async {
+    final String curUid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
     try {
-      await usersRef.doc(uid).update({'friends': friends});
+      if (remove == true) {
+        await usersRef.doc(curUid).collection('followings').doc(id).delete();
+        await usersRef.doc(id).collection('followers').doc(curUid).delete();
+      } else {
+        await usersRef
+            .doc(curUid)
+            .collection('followings')
+            .doc(id)
+            .set({"id": id, "name": name, "icon": icon});
+      }
+    } on FirebaseException catch (e) {
+      throw CustomError(
+        code: e.code,
+        message: e.message!,
+        plugin: e.plugin,
+      );
+    } catch (e) {
+      throw CustomError(
+        code: 'Exception',
+        message: e.toString(),
+        plugin: 'flutter_error/server_error',
+      );
+    }
+  }
+
+  Future<void> setFollowers(
+      {required String followingId, required User currentUser}) async {
+    try {
+      await usersRef
+          .doc(followingId)
+          .collection('followers')
+          .doc(currentUser.id)
+          .set({
+        "id": currentUser.id,
+        "name": currentUser.name,
+        "icon": currentUser.icon
+      });
     } on FirebaseException catch (e) {
       throw CustomError(
         code: e.code,

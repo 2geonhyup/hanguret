@@ -30,7 +30,6 @@ class AuthRepository {
     late String firebaseToken;
     try {
       kakaoToken = await kakaoLogin();
-      print("authrepopo$kakaoToken");
 
       // set user in firebase
       try {

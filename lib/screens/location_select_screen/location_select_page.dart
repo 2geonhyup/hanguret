@@ -189,7 +189,7 @@ class LocationButton extends StatelessWidget {
               mainFilter: filter.mainFilter,
               subFilterList: filter.subFilterList,
               locationFilter: location);
-          print(newFilter);
+
           context.read<SearchFilterProvider>().changeFilter(newFilter);
         },
         child: Container(

@@ -443,9 +443,10 @@ class FriendModal extends StatelessWidget {
   bool option;
   @override
   Widget build(BuildContext context) {
-    final following = context.watch<ProfileState>().user.friends;
+    final following = context.watch<ProfileState>().user.followings;
     final follower = [];
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 30.0, right: 30.0, top: 29),
@@ -492,7 +493,7 @@ class FriendModal extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 15.0),
             child: FriendRow(
                 icon: user["icon"], name: user["name"], id: user["id"]),
-          )
+          ),
       ],
     );
   }
@@ -508,6 +509,7 @@ class FriendRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.translucent,
       onTap: () {
         pushNewScreen(context,
             screen: OthersProfilePage(
@@ -515,41 +517,44 @@ class FriendRow extends StatelessWidget {
             ),
             withNavBar: true);
       },
-      child: Row(
-        children: [
-          SizedBox(
-            width: 33,
-          ),
-          FriendIconBox(content: profileIcons[icon]),
-          SizedBox(
-            width: 12,
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name,
-                style: TextStyle(
-                    color: kSecondaryTextColor,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Suit'),
-              ),
-              SizedBox(
-                height: 3,
-              ),
-              Text(
-                "@$id",
-                style: TextStyle(
-                    color: kSecondaryTextColor,
-                    fontFamily: 'Suit',
-                    fontWeight: FontWeight.w400,
-                    fontSize: 11),
-              )
-            ],
-          )
-        ],
+      child: Container(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            SizedBox(
+              width: 33,
+            ),
+            FriendIconBox(content: profileIcons[icon]),
+            SizedBox(
+              width: 12,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                      color: kSecondaryTextColor,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Suit'),
+                ),
+                SizedBox(
+                  height: 3,
+                ),
+                Text(
+                  "@$id",
+                  style: TextStyle(
+                      color: kSecondaryTextColor,
+                      fontFamily: 'Suit',
+                      fontWeight: FontWeight.w400,
+                      fontSize: 11),
+                )
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

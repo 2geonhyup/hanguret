@@ -12,7 +12,6 @@ class MyProfileCard extends StatelessWidget {
   final id;
   @override
   Widget build(BuildContext context) {
-    print("icon$icon");
     return Container(
       decoration: BoxDecoration(
           color: kBasicColor,

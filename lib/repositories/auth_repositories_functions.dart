@@ -46,7 +46,7 @@ Future<OAuthToken?> kakaoLogin() async {
 Future<Map<String, String>?> getUserInfoFromKakao() async {
   try {
     User user = await UserApi.instance.me();
-    print("userkakaoinfo: ${user.id}");
+
     return {
       'id': '${user.id}',
       'name': '${user.kakaoAccount?.profile?.nickname}',

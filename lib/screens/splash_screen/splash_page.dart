@@ -59,7 +59,6 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     final onBoardingState = context.watch<ProfileState>().user.onboarding;
-    print("hereisproblem$onBoardingState");
 
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
       //여기서 ready를 체크안해주면 무한루프가 발생함

@@ -140,7 +140,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                 padding:
                                     const EdgeInsets.only(left: 31.0, top: 36),
                                 child: Text(
-                                  "밥친구 ${myProfile.friends.length}",
+                                  "밥친구 ${myProfile.followings.length}",
                                   style: TextStyle(
                                       color: kBasicTextColor.withOpacity(0.6),
                                       fontWeight: FontWeight.w500,
@@ -157,8 +157,8 @@ class _FriendsPageState extends State<FriendsPage> {
                                     width: 33,
                                   ),
                                   FriendIconBox(
-                                      content: profileIcons[myProfile.friends[0]
-                                          ["icon"]]),
+                                      content: profileIcons[
+                                          myProfile.followings[0]["icon"]]),
                                   SizedBox(
                                     width: 12,
                                   ),
@@ -168,7 +168,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        myProfile.friends[0]["name"],
+                                        myProfile.followings[0]["name"],
                                         style: TextStyle(
                                             color: kSecondaryTextColor,
                                             fontSize: 18,
@@ -179,7 +179,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                         height: 3,
                                       ),
                                       Text(
-                                        "@${myProfile.friends[0]["id"]}",
+                                        "@${myProfile.followings[0]["id"]}",
                                         style: TextStyle(
                                             color: kSecondaryTextColor,
                                             fontFamily: 'Suit',
