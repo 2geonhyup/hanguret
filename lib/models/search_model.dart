@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:equatable/equatable.dart';
 
 enum MainFilter { none, meal, alcohol, coffee }

@@ -4,13 +4,11 @@ import 'package:hangeureut/models/friend.dart';
 import 'package:hangeureut/providers/friend/recommend_friend_state.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
-import 'package:hangeureut/screens/friend_screen/friends_page.dart';
 import 'package:hangeureut/widgets/profile_icon_box.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/profile/profile_state.dart';
-import '../profile_screen/profile_page.dart';
 
 class FriendRecommendPage extends StatefulWidget {
   const FriendRecommendPage({Key? key}) : super(key: key);
@@ -140,7 +138,7 @@ class _FriendRecommendPageState extends State<FriendRecommendPage> {
                         ));
                   },
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 34.0, top: 53),
+                    padding: const EdgeInsets.only(left: 34.0, top: 54),
                     child: Icon(Icons.arrow_back_ios),
                   ),
                 ),

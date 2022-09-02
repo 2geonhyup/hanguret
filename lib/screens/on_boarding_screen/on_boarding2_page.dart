@@ -5,11 +5,11 @@ import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:hangeureut/widgets/progress_bar.dart';
 import 'package:provider/provider.dart';
+
 import '../../providers/profile/profile_state.dart';
 import '../../widgets/bottom_navigation_bar.dart';
 import 'on_boarding1_page.dart';
 import 'on_boarding2_view.dart';
-
 import 'on_boarding3_page.dart';
 
 class OnBoarding2Page extends StatefulWidget {

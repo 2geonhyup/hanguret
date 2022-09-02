@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../constants.dart';
 import '../../providers/profile/profile_provider.dart';
 import '../../widgets/profile_icon_box.dart';
-import 'package:provider/provider.dart';
-
-import '../friend_screen/friend_recommend_page.dart';
 
 class WelcomeDialog extends StatefulWidget {
   WelcomeDialog({Key? key, required this.onMoreTap}) : super(key: key);

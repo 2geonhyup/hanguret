@@ -1,11 +1,5 @@
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
-import 'dart:convert';
-
-import '../constants.dart';
-import 'friend.dart';
 
 class User extends Equatable {
   final String id;

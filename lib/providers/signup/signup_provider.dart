@@ -1,12 +1,8 @@
 // import 'package:flutter/foundation.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter/material.dart';
-
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../models/custom_error.dart';
 import '../../repositories/auth_repository.dart';
-import '../profile/profile_provider.dart';
 import 'signup_state.dart';
 
 // class SignupProvider with ChangeNotifier {

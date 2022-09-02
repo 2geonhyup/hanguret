@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:hangeureut/providers/auth/auth_state.dart';
-import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/start_screen/start_view_model.dart';
-import 'package:provider/provider.dart';
+
 import '../../constants.dart';
-import '../splash_screen/splash_page.dart';
 
 class StartPage extends StatefulWidget {
   const StartPage({Key? key}) : super(key: key);

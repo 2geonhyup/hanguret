@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
-
+import 'package:hangeureut/widgets/bottom_navigation_bar.dart';
 import 'package:hangeureut/widgets/progress_bar.dart';
 import 'package:provider/provider.dart';
+
 import '../../models/custom_error.dart';
 import '../../providers/profile/profile_provider.dart';
 import '../../widgets/error_dialog.dart';
 import 'on_boarding1_view.dart';
-import 'package:hangeureut/widgets/bottom_navigation_bar.dart';
-
-import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
-
 import 'on_boarding2_page.dart';
 
 class OnBoarding1Page extends StatefulWidget {

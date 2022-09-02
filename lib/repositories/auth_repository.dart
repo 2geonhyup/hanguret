@@ -1,14 +1,14 @@
 // fbAuth로 임포하는 이유는 우리가 정의한 usermodel과 firebase의 usermodel이 충돌하는 것을 방지하기 위함이다.
-import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hangeureut/models/custom_error.dart';
-import 'package:cloud_functions/cloud_functions.dart';
+import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
+import 'package:hangeureut/models/custom_error.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 
 import '../constants.dart';
 import 'auth_repositories_functions.dart';
-import 'dart:math';
 
 class AuthRepository {
   final FirebaseFirestore firebaseFirestore;

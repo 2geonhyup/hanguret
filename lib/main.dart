@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_state_notifier/flutter_state_notifier.dart';
 import 'package:hangeureut/providers/auth/auth_provider.dart';
 import 'package:hangeureut/providers/auth/auth_state.dart';
 import 'package:hangeureut/providers/filter/filter_provider.dart';
@@ -20,7 +22,6 @@ import 'package:hangeureut/screens/friend_screen/friends_page.dart';
 import 'package:hangeureut/screens/location_select_screen/location_select_page.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding1_page.dart';
-
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding2_page.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding3_page.dart';
 import 'package:hangeureut/screens/profile_screen/modify_loction.dart';
@@ -28,15 +29,12 @@ import 'package:hangeureut/screens/result_screen/search_result.dart';
 import 'package:hangeureut/screens/review_screen/review_page.dart';
 import 'package:hangeureut/screens/serching_screen/searching_page.dart';
 import 'package:hangeureut/screens/splash_screen/splash_page.dart';
-import 'package:provider/provider.dart';
-import 'constants.dart';
-import 'screens/start_screen/start_page.dart';
 import 'package:kakao_flutter_sdk_auth/kakao_flutter_sdk_auth.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
-import 'package:flutter_state_notifier/flutter_state_notifier.dart';
+import 'package:provider/provider.dart';
 
-import 'package:firebase_core/firebase_core.dart';
+import 'constants.dart';
 import 'firebase_options.dart';
+import 'screens/start_screen/start_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -96,7 +94,6 @@ class Hangeureut extends StatelessWidget {
           OnBoarding3Page.routeName: (context) => OnBoarding3Page(),
           MainScreenPage.routeName: (context) => MainScreenPage(),
           SearchingPage.routeName: (context) => SearchingPage(),
-          ReviewPage.routeName: (context) => ReviewPage(),
           SearchResult.routeName: (context) => SearchResult(),
           BasicScreenPage.routeName: (context) => BasicScreenPage(),
           SplashPage.routeName: (context) => SplashPage(),

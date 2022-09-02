@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/friend/recommend_friend_provider.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
-import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding1_page.dart';
 import 'package:provider/provider.dart';
 
@@ -60,7 +59,7 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
     final onBoardingState = context.watch<ProfileState>().user.onboarding;
 
-    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       //여기서 ready를 체크안해주면 무한루프가 발생함
       if (completed & !ready) {
         setState(() {

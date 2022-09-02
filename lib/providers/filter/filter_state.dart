@@ -1,6 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:state_notifier/state_notifier.dart';
-
 import 'package:hangeureut/models/search_model.dart';
 
 class SearchFilterState extends Equatable {

@@ -1,20 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
-import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/repositories/friend_repository.dart';
-import 'package:hangeureut/screens/serching_screen/searching_page.dart';
-import 'package:hangeureut/widgets/profile_icon_box.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/services.dart';
 
 import '../../models/search_model.dart';
 import '../../providers/filter/filter_provider.dart';
 import '../../providers/filter/filter_state.dart';
-import '../../widgets/floating_button.dart';
 import '../location_select_screen/location_select_page.dart';
-import '../review_screen/search_for_review_page.dart';
-import 'main_screen_view.dart';
 
 class MainScreenPage extends StatefulWidget {
   static const String routeName = '/main';

@@ -1,12 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
-import 'package:hangeureut/models/custom_error.dart';
-import 'package:provider/provider.dart';
-
-import '../../providers/profile/profile_provider.dart';
-import '../../providers/profile/profile_state.dart';
-import '../../widgets/error_dialog.dart';
 
 class NickNameSetting extends StatefulWidget {
   NickNameSetting(

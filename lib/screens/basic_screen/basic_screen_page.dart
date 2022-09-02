@@ -1,26 +1,18 @@
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/screens/friend_screen/friend_recommend_page.dart';
-import 'package:hangeureut/screens/friend_screen/friends_page.dart';
-import 'package:hangeureut/screens/location_select_screen/location_select_page.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/profile_screen/profile_page.dart';
-import 'package:hangeureut/screens/review_screen/search_for_review_page.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/search_model.dart';
 import '../../providers/filter/filter_provider.dart';
-import '../../providers/profile/profile_provider.dart';
 import '../../widgets/floating_button.dart';
-import '../../widgets/nav_custom_painter.dart';
 import '../main_screen/main_screen_view.dart';
-import '../profile_screen/modify_loction.dart';
 import 'basic_screen_view.dart';
 
 class BasicScreenPage extends StatefulWidget {
@@ -43,7 +35,7 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
     _controller = PersistentTabController(initialIndex: widget.initialIndex);
     if (context.read<ProfileState>().user.first) {
-      WidgetsBinding.instance!.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         showDialog(
             context: context,
             builder: (context) {
@@ -65,6 +57,7 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       floatingActionButton: ReviewFloatingButton(
         onTap: () {
           setState(() {

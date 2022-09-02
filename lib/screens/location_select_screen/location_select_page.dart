@@ -4,7 +4,6 @@ import 'package:hangeureut/models/search_model.dart';
 import 'package:hangeureut/providers/filter/filter_provider.dart';
 import 'package:hangeureut/providers/filter/filter_state.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
-import 'package:hangeureut/screens/serching_screen/searching_page.dart';
 import 'package:provider/provider.dart';
 
 class LocationSelectPage extends StatelessWidget {

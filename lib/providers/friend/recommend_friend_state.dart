@@ -1,9 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:hangeureut/models/friend.dart';
 
-import '../../models/custom_error.dart';
-import '../../models/user_model.dart';
-
 class RecommendFriendState extends Equatable {
   final List<MealFriend> recommendFriends;
 

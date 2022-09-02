@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/filter/filter_state.dart';
-import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
-import 'package:hangeureut/screens/result_screen/search_result.dart';
 import 'package:hangeureut/widgets/bottom_navigation_bar.dart';
 import 'package:provider/provider.dart';
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
-import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 class BasicBottomNavigationBar extends StatelessWidget {
@@ -78,6 +77,8 @@ class OptionCard extends StatelessWidget {
           Text(
             optionText,
             style: TextStyle(
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Suit',
               fontSize: 18,
               color: Colors.black,
             ),

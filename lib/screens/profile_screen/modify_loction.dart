@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
 import 'package:provider/provider.dart';
 
 import '../../constants.dart';
@@ -8,7 +7,6 @@ import '../../providers/profile/profile_provider.dart';
 import '../../providers/profile/profile_state.dart';
 import '../../widgets/bottom_navigation_bar.dart';
 import '../../widgets/error_dialog.dart';
-import '../../widgets/progress_bar.dart';
 
 class ModifyLocation extends StatefulWidget {
   const ModifyLocation({Key? key}) : super(key: key);

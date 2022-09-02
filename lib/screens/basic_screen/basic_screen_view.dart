@@ -1,21 +1,13 @@
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hangeureut/constants.dart';
-import 'package:hangeureut/screens/friend_screen/friend_recommend_page.dart';
 import 'package:hangeureut/screens/location_select_screen/location_select_page.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
-import 'package:hangeureut/screens/profile_screen/modify_loction.dart';
 import 'package:hangeureut/screens/profile_screen/profile_page.dart';
 import 'package:hangeureut/screens/review_screen/search_for_review_page.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
-import '../../widgets/floating_button.dart';
 import '../../widgets/nav_custom_painter.dart';
-import '../friend_screen/friends_page.dart';
-
-import 'package:provider/provider.dart';
 
 List<Widget> buildScreens(reviewing) {
   return [

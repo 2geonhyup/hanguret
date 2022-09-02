@@ -5,390 +5,435 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
+import 'package:hangeureut/restaurants.dart';
 import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
+import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_page.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/services.dart';
+import 'package:image_crop/image_crop.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 import '../../widgets/bottom_navigation_bar.dart';
+import '../../widgets/res_title.dart';
 
 class ReviewPage extends StatefulWidget {
-  const ReviewPage({Key? key}) : super(key: key);
+  ReviewPage({Key? key, required this.res, required this.score})
+      : super(key: key);
   static const String routeName = "review";
+
+  final res;
+  int score;
 
   @override
   State<ReviewPage> createState() => _ReviewPageState();
 }
 
 class _ReviewPageState extends State<ReviewPage> {
-  bool searchCompleted = false;
-  String title = "";
+  int category = 0;
+  int option = -1;
+  bool scrollable = true;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 30),
-          child: GestureDetector(
-              onTap: () =>
-                  Navigator.popAndPushNamed(context, BasicScreenPage.routeName),
-              child: kBasicBackIcon),
-        ),
+    List optionIconList = resFilterIcons[widget.res["category${category + 1}"]];
+    List optionTextList = resFilterTexts[widget.res["category${category + 1}"]];
+    print(optionTextList);
+    List _items = [
+      ResTitle(
+          category: widget.res["category1"],
+          icon: widget.res["tag1"],
+          name: widget.res["name"],
+          detail:
+              "${resScoreIcons[widget.score - 1][0]} ${resScoreIcons[widget.score - 1][1]} (다시 선택)"),
+      SizedBox(
+        height: 18,
       ),
-      body: ListView(
-        children: [
-          searchCompleted
-              ? TitleCard(
-                  title: title,
-                )
-              : SearchRestaurantBar(
-                  callback: (val) {
+      widget.res["category2"] == null
+          ? Center(
+              child: CategoryTile(
+                title: categoryTexts[widget.res["category1"]],
+                selected: true,
+              ),
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CategoryTile(
+                  title: categoryTexts[widget.res["category1"]],
+                  selected: category == 0,
+                  onTap: () {
                     setState(() {
-                      searchCompleted
-                          ? searchCompleted = false
-                          : searchCompleted = true;
-                      val == null ? null : title = val;
+                      category = 0;
                     });
                   },
                 ),
-          searchCompleted ? StampPicker() : SizedBox.shrink(),
-          SizedBox(
-            height: 30,
+                SizedBox(
+                  width: 22,
+                ),
+                CategoryTile(
+                  title: categoryTexts[widget.res["category2"]],
+                  selected: category == 1,
+                  onTap: () {
+                    setState(() {
+                      category = 1;
+                    });
+                  },
+                )
+              ],
+            ),
+      SizedBox(
+        height: 34,
+      ),
+      ImageBox(onDrag: (val) {
+        setState(() {
+          scrollable = false;
+        });
+        print(scrollable);
+      }, onDragEnd: (val) {
+        setState(() {
+          scrollable = true;
+        });
+      }),
+      SizedBox(
+        height: 15,
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FilterTile(
+            icon: optionIconList[0],
+            text: optionTextList[0],
+            selected: option == 0,
+            onTap: () {
+              setState(() {
+                option = 0;
+              });
+            },
           ),
-          searchCompleted ? TextReview() : SizedBox.shrink(),
+          FilterTile(
+            icon: optionIconList[1],
+            text: optionTextList[1],
+            selected: option == 1,
+            onTap: () {
+              setState(() {
+                option = 1;
+              });
+            },
+          ),
+          FilterTile(
+            icon: optionIconList[2],
+            text: optionTextList[2],
+            selected: option == 2,
+            onTap: () {
+              setState(() {
+                option = 2;
+              });
+            },
+          ),
         ],
       ),
-    );
-  }
-}
-
-class SearchRestaurantBar extends StatefulWidget {
-  SearchRestaurantBar({Key? key, required this.callback}) : super(key: key);
-  final void Function(String?) callback;
-
-  @override
-  State<SearchRestaurantBar> createState() => _SearchRestaurantBarState();
-}
-
-class _SearchRestaurantBarState extends State<SearchRestaurantBar> {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 200.0),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          height: 50,
-          decoration: BoxDecoration(
-              border: Border.all(
-                color: kSecondaryTextColor,
-                width: 1,
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FilterTile(
+            icon: optionIconList[3],
+            text: optionTextList[3],
+            selected: option == 3,
+            onTap: () {
+              setState(() {
+                option = 3;
+              });
+            },
+          ),
+          FilterTile(
+            icon: optionIconList[4],
+            text: optionTextList[4],
+            selected: option == 4,
+            onTap: () {
+              setState(() {
+                option = 4;
+              });
+            },
+          ),
+          FilterTile(
+            icon: optionIconList[5],
+            text: optionTextList[5],
+            selected: option == 5,
+            onTap: () {
+              setState(() {
+                option = 5;
+              });
+            },
+          ),
+        ],
+      ),
+      SizedBox(
+        height: 50,
+      ),
+    ];
+    return Scaffold(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 34.0, top: 54),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: Icon(
+                        Icons.arrow_back_ios,
+                        color: kBasicTextColor.withOpacity(0.8),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              borderRadius: BorderRadius.all(Radius.circular(16.0))),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            ],
+          ),
+          Expanded(
+            child: ListView.separated(
+                physics: scrollable
+                    ? ScrollPhysics()
+                    : NeverScrollableScrollPhysics(),
+                separatorBuilder: (_, __) => SizedBox.shrink(),
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                itemCount: _items.length,
+                itemBuilder: (context, int index) {
+                  return _items[index];
+                }),
+          ),
+          Row(
             children: [
               Expanded(
-                child: TextFormField(
-                  onFieldSubmitted: widget.callback,
-                  decoration: InputDecoration(
-                    contentPadding: EdgeInsets.all(0),
-                    hintText: "가게 이름을 입력해주세요.",
-                    hintStyle: TextStyle(
-                        fontFamily: 'Suit',
-                        fontWeight: FontWeight.w400,
-                        color: kSecondaryTextColor.withOpacity(0.5),
-                        fontSize: 14),
-                    border: OutlineInputBorder(borderSide: BorderSide.none),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: OptionCard(
+                    optionText: "취소",
+                    optionColor: kThirdColor,
                   ),
                 ),
               ),
-              Icon(
-                Icons.search,
-                color: kBasicColor,
-                size: 20,
-              )
+              Expanded(
+                child: GestureDetector(
+                  onTap: () async {
+                    pushNewScreen(context,
+                        screen: RestaurantDetailPage(
+                            res: widget.res, option: false));
+                  },
+                  child: OptionCard(
+                    optionText: "완료",
+                    optionColor: Color(0xffc7c7c0),
+                  ),
+                ),
+              ),
             ],
-          ),
-        ),
+          )
+        ],
       ),
     );
   }
 }
 
-class TitleCard extends StatelessWidget {
-  TitleCard({Key? key, required this.title}) : super(key: key);
-  String title;
+class CategoryTile extends StatelessWidget {
+  const CategoryTile(
+      {Key? key, required this.title, required this.selected, this.onTap})
+      : super(key: key);
+
+  final title;
+  final selected;
+  final onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(height: 60),
-        Image.asset("images/icons/rounded_rice.png"),
-        SizedBox(
-          height: 15,
-        ),
-        Text(
-          title,
-          style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(
-          height: 10,
-        ),
-        Text(
-          "2022년 5월 2일",
-          style: TextStyle(
-              fontSize: 12, color: kBasicColor, fontWeight: FontWeight.bold),
-        ),
-        Text("오늘의 한그릇 기록", style: TextStyle(fontSize: 12, color: kBasicColor)),
-        SizedBox(
-          height: 80,
-          child: Divider(
-            color: kBorderGreenColor.withOpacity(0.5),
-            height: 0.5,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class ImageInput extends StatefulWidget {
-  const ImageInput({Key? key}) : super(key: key);
-
-  @override
-  State<ImageInput> createState() => _ImageInputState();
-}
-
-class _ImageInputState extends State<ImageInput> {
-  final ImagePicker _picker = ImagePicker();
-  XFile? _pickedImg;
-
-  Future<void> getImg() async {
-    final img = await _picker.pickImage(source: ImageSource.gallery);
-    if (img != null) {
-      setState(() {
-        _pickedImg = img;
-      });
-    }
-  }
-
-  Widget imgButton() {
     return GestureDetector(
-      onTap: () async {
-        await getImg();
-      },
-      child: Container(
-        //TODO: 플렉서블하게 고쳐야 한다
-        width: 310,
-        height: 310,
-        child: Text("click!"),
-      ),
-    );
-  }
-
-  Widget ImgCard(img) {
-    return Container(
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(19),
-          image: DecorationImage(
-              fit: BoxFit.cover, image: FileImage(File(_pickedImg!.path)))),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _pickedImg == null ? imgButton() : ImgCard(_pickedImg);
-  }
-}
-
-class StampPicker extends StatefulWidget {
-  const StampPicker({Key? key}) : super(key: key);
-
-  @override
-  State<StampPicker> createState() => _StampPickerState();
-}
-
-class _StampPickerState extends State<StampPicker> {
-  List<bool> clickedList = [false, false, false, false, false, false];
-  Widget reviewStamp(String imagePath, String name, bool clicked) {
-    return Container(
-      width: 100,
-      height: 100,
-      decoration: BoxDecoration(
-        color: clicked ? kBasicColor : Colors.white,
-        borderRadius: BorderRadius.all(
-          Radius.circular(22),
-        ),
-      ),
+      onTap: onTap,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Positioned(top: 30, child: Image.asset(imagePath)),
-          Positioned(
-              top: 65,
-              child: Text(
-                name,
-                style: TextStyle(
-                    color: clicked ? Colors.white : kBasicTextColor,
-                    fontSize: 12),
-              )),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "스탬프로 리뷰",
-                style: TextStyle(
-                    fontSize: 14,
-                    color: kBasicTextColor,
-                    fontWeight: FontWeight.w700),
-              ),
-              Text(
-                "여러 개 선택할 수 있어요",
-                style: TextStyle(
-                    fontSize: 11,
-                    color: kBasicTextColor,
-                    fontWeight: FontWeight.w100),
-              )
-            ],
+          Image.asset(
+            "images/category_tile.png",
+            width: 47,
+            color: selected ? kSecondaryTextColor : Color(0xffC7C7C0),
           ),
-          SizedBox(
-            height: 20,
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    clickedList[0] = !clickedList[0];
-                  });
-                },
-                child: reviewStamp(
-                    "images/icons/vibegood.png", "분위기가 좋아", clickedList[0]),
-              ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    clickedList[1] = !clickedList[1];
-                  });
-                },
-                child: reviewStamp(
-                    "images/icons/tastegood.png", "여기 맛집이네", clickedList[1]),
-              ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    clickedList[2] = !clickedList[2];
-                  });
-                },
-                child: reviewStamp(
-                    "images/icons/pricegood.png", "가격이 좋아", clickedList[2]),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 15,
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    clickedList[3] = !clickedList[3];
-                  });
-                },
-                child: reviewStamp(
-                    "images/icons/bad.png", "좀 실망이야", clickedList[3]),
-              ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    clickedList[4] = !clickedList[4];
-                  });
-                },
-                child: reviewStamp(
-                    "images/icons/cleangood.png", "내부가 깨끗해", clickedList[4]),
-              ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    clickedList[5] = !clickedList[5];
-                  });
-                },
-                child: reviewStamp(
-                    "images/icons/servicegood.png", "서비스 친절해", clickedList[5]),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class TextReview extends StatefulWidget {
-  const TextReview({Key? key}) : super(key: key);
-
-  @override
-  State<TextReview> createState() => _TextReviewState();
-}
-
-class _TextReviewState extends State<TextReview> {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
           Text(
-            "텍스트로 리뷰",
+            title,
             style: TextStyle(
-                fontSize: 14,
-                color: kBasicTextColor,
-                fontWeight: FontWeight.w700),
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                fontFamily: 'Suit',
+                fontSize: 12),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class ImageBox extends StatefulWidget {
+  const ImageBox({Key? key, required this.onDrag, required this.onDragEnd})
+      : super(key: key);
+  final onDrag;
+  final onDragEnd;
+
+  @override
+  State<ImageBox> createState() => _ImageBoxState();
+}
+
+class _ImageBoxState extends State<ImageBox> {
+  final cropKey = GlobalKey<CropState>();
+
+  File? _file;
+  File? _sample;
+  File? _lastCropped;
+
+  @override
+  void dispose() {
+    super.dispose();
+    _file?.delete();
+    _sample?.delete();
+    _lastCropped?.delete();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 33.0),
+      child: Container(
+          clipBehavior: Clip.hardEdge,
+          width: 324,
+          height: _sample == null ? 196 : 324,
+          decoration: BoxDecoration(
+              color: Color(0xffececec),
+              borderRadius: BorderRadius.circular(19)),
+          child: _sample == null ? _buildOpeningImage() : _buildCropImage()),
+    );
+  }
+
+  Widget _buildOpeningImage() {
+    return Center(child: _buildOpenImage());
+  }
+
+  Widget _buildOpenImage() {
+    return TextButton(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            "images/download.png",
+            width: 24,
+            height: 24,
           ),
-          SizedBox(
-            height: 10,
-          ),
-          Container(
-            height: 40,
-            child: TextFormField(
-              textAlign: TextAlign.left,
-              textAlignVertical: TextAlignVertical.center,
-              decoration: InputDecoration(
-                contentPadding: EdgeInsets.only(left: 15, bottom: 15),
-                border: InputBorder.none,
-                hintText: "원하는 경우에 입력해주세요!",
-                hintStyle: TextStyle(
-                    color: kHintTextColor.withOpacity(0.6), fontSize: 12),
-              ),
-            ),
-            decoration: BoxDecoration(
-              color: kSecondaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
+          Text(
+            '사진 추가',
+            style: TextStyle(
+                fontWeight: FontWeight.w800,
+                color: kSecondaryTextColor,
+                fontFamily: 'Suit',
+                fontSize: 15),
           ),
         ],
+      ),
+      onPressed: () => _openImage(),
+    );
+  }
+
+  Future<void> _openImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    final file = File(pickedFile!.path);
+    final sample = await ImageCrop.sampleImage(
+        file: file, preferredWidth: 324, preferredHeight: 324);
+
+    _sample?.delete();
+    _file?.delete();
+    setState(() {
+      _sample = sample;
+      _file = file;
+    });
+  }
+
+  Widget _buildCropImage() {
+    return GestureDetector(
+      onTap: () => _openImage(),
+      child: Transform.scale(
+        scale: 1.03,
+        child: Crop.file(
+          _sample!,
+          key: cropKey,
+        ),
+      ),
+    );
+  }
+}
+
+class FilterTile extends StatelessWidget {
+  const FilterTile(
+      {Key? key,
+      required this.icon,
+      required this.text,
+      required this.selected,
+      required this.onTap})
+      : super(key: key);
+  final icon;
+  final text;
+  final selected;
+  final onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(3.25),
+        child: Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                          blurStyle: BlurStyle.outer,
+                          offset: Offset(0, 1),
+                          blurRadius: 3,
+                          color: Colors.black.withOpacity(0.15))
+                    ]
+                  : null,
+              borderRadius: BorderRadius.circular(22),
+              color:
+                  selected ? Color(0xffd9d9d9).withOpacity(0.2) : Colors.white),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 25.71,
+              ),
+              Text(
+                icon,
+                style: TextStyle(fontSize: 24, height: 1),
+              ),
+              SizedBox(
+                height: 19.92,
+              ),
+              Text(
+                text,
+                style: TextStyle(
+                    fontSize: 12,
+                    height: 1,
+                    fontFamily: 'Suit',
+                    fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
+                    color: kSecondaryTextColor),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

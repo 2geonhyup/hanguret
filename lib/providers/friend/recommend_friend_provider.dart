@@ -2,10 +2,7 @@ import 'package:hangeureut/models/friend.dart';
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../models/custom_error.dart';
-import '../../models/user_model.dart';
 import '../../repositories/friend_repository.dart';
-import '../../repositories/profile_repository.dart';
-import '../profile/profile_state.dart';
 import 'recommend_friend_state.dart';
 
 class RecommendFriendProvider extends StateNotifier<RecommendFriendState>
