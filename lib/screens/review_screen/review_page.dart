@@ -4,15 +4,23 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:hangeureut/constants.dart';
+import 'package:hangeureut/models/custom_error.dart';
+import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/restaurants.dart';
 import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
 import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_page.dart';
+import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:image_crop/image_crop.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:provider/provider.dart';
 
+import '../../models/user_model.dart';
+import '../../repositories/review_repository.dart';
 import '../../widgets/bottom_navigation_bar.dart';
 import '../../widgets/res_title.dart';
 
@@ -32,6 +40,117 @@ class _ReviewPageState extends State<ReviewPage> {
   int category = 0;
   int option = -1;
   bool scrollable = true;
+
+  final cropKey = GlobalKey<CropState>();
+
+  File? _file;
+  File? _sample;
+  File? _lastCropped;
+
+  @override
+  void dispose() {
+    super.dispose();
+    _file?.delete();
+    _sample?.delete();
+    _lastCropped?.delete();
+  }
+
+  Widget ImageBox({required onDrag, required onDragEnd}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 33.0),
+      child: Container(
+          clipBehavior: Clip.hardEdge,
+          width: 324,
+          height: _sample == null ? 196 : 324,
+          decoration: BoxDecoration(
+              color: Color(0xffececec),
+              borderRadius: BorderRadius.circular(19)),
+          child: _sample == null ? _buildOpenImage() : _buildCropImage()),
+    );
+  }
+
+  Widget _buildOpenImage() {
+    return Center(
+      child: TextButton(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              "images/download.png",
+              width: 24,
+              height: 24,
+            ),
+            Text(
+              '사진 추가',
+              style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: kSecondaryTextColor,
+                  fontFamily: 'Suit',
+                  fontSize: 15),
+            ),
+          ],
+        ),
+        onPressed: () => _openImage(),
+      ),
+    );
+  }
+
+  Future<void> _openImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    final file = File(pickedFile!.path);
+    final sample = await ImageCrop.sampleImage(
+        file: file, preferredWidth: 324, preferredHeight: 324);
+
+    _sample?.delete();
+    _file?.delete();
+    setState(() {
+      _sample = sample;
+      _file = file;
+    });
+  }
+
+  Widget _buildCropImage() {
+    return GestureDetector(
+      onTap: () => _openImage(),
+      child: Transform.scale(
+        scale: 1.03,
+        child: Crop.file(
+          _sample!,
+          key: cropKey,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _cropImage() async {
+    final scale = cropKey.currentState!.scale;
+    final area = cropKey.currentState?.area;
+
+    if (area == null) {
+      // cannot crop, widget is not setup
+      return;
+    }
+
+    // scale up to use maximum possible number of pixels
+    // this will sample image in higher resolution to make cropped image larger
+    final sample = await ImageCrop.sampleImage(
+      file: _file!,
+      preferredSize: (2000 / scale).round(),
+    );
+
+    final file = await ImageCrop.cropImage(
+      file: sample,
+      area: area,
+    );
+
+    sample.delete();
+
+    _lastCropped?.delete();
+    _lastCropped = file;
+
+    debugPrint('$file');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -225,6 +344,21 @@ class _ReviewPageState extends State<ReviewPage> {
               Expanded(
                 child: GestureDetector(
                   onTap: () async {
+                    if (_sample == null) {
+                      errorDialog(context, CustomError(message: "사진을 선택해주세요!"));
+                      return;
+                    }
+                    await _cropImage();
+                    User user = context.read<ProfileState>().user;
+                    await context.read<ReviewRepository>().reviewComplete(
+                        userId: user.id,
+                        userName: user.name,
+                        resId: widget.res["id"],
+                        score: widget.score,
+                        imgFile: _lastCropped!,
+                        icon: option,
+                        date: DateTime.now());
+                    ;
                     pushNewScreen(context,
                         screen: RestaurantDetailPage(
                             res: widget.res, option: false));
@@ -273,103 +407,6 @@ class CategoryTile extends StatelessWidget {
                 fontSize: 12),
           )
         ],
-      ),
-    );
-  }
-}
-
-class ImageBox extends StatefulWidget {
-  const ImageBox({Key? key, required this.onDrag, required this.onDragEnd})
-      : super(key: key);
-  final onDrag;
-  final onDragEnd;
-
-  @override
-  State<ImageBox> createState() => _ImageBoxState();
-}
-
-class _ImageBoxState extends State<ImageBox> {
-  final cropKey = GlobalKey<CropState>();
-
-  File? _file;
-  File? _sample;
-  File? _lastCropped;
-
-  @override
-  void dispose() {
-    super.dispose();
-    _file?.delete();
-    _sample?.delete();
-    _lastCropped?.delete();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 33.0),
-      child: Container(
-          clipBehavior: Clip.hardEdge,
-          width: 324,
-          height: _sample == null ? 196 : 324,
-          decoration: BoxDecoration(
-              color: Color(0xffececec),
-              borderRadius: BorderRadius.circular(19)),
-          child: _sample == null ? _buildOpeningImage() : _buildCropImage()),
-    );
-  }
-
-  Widget _buildOpeningImage() {
-    return Center(child: _buildOpenImage());
-  }
-
-  Widget _buildOpenImage() {
-    return TextButton(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            "images/download.png",
-            width: 24,
-            height: 24,
-          ),
-          Text(
-            '사진 추가',
-            style: TextStyle(
-                fontWeight: FontWeight.w800,
-                color: kSecondaryTextColor,
-                fontFamily: 'Suit',
-                fontSize: 15),
-          ),
-        ],
-      ),
-      onPressed: () => _openImage(),
-    );
-  }
-
-  Future<void> _openImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    final file = File(pickedFile!.path);
-    final sample = await ImageCrop.sampleImage(
-        file: file, preferredWidth: 324, preferredHeight: 324);
-
-    _sample?.delete();
-    _file?.delete();
-    setState(() {
-      _sample = sample;
-      _file = file;
-    });
-  }
-
-  Widget _buildCropImage() {
-    return GestureDetector(
-      onTap: () => _openImage(),
-      child: Transform.scale(
-        scale: 1.03,
-        child: Crop.file(
-          _sample!,
-          key: cropKey,
-        ),
       ),
     );
   }

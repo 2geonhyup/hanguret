@@ -37,6 +37,8 @@ dependencies:
   draggable_scrollbar: ^0.1.0
   url_launcher: ^6.1.5
   image_crop: ^0.4.1
+  path_provider: ^2.0.11
+  gallery_saver: ^2.3.2
 
 
 dev_dependencies:
