@@ -16,6 +16,7 @@ class ProfileRepository {
     try {
       List followingList = [];
       List followerList = [];
+      List savedList = [];
       final DocumentSnapshot userDoc = await usersRef.doc(uid).get();
 
       final QuerySnapshot followings =
@@ -28,10 +29,15 @@ class ProfileRepository {
       if (followers.docs.isNotEmpty) {
         followerList = followers.docs.map((e) => e.data()).toList();
       }
+      final QuerySnapshot saved =
+          await usersRef.doc(uid).collection('saved').get();
+      if (saved.docs.isNotEmpty) {
+        savedList = saved.docs.map((e) => e.data()).toList();
+      }
       // 존재하는 uid를 입력받은 경우
       if (userDoc.exists) {
         final User currentUser =
-            User.fromDoc(userDoc, followerList, followingList);
+            User.fromDoc(userDoc, followerList, followingList, savedList);
 
         return currentUser;
       }
@@ -112,21 +118,33 @@ class ProfileRepository {
   }
 
   Future<void> setFollowings(
-      {required String id,
+      {required String myId,
+      required int myIcon,
+      required String myName,
+      required String id,
       required String name,
       required int icon,
       bool? remove}) async {
-    final String curUid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
     try {
       if (remove == true) {
-        await usersRef.doc(curUid).collection('followings').doc(id).delete();
-        await usersRef.doc(id).collection('followers').doc(curUid).delete();
+        await usersRef.doc(myId).collection('followings').doc(id).delete();
+        await usersRef.doc(id).collection('followers').doc(myId).delete();
+        await usersRef.doc(id).collection('news').doc(myId).delete();
       } else {
         await usersRef
-            .doc(curUid)
+            .doc(myId)
             .collection('followings')
             .doc(id)
             .set({"id": id, "name": name, "icon": icon});
+        await usersRef.doc(id).collection('news').doc(myId).set({
+          "type": 1,
+          "date": DateTime.now(),
+          "content": {
+            "id": myId,
+            "name": myName,
+            "icon": myIcon,
+          }
+        });
       }
     } on FirebaseException catch (e) {
       throw CustomError(

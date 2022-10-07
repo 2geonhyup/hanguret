@@ -84,6 +84,7 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
                                       width: 1, color: Colors.white)),
                             ),
                             child: TextFormField(
+                              autofocus: true,
                               onChanged: (val) async {
                                 searchTerm = val;
                                 relatedResults = await getRelated(val);
@@ -135,10 +136,10 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
                                         pushNewScreen(
                                           context,
                                           screen: RestaurantDetailPage(
-                                            res: e,
+                                            resId: e["id"],
                                             option: false,
                                           ),
-                                          withNavBar: false,
+                                          withNavBar: true,
                                         );
                                       },
                                       style: ButtonStyle(
@@ -192,18 +193,22 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
             SizedBox(
               height: 43,
             ),
-            Padding(
-              padding: const EdgeInsets.only(
-                left: 30.0,
-              ),
-              child: Text(
-                "혹시 이곳을 기록하시나요?",
-                style: TextStyle(
-                    fontFamily: 'Suit',
-                    color: kSecondaryTextColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800),
-              ),
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: 30.0,
+                  ),
+                  child: Text(
+                    "혹시 이곳을 기록하시나요?",
+                    style: TextStyle(
+                        fontFamily: 'Suit',
+                        color: kSecondaryTextColor,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

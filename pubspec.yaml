@@ -39,6 +39,8 @@ dependencies:
   image_crop: ^0.4.1
   path_provider: ^2.0.11
   gallery_saver: ^2.3.2
+  card_swiper: ^2.0.4
+  dots_indicator: ^2.1.0
 
 
 dev_dependencies:
@@ -57,6 +59,7 @@ flutter:
     - images/filters/coffee/
     - images/filters/meal/
     - images/dummies/
+    - images/restaurants/
 
   fonts:
     - family: GmarketSans

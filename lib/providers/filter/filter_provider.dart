@@ -7,25 +7,10 @@ class SearchFilterProvider extends StateNotifier<SearchFilterState>
     with LocatorMixin {
   SearchFilterProvider() : super(SearchFilterState.initial());
 
-  void changeFilter(Filter newFilter) {
-    state = state.copyWith(filter: newFilter);
-  }
-
-  get subFilters => state.filter.subFilterList;
-  get locationFilter => state.filter.locationFilter;
-
-  void addSubFilter(newSubFilter) {
-    Filter currentFilter = state.filter;
-    List currentSubFilters = currentFilter.subFilterList;
-    if (!currentSubFilters.contains(newSubFilter)) {
-      currentSubFilters.add(newSubFilter);
-    } else {
-      currentSubFilters.remove(newSubFilter);
-    }
-    Filter newFilter = Filter(
-        mainFilter: currentFilter.mainFilter,
-        subFilterList: currentSubFilters,
-        locationFilter: currentFilter.locationFilter);
-    state = state.copyWith(filter: newFilter);
+  void changeFilter({MainFilter? mainFilter, String? subFilter}) {
+    state = state.copyWith(
+        filter: Filter(
+            mainFilter: mainFilter ?? state.filter.mainFilter,
+            subFilter: subFilter ?? state.filter.subFilter));
   }
 }

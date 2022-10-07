@@ -10,6 +10,7 @@ class User extends Equatable {
   final List followers;
   final int icon;
   final bool first;
+  final List saved;
 
   User({
     required this.id,
@@ -20,10 +21,11 @@ class User extends Equatable {
     required this.followers,
     required this.icon,
     required this.first,
+    required this.saved,
   });
 
-  factory User.fromDoc(
-      DocumentSnapshot userDoc, List followers, List followings) {
+  factory User.fromDoc(DocumentSnapshot userDoc, List followers,
+      List followings, List savedList) {
     final userData = userDoc.data() as Map<String, dynamic>?;
 
     //onboarding은 가입할 당시에는 null일 수 있다. 나머지는 정해진다.
@@ -34,8 +36,9 @@ class User extends Equatable {
         onboarding: userData['onboarding'] ?? {},
         followings: followings,
         followers: followers,
-        icon: userData['icon'],
-        first: userData['first-login']);
+        icon: userData['icon'] ?? 0,
+        first: userData['first-login'] ?? false,
+        saved: savedList);
   }
 
   // 어떤 state에서 유저정보를 읽어올 때,
@@ -45,19 +48,54 @@ class User extends Equatable {
   // 겹칠 염려가 없는 non-null user를 사용하기 위해서 해당 initialuser()를 만듦
   factory User.initialUser() {
     return User(
-        id: '',
-        name: '',
-        email: '',
-        onboarding: {},
-        followings: [],
-        followers: [],
-        icon: 0,
-        first: false);
+      id: '',
+      name: '',
+      email: '',
+      onboarding: {},
+      followings: [],
+      followers: [],
+      icon: 0,
+      first: false,
+      saved: [],
+    );
   }
 
   @override
   List<Object> get props {
-    return [id, name, email, onboarding, followings, followers, icon, first];
+    return [
+      id,
+      name,
+      email,
+      onboarding,
+      followings,
+      followers,
+      icon,
+      first,
+      saved
+    ];
+  }
+
+  User copyWith(
+      {String? id,
+      String? name,
+      String? email,
+      Map? onboarding,
+      List? followings,
+      List? followers,
+      int? icon,
+      bool? first,
+      List? saved}) {
+    return User(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      onboarding: onboarding ?? this.onboarding,
+      followings: followings ?? this.followings,
+      followers: followers ?? this.followers,
+      icon: icon ?? this.icon,
+      first: first ?? this.first,
+      saved: saved ?? this.saved,
+    );
   }
 
   @override

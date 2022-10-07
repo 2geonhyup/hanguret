@@ -2,13 +2,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hangeureut/constants.dart';
+import 'package:hangeureut/providers/navbar/navbar_state.dart';
+import 'package:hangeureut/providers/news/news_provider.dart';
+import 'package:hangeureut/providers/news/news_state.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
+import 'package:hangeureut/repositories/news_repository.dart';
 import 'package:hangeureut/screens/friend_screen/friend_recommend_page.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/profile_screen/profile_page.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/news_model.dart';
 import '../../models/search_model.dart';
 import '../../providers/filter/filter_provider.dart';
 import '../../widgets/floating_button.dart';
@@ -17,8 +22,11 @@ import 'basic_screen_view.dart';
 
 class BasicScreenPage extends StatefulWidget {
   static const String routeName = '/basic';
-  BasicScreenPage({Key? key, this.initialIndex = 0}) : super(key: key);
+  BasicScreenPage({Key? key, this.initialIndex = 0, this.reviewing, this.page})
+      : super(key: key);
   final initialIndex;
+  bool? reviewing;
+  Widget? page;
 
   @override
   State<BasicScreenPage> createState() => _BasicScreenPageState();
@@ -34,6 +42,7 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
     _controller = PersistentTabController(initialIndex: widget.initialIndex);
+    widget.reviewing != null ? reviewing = true : null;
     if (context.read<ProfileState>().user.first) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showDialog(
@@ -56,53 +65,60 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool navBarShow = context.watch<NavBarState>().show;
+
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      floatingActionButton: ReviewFloatingButton(
-        onTap: () {
-          setState(() {
-            _controller.index = 0;
-            reviewing = true;
-          });
-        },
-        buttonColor: kSecondaryTextColor,
-      ),
+      extendBody: true,
+      floatingActionButton: _controller.index == 0 && !navBarShow
+          ? null
+          : ReviewFloatingButton(
+              onTap: () {
+                pushNewScreen(
+                  context,
+                  screen: BasicScreenPage(
+                    initialIndex: 0,
+                    reviewing: true,
+                  ),
+                  withNavBar: true, // OPTIONAL VALUE. True by default.
+                );
+              },
+              buttonColor: kSecondaryTextColor,
+            ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      body: Padding(
-        padding: const EdgeInsets.only(bottom: 30.0),
+      body: AnimatedPadding(
+        curve: Curves.easeInCirc,
+        duration: Duration(milliseconds: 200),
+        padding: EdgeInsets.only(bottom: navBarShow ? 30.0 : 0),
         child: PersistentTabView.custom(
           context,
-          routeAndNavigatorSettings:
-              CutsomWidgetRouteAndNavigatorSettings(routes: {
-            ProfilePage.routeName: (context) => ProfilePage(),
-            MainScreenPage.routeName: (context) => MainScreenPage(),
-          }),
           controller: _controller,
           itemCount: 4,
-          screens: buildScreens(reviewing),
+          bottomScreenMargin: 0,
+          screens: buildScreens(reviewing, widget.page),
           confineInSafeArea: false,
           handleAndroidBackButtonPress: true,
-          backgroundColor:
-              reviewing ? Colors.white : navBackgroundColor[_controller.index],
+          screenTransitionAnimation:
+              ScreenTransitionAnimation(animateTabTransition: true),
+          backgroundColor: reviewing ? Colors.white : Colors.transparent,
           hideNavigationBarWhenKeyboardShows: true,
+          hideNavigationBar: !navBarShow,
           customWidget: CustomNavBarWidget(
             // Your custom widget goes here
             items: navBarsItems(),
             selectedIndex: _controller.index,
             onItemSelected: (index) {
-              if (index == 0) {
-                context
-                    .read<SearchFilterProvider>()
-                    .changeFilter(Filter(mainFilter: MainFilter.none));
-              }
               if (_controller.index == index) {
                 pushNewScreen(
                   context,
+                  pageTransitionAnimation: PageTransitionAnimation.fade,
                   screen: BasicScreenPage(
                     initialIndex: index,
                   ),
                   withNavBar: true, // OPTIONAL VALUE. True by default.
                 );
+              }
+              if (_controller.index == 3) {
+                context.read<NewsProvider>().watchNews();
               }
               setState(() {
                 _controller.index =

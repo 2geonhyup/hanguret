@@ -2,9 +2,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
+import 'package:hangeureut/screens/profile_screen/review_detail_page.dart';
+import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
 import '../../widgets/profile_icon_box.dart';
+import '../restaurant_detail_screen/restaurant_detail_page.dart';
 
 enum ModifyingField { none, favorite, hate, alcohol, spicy }
 
@@ -224,7 +227,7 @@ class TasteProfile extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.only(left: 30.0),
             child: ListView(scrollDirection: Axis.horizontal, children: [
-              for (var keyword in keyWordList)
+              for (var keyword in keyWordList2)
                 RoundedButton(
                   iconPath: "${tasteProfileIconPath}/${keyword[0]}.png",
                   text: keyword[1],
@@ -303,5 +306,188 @@ class RoundedButton extends StatelessWidget {
             ),
           )
         : SizedBox.shrink();
+  }
+}
+
+class ProfileReviewsView extends StatelessWidget {
+  const ProfileReviewsView(
+      {Key? key,
+      required this.reviews,
+      required this.count,
+      required this.forSaved})
+      : super(key: key);
+
+  final List reviews;
+  final int count;
+  final bool forSaved;
+
+  // 1. 기록을 세개씩 묶어서 리스트로 저장, 나머지는 처음에 넣어야 함
+  // 2. 각 리스트를 돌면서 한개, 두개, 세개에 따라 다른 레이아웃을 적용시킴
+
+  @override
+  Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double sideLength2 = screenWidth / 2 - 4;
+    double sideLength31 = (screenWidth - 16) / 3;
+    double sideLength32 = 2 * sideLength31 + 8;
+    int changePoint = count % 3;
+    List reviewsCollection = [];
+    List imsiList = [];
+    List<Widget> reviewsRows = [];
+
+    reviews.asMap().forEach((index, review) {
+      imsiList.add([review["imgUrl"], review["resId"]]);
+      if ((index % 3 + 1) % 3 == changePoint) {
+        if (imsiList.isNotEmpty) reviewsCollection.add(imsiList);
+        imsiList = [];
+      }
+    });
+
+    bool direction = true;
+
+    reviewsCollection.asMap().forEach((index, _reviews) {
+      if (_reviews.length == 3) {
+        reviewsRows.add(Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child:
+              row3(sideLength31, sideLength32, direction, _reviews, forSaved),
+        ));
+        direction = !direction;
+      } else if (_reviews.length == 1) {
+        reviewsRows.add(Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: row1(screenWidth, _reviews, forSaved)));
+      } else if (_reviews.length == 2) {
+        reviewsRows.add(Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: row2(sideLength2, _reviews, forSaved),
+        ));
+      }
+    });
+
+    return Column(
+      children: reviewsRows,
+    );
+  }
+
+  Widget row3(sideLength31, sideLength32, direction, reviews, forSaved) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: direction
+          ? [
+              forSaved
+                  ? SavedTile(
+                      sideLength32, sideLength32, reviews[0][1], reviews[0][0])
+                  : reviewTile(sideLength32, sideLength32, reviews[0][0]),
+              SizedBox(
+                height: sideLength32,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    forSaved
+                        ? SavedTile(sideLength31, sideLength31, reviews[1][1],
+                            reviews[1][0])
+                        : reviewTile(sideLength31, sideLength31, reviews[1][0]),
+                    forSaved
+                        ? SavedTile(sideLength31, sideLength31, reviews[2][1],
+                            reviews[2][0])
+                        : reviewTile(sideLength31, sideLength31, reviews[2][0])
+                  ],
+                ),
+              )
+            ]
+          : [
+              SizedBox(
+                height: sideLength32,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    forSaved
+                        ? SavedTile(sideLength31, sideLength31, reviews[0][1],
+                            reviews[0][0])
+                        : reviewTile(sideLength31, sideLength31, reviews[0][0]),
+                    forSaved
+                        ? SavedTile(sideLength31, sideLength31, reviews[1][1],
+                            reviews[1][0])
+                        : reviewTile(sideLength31, sideLength31, reviews[1][0])
+                  ],
+                ),
+              ),
+              forSaved
+                  ? SavedTile(
+                      sideLength32, sideLength32, reviews[2][1], reviews[2][0])
+                  : reviewTile(sideLength32, sideLength32, reviews[2][0])
+            ],
+    );
+  }
+
+  Widget row1(screenWidth, reviews, forSaved) {
+    return forSaved
+        ? SavedTile(screenWidth, screenWidth, reviews[0][1], reviews[0][0])
+        : reviewTile(screenWidth, screenWidth, reviews[0][0]);
+  }
+
+  Widget row2(sideLength2, reviews, forSaved) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        forSaved
+            ? SavedTile(sideLength2, sideLength2, reviews[0][1], reviews[0][0])
+            : reviewTile(sideLength2, sideLength2, reviews[0][0]),
+        forSaved
+            ? SavedTile(sideLength2, sideLength2, reviews[1][1], reviews[1][0])
+            : reviewTile(sideLength2, sideLength2, reviews[1][0]),
+      ],
+    );
+  }
+
+  Widget reviewTile(width, height, imgUrl) {
+    return Container(
+      width: width,
+      height: height,
+      child: Image.asset(
+        imgUrl,
+        fit: BoxFit.fill,
+      ),
+    );
+  }
+}
+
+class SavedTile extends StatelessWidget {
+  SavedTile(this.width, this.height, this.resId, this.imgUrl);
+
+  final double width;
+  final double height;
+  final String resId;
+  final String imgUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+        onTap: () async {
+          pushNewScreen(context,
+              screen: RestaurantDetailPage(resId: resId, option: false));
+        },
+        child: Stack(
+          children: [
+            Container(
+              width: width,
+              height: height,
+              child: Image.asset(
+                imgUrl,
+                fit: BoxFit.fill,
+              ),
+            ),
+            Positioned(
+              top: 13,
+              right: 13,
+              child: Image.asset(
+                "images/icons/bookmark_fill.png",
+                color: Colors.white,
+                width: 17,
+              ),
+            )
+          ],
+        ));
   }
 }

@@ -50,8 +50,8 @@ class AuthRepository {
             'name': signedInUser.displayName!.substring(1),
             'email': signedInUser.email,
             'first-login': true,
-            'friends': [],
             'icon': Random().nextInt(78),
+            'c-id': getRandomString(10, signedInUser.uid),
           });
         }
       } catch (e) {
@@ -90,3 +90,9 @@ class AuthRepository {
     }
   }
 }
+
+Random _rnd = Random();
+
+String getRandomString(int length, String _chars) =>
+    String.fromCharCodes(Iterable.generate(
+        length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));

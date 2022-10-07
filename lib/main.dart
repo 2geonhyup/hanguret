@@ -9,17 +9,28 @@ import 'package:hangeureut/providers/filter/filter_provider.dart';
 import 'package:hangeureut/providers/filter/filter_state.dart';
 import 'package:hangeureut/providers/friend/recommend_friend_provider.dart';
 import 'package:hangeureut/providers/friend/recommend_friend_state.dart';
+import 'package:hangeureut/providers/navbar/navbar_provider.dart';
+import 'package:hangeureut/providers/navbar/navbar_state.dart';
+import 'package:hangeureut/providers/news/news_provider.dart';
+import 'package:hangeureut/providers/news/news_state.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
+import 'package:hangeureut/providers/restaurants/restaurants_provider.dart';
+import 'package:hangeureut/providers/restaurants/restaurants_state.dart';
+import 'package:hangeureut/providers/result/result_provider.dart';
+import 'package:hangeureut/providers/result/result_state.dart';
 import 'package:hangeureut/providers/signup/signup_provider.dart';
 import 'package:hangeureut/providers/signup/signup_state.dart';
 import 'package:hangeureut/repositories/auth_repository.dart';
+import 'package:hangeureut/repositories/contents_repository.dart';
 import 'package:hangeureut/repositories/friend_repository.dart';
+import 'package:hangeureut/repositories/news_repository.dart';
 import 'package:hangeureut/repositories/profile_repository.dart';
+import 'package:hangeureut/repositories/restaurant_repository.dart';
+import 'package:hangeureut/repositories/review_repository.dart';
 import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
 import 'package:hangeureut/screens/friend_screen/friend_recommend_page.dart';
 import 'package:hangeureut/screens/friend_screen/friends_page.dart';
-import 'package:hangeureut/screens/location_select_screen/location_select_page.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding1_page.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding2_page.dart';
@@ -27,13 +38,14 @@ import 'package:hangeureut/screens/on_boarding_screen/on_boarding3_page.dart';
 import 'package:hangeureut/screens/profile_screen/modify_loction.dart';
 import 'package:hangeureut/screens/result_screen/search_result.dart';
 import 'package:hangeureut/screens/review_screen/review_page.dart';
-import 'package:hangeureut/screens/serching_screen/searching_page.dart';
+
 import 'package:hangeureut/screens/splash_screen/splash_page.dart';
 import 'package:kakao_flutter_sdk_auth/kakao_flutter_sdk_auth.dart';
 import 'package:provider/provider.dart';
 
 import 'constants.dart';
 import 'firebase_options.dart';
+import 'models/news_model.dart';
 import 'screens/start_screen/start_page.dart';
 
 void main() async {
@@ -66,9 +78,31 @@ class Hangeureut extends StatelessWidget {
             firebaseFirestore: FirebaseFirestore.instance,
           ),
         ),
+        Provider<ReviewRepository>(
+          create: (context) => ReviewRepository(
+            firebaseFirestore: FirebaseFirestore.instance,
+          ),
+        ),
+        Provider<RestaurantRepository>(
+          create: (context) => RestaurantRepository(),
+        ),
+        Provider<NewsRepository>(
+          create: (context) => NewsRepository(
+            firebaseFirestore: FirebaseFirestore.instance,
+          ),
+        ),
+        Provider<ContentsRepository>(
+            create: (context) => ContentsRepository(
+                firebaseFirestore: FirebaseFirestore.instance)),
         StreamProvider<fbAuth.User?>(
             create: (context) => context.read<AuthRepository>().user,
             initialData: null),
+        StreamProvider<List<News>>(
+            create: (context) => context.read<NewsRepository>().news,
+            initialData: []),
+        StateNotifierProvider<NewsProvider, NewsState>(
+          create: (context) => NewsProvider(),
+        ),
         StateNotifierProvider<AuthProvider, AuthState>(
           create: (context) => AuthProvider(),
         ),
@@ -84,6 +118,15 @@ class Hangeureut extends StatelessWidget {
         StateNotifierProvider<RecommendFriendProvider, RecommendFriendState>(
           create: (context) => RecommendFriendProvider(),
         ),
+        StateNotifierProvider<RestaurantsProvider, RestaurantsState>(
+          create: (context) => RestaurantsProvider(),
+        ),
+        StateNotifierProvider<ResultProvider, ResultState>(
+          create: (context) => ResultProvider(),
+        ),
+        StateNotifierProvider<NavBarProvider, NavBarState>(
+          create: (context) => NavBarProvider(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -93,11 +136,9 @@ class Hangeureut extends StatelessWidget {
           OnBoarding2Page.routeName: (context) => OnBoarding2Page(),
           OnBoarding3Page.routeName: (context) => OnBoarding3Page(),
           MainScreenPage.routeName: (context) => MainScreenPage(),
-          SearchingPage.routeName: (context) => SearchingPage(),
           SearchResult.routeName: (context) => SearchResult(),
           BasicScreenPage.routeName: (context) => BasicScreenPage(),
           SplashPage.routeName: (context) => SplashPage(),
-          LocationSelectPage.routeName: (context) => LocationSelectPage(),
           FriendRecommendPage.routeName: (context) => FriendRecommendPage(),
           FriendsPage.routeName: (context) => FriendsPage(),
           ModifyLocation.routeName: (context) => ModifyLocation(),

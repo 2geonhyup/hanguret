@@ -1,13 +1,37 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
-import 'package:hangeureut/repositories/friend_repository.dart';
+import 'package:hangeureut/providers/navbar/navbar_provider.dart';
+import 'package:hangeureut/providers/profile/profile_state.dart';
+import 'package:hangeureut/providers/restaurants/restaurants_provider.dart';
+import 'package:hangeureut/providers/restaurants/restaurants_state.dart';
+import 'package:hangeureut/providers/result/result_state.dart';
+import 'package:hangeureut/restaurants.dart';
+import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_page.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../models/custom_error.dart';
 import '../../models/search_model.dart';
 import '../../providers/filter/filter_provider.dart';
 import '../../providers/filter/filter_state.dart';
-import '../location_select_screen/location_select_page.dart';
+import '../../repositories/contents_repository.dart';
+import '../../widgets/error_dialog.dart';
+import 'hangerut_post.dart';
+
+const double filterBarTopPadding = 35;
+const double filterBarTop2Padding = 35;
+const double changeOffsetDown = 360;
+const double changeOffsetSearchingDown = 484;
+const double changeOffsetUp = 320;
+const double changeOffsetSearchingUp = 444;
+
+const titleStyle = TextStyle(
+    fontWeight: FontWeight.w400,
+    fontFamily: 'Suit',
+    fontSize: 30,
+    color: Colors.white);
 
 class MainScreenPage extends StatefulWidget {
   static const String routeName = '/main';
@@ -18,337 +42,799 @@ class MainScreenPage extends StatefulWidget {
 }
 
 class MainScreenPageState extends State<MainScreenPage> {
+  ScrollController scrollController = ScrollController();
+  PageController pageController = PageController(initialPage: 0);
+  ScrollController pageButtonScrollController = ScrollController();
+  int pageIndex = 0;
+  bool scrollEnd = false;
+  bool sortType = false;
+  bool searching = false;
+  Future<void> _launchUrl(url) async {
+    if (!await launchUrl(url)) {
+      throw 'Could not launch $url';
+    }
+  }
+
+  Map _contents = {};
+
+  Future<void> _getContents() async {
+    _contents = await context.read<ContentsRepository>().getContents();
+    setState(() {});
+  }
+
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _getContents();
+    });
     // TODO: implement initState
+    scrollController.addListener(() {
+      //429-(122-53)
+      double offset1 = searching ? changeOffsetSearchingDown : changeOffsetDown;
+      double offset2 = searching ? changeOffsetSearchingUp : changeOffsetUp;
+      if (scrollController.offset > offset1) {
+        if (scrollEnd == false) {
+          context.read<NavBarProvider>().changeNavBarShow();
+          setState(() {
+            scrollEnd = true;
+          });
+        }
+      } else if (scrollController.offset < offset2) {
+        if (scrollEnd == true) {
+          context.read<NavBarProvider>().changeNavBarShow();
+          setState(() {
+            scrollEnd = false;
+          });
+        }
+      }
+    });
+
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final currentState = context.watch<SearchFilterState>();
+
     final mainFilter = currentState.filter.mainFilter;
+
     bool selected = mainFilter != MainFilter.none;
-    List? subOptions;
-    if (selected) {
-      subOptions = filterMap[mainFilter].keys.toList();
-    }
 
     return Scaffold(
       backgroundColor: kBackgroundColor2,
-      body: ListView(
-          padding: EdgeInsets.zero,
-          physics: NeverScrollableScrollPhysics(),
-          children: [
-            Container(
-              color: !selected ? kBasicColor : kBackgroundColor2,
-              child: Column(
-                children: [
-                  !selected
-                      ? Padding(
-                          padding:
-                              EdgeInsets.only(top: 60, left: 40, right: 30),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "한그릇",
-                                style: TextStyle(
-                                    fontFamily: "Cafe24",
+      body: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        removeBottom: true,
+        child: NestedScrollView(
+          controller: selected ? scrollController : null,
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return abbBarList(
+                selected, mainFilter, currentState.filter.subFilter);
+          },
+          body: selected
+              ? MediaQuery.removePadding(
+                  context: context,
+                  removeTop: true,
+                  child: contentsView(mainFilter.index - 1),
+                )
+              : HangerutPostWidget(
+                  contents: _contents,
+                ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> abbBarList(selected, mainFilter, subFilterText) {
+    List<Widget> result = [
+      SliverAppBar(
+        bottom: null,
+        backgroundColor: kBackgroundColor2,
+        // collapsedHeight: 387, //287+100
+        // expandedHeight: 387.0,
+        toolbarHeight: searching
+            ? scrollEnd
+                ? 355
+                : 524
+            : scrollEnd
+                ? 360
+                : 429,
+        elevation: 0,
+        flexibleSpace: FlexibleSpaceBar(
+          background: Column(
+            children: [
+              // 초록색 제목/검색 타일
+              Container(
+                height: searching ? 382 : 287,
+                decoration: BoxDecoration(
+                  color: kBasicColor,
+                ),
+                child: searching
+                    ? Stack(
+                        children: [
+                          Positioned(
+                            left: 34,
+                            top: 54,
+                            child: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    searching = false;
+                                  });
+                                },
+                                icon: SizedBox(
+                                  height: 18,
+                                  child: Icon(
+                                    Icons.arrow_back_ios,
                                     color: Colors.white,
-                                    fontSize: 30),
-                              ),
+                                  ),
+                                )),
+                          ),
+                          Column(
+                            children: [
                               Padding(
-                                padding: const EdgeInsets.only(bottom: 20.0),
-                                child: Column(
+                                padding: const EdgeInsets.only(
+                                    top: 220.0, left: 30, right: 23),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      "저장",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 10),
+                                    Expanded(
+                                      child: Container(
+                                        height: 28,
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                              bottom: BorderSide(
+                                                  width: 1,
+                                                  color: Colors.white)),
+                                        ),
+                                        child: TextFormField(
+                                          onChanged: (val) async {
+                                            // searchTerm = val;
+                                            // relatedResults = await getRelated(val);
+                                            // setState(() {});
+                                          },
+                                          style: TextStyle(
+                                              fontFamily: 'Suit',
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 15,
+                                              color: Colors.white),
+                                          decoration: InputDecoration(
+                                              border: InputBorder.none,
+                                              hintText: "음식 또는 식당으로 검색해보세요.",
+                                              hintStyle: TextStyle(
+                                                  fontFamily: 'Suit',
+                                                  fontWeight: FontWeight.w400,
+                                                  fontSize: 15,
+                                                  color: Colors.white
+                                                      .withOpacity(0.6))),
+                                        ),
+                                      ),
                                     ),
-                                    Icon(
-                                      Icons.bookmark,
-                                      color: Colors.white,
-                                      size: 30,
-                                    ),
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(left: 21.0),
+                                      child: Image.asset(
+                                        "images/icons/searchbig.png",
+                                        width: 33,
+                                        height: 33,
+                                      ),
+                                    )
                                   ],
                                 ),
-                              )
+                              ),
                             ],
-                          ))
-                      : Padding(
-                          padding: const EdgeInsets.only(
-                              top: 63, left: 30, right: 30),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                          ),
+                        ],
+                      )
+                    : Stack(
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              GestureDetector(
-                                onTap: () {
-                                  context
-                                      .read<SearchFilterProvider>()
-                                      .changeFilter(
-                                          Filter(mainFilter: MainFilter.none));
-                                },
-                                child: Icon(
-                                  Icons.arrow_back_ios,
-                                  color: kBasicTextColor.withOpacity(0.8),
+                              SizedBox(
+                                height: 81,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 27.0),
+                                child: Divider(
+                                  height: 0,
+                                  thickness: 1,
+                                  color: Colors.white,
                                 ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 33.0, top: 60),
+                                child: title,
+                              ),
+                            ],
+                          ),
+                          Positioned(
+                              bottom: 35,
+                              right: 23,
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    searching = true;
+                                  });
+                                },
+                                child: Image.asset(
+                                  "images/icons/searchbig.png",
+                                  width: 33,
+                                  height: 33,
+                                ),
+                              ))
+                        ],
+                      ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                    left: 30.0, right: 30, top: 42, bottom: 0),
+                child: AnimatedOpacity(
+                  opacity: scrollEnd ? 0 : 1,
+                  duration: const Duration(milliseconds: 400),
+                  child: scrollEnd
+                      ? const SizedBox.shrink()
+                      : Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            mainFilterButton(
+                                context, MainFilter.meal, mainFilter),
+                            mainFilterButton(
+                                context, MainFilter.alcohol, mainFilter),
+                            mainFilterButton(
+                                context, MainFilter.coffee, mainFilter)
+                          ],
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      )
+    ];
+    if (selected) {
+      result.add(SliverAppBar(
+        toolbarHeight: scrollEnd
+            ? filterBarTopPadding + filterBarTop2Padding + 29 + 28 + 1
+            : 82, // 28(앱바 두께)+53(위쪽 패딩)+1(overflow 대비 여유분)
+        backgroundColor: kBackgroundColor2,
+        floating: false,
+        pinned: true,
+        elevation: 0,
+        flexibleSpace: FlexibleSpaceBar(
+          background: PageButtonRow(mainFilter.index, subFilterText),
+        ),
+      ));
+    }
+    return result;
+  }
+
+  Widget PageButtonRow(mainFilterIndex, subFilterText) {
+    List<Widget> pageButtons = [];
+    pageButtons.add(SizedBox(
+      width: 26,
+    ));
+    for (var i = 0; i < 7; i++) {
+      pageButtons.add(pageButton(
+          i,
+          resFilterTextsSh[mainFilterIndex - 1][i],
+          i == 0 ? "" : resFilterIcons[mainFilterIndex - 1][i - 1],
+          subFilterText));
+    }
+    pageButtons.add(SizedBox(
+      width: 26,
+    ));
+    return Container(
+      decoration: BoxDecoration(
+          border: Border(
+              bottom: BorderSide(
+                  width: 0.5, color: kBorderGreenColor.withOpacity(0.5)))),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          scrollEnd
+              ? Column(
+                  children: [
+                    SizedBox(
+                      height: filterBarTopPadding,
+                    ),
+                    GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        setState(() {
+                          sortType = !sortType;
+                        });
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(right: 23),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(11),
+                            border: Border.all(color: kSecondaryTextColor)),
+                        height: 29,
+                        width: 70,
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                sortType ? "거리순" : "인기순",
+                                style: TextStyle(
+                                    height: 1.25,
+                                    fontWeight: FontWeight.w400,
+                                    color: kSecondaryTextColor,
+                                    fontFamily: 'Suit',
+                                    fontSize: 12),
+                              ),
+                              SizedBox(
+                                width: 3,
+                              ),
+                              Image.asset(
+                                "images/polygon1.png",
+                                width: 11,
+                                height: 11,
                               )
                             ],
                           ),
                         ),
-                  AnimatedSize(
-                    duration: Duration(milliseconds: 200),
-                    child: Container(
-                      height: !selected ? 300 : 0,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(
-                            height: 135,
-                          ),
-                          Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 30.0),
-                              child: Container(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 20.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () async {
-                                            await context
-                                                .read<FriendRepository>()
-                                                .getKaKaoFriends();
-                                          },
-                                          child: Text(
-                                            "메뉴 이름으로 찾기",
-                                            style: TextStyle(
-                                                color: kHintTextColor
-                                                    .withOpacity(0.6),
-                                                fontSize: 14),
-                                          ),
-                                        ),
-                                        Image.asset(
-                                          "images/icons/search.png",
-                                          width: 20,
-                                          height: 20,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(50)),
-                                  )))
-                        ],
                       ),
                     ),
-                  ),
-                ],
-              ),
+                    SizedBox(
+                      height: filterBarTop2Padding,
+                    )
+                  ],
+                )
+              : SizedBox(
+                  height: 53,
+                ),
+          Expanded(
+            child: ListView(
+              controller: pageButtonScrollController,
+              scrollDirection: Axis.horizontal,
+              children: pageButtons,
             ),
-            Container(
-                color: kBackgroundColor2,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 33.0),
-                  child: Column(children: [
-                    SizedBox(
-                      height: 50,
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        mainFilterButton(context, MainFilter.meal, mainFilter),
-                        mainFilterButton(
-                            context, MainFilter.alcohol, mainFilter),
-                        mainFilterButton(context, MainFilter.coffee, mainFilter)
-                      ],
-                    ),
-                    selected
-                        ? SizedBox(
-                            height: 50,
-                            child: Divider(
-                              color: Color(0xff8B867D),
-                            ),
-                          )
-                        : SizedBox.shrink(),
-                    selected
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  SubFilterButton(
-                                    mainFilter: mainFilter,
-                                    subFilter: subOptions![1],
-                                  ),
-                                  SubFilterButton(
-                                    mainFilter: mainFilter,
-                                    subFilter: subOptions[2],
-                                  ),
-                                  SubFilterButton(
-                                    mainFilter: mainFilter,
-                                    subFilter: subOptions[3],
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 15,
-                              ),
-                              Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  SubFilterButton(
-                                    mainFilter: mainFilter,
-                                    subFilter: subOptions[4],
-                                  ),
-                                  SubFilterButton(
-                                    mainFilter: mainFilter,
-                                    subFilter: subOptions[5],
-                                  ),
-                                  SubFilterButton(
-                                    mainFilter: mainFilter,
-                                    subFilter: subOptions[6],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          )
-                        : SizedBox.shrink(),
-                    SizedBox(
-                      height: 120,
-                    ),
-                    selected
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      pushNewScreenWithRouteSettings(
-                                        context,
-                                        settings: RouteSettings(
-                                            name: LocationSelectPage.routeName),
-                                        screen: LocationSelectPage(),
-                                        withNavBar: true,
-                                        pageTransitionAnimation:
-                                            PageTransitionAnimation.cupertino,
-                                      );
-                                    },
-                                    child: Text(
-                                      "위치 선택하기 >",
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: kSecondaryTextColor),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 13,
-                              ),
-                              GestureDetector(
-                                child: Container(
-                                  width: 114,
-                                  height: 44,
-                                  decoration: BoxDecoration(
-                                      color: kBasicColor,
-                                      borderRadius: BorderRadius.circular(50)),
-                                  child: Center(
-                                    child: Text(
-                                      "바로 찾기",
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        : SizedBox.shrink(),
-                  ]),
-                )),
-          ]),
+          ),
+        ],
+      ),
     );
   }
-}
 
-class SubFilterButton extends StatefulWidget {
-  const SubFilterButton({
-    Key? key,
-    required this.mainFilter,
-    required this.subFilter,
-  }) : super(key: key);
-  final mainFilter;
-  final subFilter;
+  Widget pageButton(index, text, icon, subFilterText) {
+    bool selected = text == subFilterText;
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => pageBtnOnTap(index, text),
+      child: Container(
+        decoration: BoxDecoration(
+            border: selected
+                ? Border(
+                    bottom: BorderSide(width: 1, color: kSecondaryTextColor))
+                : null),
+        child: Padding(
+          padding: EdgeInsets.only(left: 13, right: 13),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                "$icon$text",
+                style: TextStyle(
+                  height: 1,
+                  fontFamily: 'Suit',
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w400,
+                  fontSize: 14,
+                  color: selected
+                      ? kSecondaryTextColor
+                      : kSecondaryTextColor.withOpacity(0.6),
+                ),
+              ),
+              SizedBox(
+                height: 8 + 3,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-  @override
-  State<SubFilterButton> createState() => _SubFilterButtonState();
-}
+  pageBtnOnTap(int page, String text) {
+    print("onTapppp");
+    setState(() {
+      pageIndex = page;
+      // pageController.animateToPage(pageIndex,
+      //     duration: Duration(milliseconds: 700), curve: Curves.easeOutCirc);
+    });
 
-class _SubFilterButtonState extends State<SubFilterButton> {
-  @override
-  Widget build(BuildContext context) {
-    final state = context.watch<SearchFilterState>();
-    List subFilters = state.filter.subFilterList;
-    bool selected = subFilters.contains(widget.subFilter);
+    if (scrollEnd) scrollController.jumpTo(360);
 
+    context.read<SearchFilterProvider>().changeFilter(subFilter: text);
+  }
+
+  Widget contentsView(mainFilterIndex) {
+    return PageView(
+      controller: pageController,
+      children: [
+        pageItem(0),
+        pageItem(1),
+        pageItem(2),
+        pageItem(3),
+        pageItem(4),
+        pageItem(5),
+        pageItem(6)
+      ],
+      onPageChanged: (index) {
+        setState(() {
+          pageIndex = index;
+        });
+        if (scrollEnd) scrollController.jumpTo(360);
+
+        context
+            .read<SearchFilterProvider>()
+            .changeFilter(subFilter: resFilterTextsSh[mainFilterIndex][index]);
+      },
+    );
+  }
+
+  Widget pageItem(int index) {
+    final status = context.watch<RestaurantsState>().resStatus;
+    if (status == ResStatus.loading) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: kBasicColor,
+          strokeWidth: 2,
+        ),
+      );
+    }
+    final contents = context.watch<ResultState>().filteredResult;
+    final resTileList = contents.map((e) => resTile(e)).toList();
+
+    return Stack(
+      children: [
+        GridView.count(
+            physics: ClampingScrollPhysics(),
+            padding: EdgeInsets.only(top: 29.5, bottom: 60),
+            crossAxisCount: 2,
+            childAspectRatio: 0.709,
+            crossAxisSpacing: 10,
+            children: List.generate(
+                resTileList.length, (index) => resTileList[index])),
+        scrollEnd
+            ? Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                    height: 233,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withOpacity(0),
+                            Colors.black.withOpacity(0.23)
+                          ]),
+                    )))
+            : SizedBox.shrink(),
+        scrollEnd
+            ? Positioned.fill(
+                bottom: 65,
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      scrollController.animateTo(0,
+                          duration: Duration(milliseconds: 500),
+                          curve: Curves.easeOutSine);
+                    },
+                    child: Container(
+                      width: 90,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Center(
+                          child: Text(
+                        "닫기",
+                        style: TextStyle(
+                            fontFamily: 'Suit',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            color: kSecondaryTextColor),
+                      )),
+                    ),
+                  ),
+                ),
+              )
+            : SizedBox.shrink(),
+      ],
+    );
+  }
+
+  Widget resTile(Map res) {
+    List<Widget> resInfoTiles = [];
+    resInfoTiles = makeTiles(res);
     return GestureDetector(
       onTap: () {
+        print(res);
+        pushNewScreen(context,
+            //option true일 때 error
+
+            screen: RestaurantDetailPage(
+              resId: res["id"],
+              option: true,
+            ),
+            withNavBar: false);
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              AspectRatio(
+                aspectRatio: 1,
+                child: Container(
+                  width: double.infinity,
+                  child: Image.asset(
+                    res["imgUrl"],
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 12,
+                top: 12,
+                child: Row(
+                  children: resInfoTiles,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 15.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 13,
+                    ),
+                    Text(
+                      res["name"],
+                      style: TextStyle(
+                          height: 1.357,
+                          fontWeight: FontWeight.w900,
+                          color: kSecondaryTextColor,
+                          fontFamily: 'Suit',
+                          fontSize: 14),
+                    ),
+                    SizedBox(
+                      height: 3,
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          "지금 내 위치에서 ",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              color: kSecondaryTextColor,
+                              fontFamily: 'Suit',
+                              fontSize: 11),
+                        ),
+                        Text(
+                          "${res["distance"]}m",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: kBasicColor,
+                              fontFamily: 'Suit',
+                              fontSize: 11),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 10.0),
+                child: GestureDetector(
+                  onTap: () async {
+                    final Uri _url = Uri.parse(
+                        'https://map.kakao.com/link/to/${res["kakaoId"]}');
+                    try {
+                      await _launchUrl(_url);
+                    } catch (e) {
+                      print(e);
+                      final ec =
+                          CustomError(code: '', message: '카카오맵을 열 수 없습니다');
+                      errorDialog(context, ec);
+                    }
+                  },
+                  child: Image.asset(
+                    "images/location-marker.png",
+                    width: 25,
+                    height: 25,
+                    color: kBasicColor,
+                  ),
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  List<Widget> makeTiles(res) {
+    List<Widget> resInfoList = [];
+    if (res["score"] != null)
+      resInfoList.add(
+        Padding(
+          padding: const EdgeInsets.only(right: 4.0),
+          child: Container(
+            child: Center(
+              child: Text(res["score"],
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      fontFamily: 'Suit')),
+            ),
+            width: 36,
+            height: 22,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(15),
+            ),
+          ),
+        ),
+      );
+    if (res["tag1"] != null)
+      resInfoList.add(
+        Padding(
+          padding: const EdgeInsets.only(right: 4.0),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: Center(
+              child: Text(res["tag1"],
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'Suit')),
+            ),
+            height: 22,
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(15),
+            ),
+          ),
+        ),
+      );
+    if (res["tag2"] != null)
+      resInfoList.add(
+        Padding(
+          padding: const EdgeInsets.only(right: 4.0),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: Center(
+              child: Text(res["tag2"],
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'Suit')),
+            ),
+            height: 22,
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(15),
+            ),
+          ),
+        ),
+      );
+    return resInfoList;
+  }
+
+  Widget title = Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text("오늘", style: titleStyle),
+      Row(
+        children: [
+          Text(
+            "신촌",
+            style: titleStyle.copyWith(fontWeight: FontWeight.w900),
+          ),
+          Text(
+            "에서",
+            style: titleStyle,
+          ),
+        ],
+      ),
+      Text(
+        "뭐 먹지",
+        style: titleStyle,
+      ),
+    ],
+  );
+
+  Widget mainFilterButton(
+      BuildContext context, MainFilter filter, MainFilter curFilter) {
+    return GestureDetector(
+      onTap: () async {
         setState(() {
-          context.read<SearchFilterProvider>().addSubFilter(widget.subFilter);
+          searching = false;
         });
+        if (curFilter == filter) {
+          context
+              .read<SearchFilterProvider>()
+              .changeFilter(mainFilter: MainFilter.none);
+          return;
+        }
+        context
+            .read<SearchFilterProvider>()
+            .changeFilter(mainFilter: filter, subFilter: "전체");
+        await context
+            .read<RestaurantsProvider>()
+            .getRes(mainFilter: filter, sortType: false);
       },
       child: Container(
         width: 100,
         height: 100,
         decoration: BoxDecoration(
-          color: subButtonColor(context, widget.subFilter),
-          border: selected
-              ? Border.all(
-                  color: kSecondaryTextColor.withOpacity(0.2), width: 0.5)
-              : null,
-          borderRadius: BorderRadius.all(
-            Radius.circular(25),
-          ),
-        ),
+            color: mainButtonColor(context, filter, curFilter),
+            borderRadius: BorderRadius.all(
+              Radius.circular(25),
+            ),
+            boxShadow: [
+              filter == curFilter
+                  ? BoxShadow(color: Colors.transparent)
+                  : BoxShadow(
+                      blurStyle: BlurStyle.outer,
+                      offset: Offset(0, 1),
+                      blurRadius: 4,
+                      color: Colors.black.withOpacity(0.05))
+            ]),
         child: Stack(
           alignment: Alignment.center,
           children: [
             Positioned(
-              top: 30,
-              child: Image.asset(
-                  filterMap[widget.mainFilter][widget.subFilter][0]),
-              width: 25,
-              height: 25,
-            ),
-            Positioned(
-                top: 65,
+                top: 29,
                 child: Text(
-                  filterMap[widget.mainFilter][widget.subFilter][1],
+                  mainFilterIcons[filter.index - 1],
+                  style: TextStyle(
+                      fontSize: filter.index == 1
+                          ? 23
+                          : filter.index == 2
+                              ? 24
+                              : 26,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Suit',
+                      height: 1),
+                )),
+            Positioned(
+                top: 60,
+                child: Text(
+                  filterMap[filter][filter][1],
                   style: TextStyle(
                       fontFamily: 'Suit',
                       fontSize: 12,
-                      fontWeight:
-                          selected ? FontWeight.bold : FontWeight.normal),
+                      fontWeight: curFilter == filter
+                          ? FontWeight.bold
+                          : FontWeight.normal),
                 )),
           ],
         ),
@@ -357,69 +843,10 @@ class _SubFilterButtonState extends State<SubFilterButton> {
   }
 }
 
-Color subButtonColor(BuildContext context, subFilter) {
-  final state = context.watch<SearchFilterState>();
-  List subFilters = state.filter.subFilterList;
-
-  return subFilters.contains(subFilter) ? Colors.white : kBackgroundColor2;
-}
-
-Widget mainFilterButton(
-    BuildContext context, MainFilter filter, MainFilter curFilter) {
-  return GestureDetector(
-    onTap: () {
-      if (curFilter == filter) {
-        context
-            .read<SearchFilterProvider>()
-            .changeFilter(Filter(mainFilter: MainFilter.none));
-        return;
-      }
-      context
-          .read<SearchFilterProvider>()
-          .changeFilter(Filter(mainFilter: filter));
-    },
-    child: Container(
-      width: 100,
-      height: 100,
-      decoration: BoxDecoration(
-        border:
-            Border.all(color: kSecondaryTextColor.withOpacity(0.2), width: 0.5),
-        color: mainButtonColor(context, filter, curFilter),
-        borderRadius: BorderRadius.all(
-          Radius.circular(25),
-        ),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-              top: 30,
-              child: Image.asset(
-                filterMap[filter][filter][0],
-                width: 25,
-                height: 25,
-              )),
-          Positioned(
-              top: 65,
-              child: Text(
-                filterMap[filter][filter][1],
-                style: TextStyle(
-                    fontFamily: 'Suit',
-                    fontSize: 12,
-                    fontWeight: curFilter == filter
-                        ? FontWeight.bold
-                        : FontWeight.normal),
-              )),
-        ],
-      ),
-    ),
-  );
-}
-
 Color mainButtonColor(
     BuildContext context, MainFilter filter, MainFilter curFilter) {
   if (curFilter == MainFilter.none) {
     return Colors.white;
   }
-  return curFilter == filter ? Colors.white : Colors.white.withOpacity(0.3);
+  return curFilter == filter ? Colors.white : Colors.white.withOpacity(0.5);
 }

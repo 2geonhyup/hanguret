@@ -19,8 +19,9 @@ class ProfileIconBox extends StatelessWidget {
           borderRadius: BorderRadius.circular(53),
           boxShadow: [
             BoxShadow(
-                color: Color(0xff000000).withOpacity(0.08),
-                blurRadius: 6,
+                blurStyle: BlurStyle.outer,
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 15,
                 spreadRadius: 0,
                 offset: Offset(
                   0,

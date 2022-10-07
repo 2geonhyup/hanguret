@@ -22,30 +22,15 @@ enum AlcoholSubFilter {
 
 enum CoffeeSubFilter { study, talk, vibe, desert, coffee, cheap }
 
-class LocationFilter extends Equatable {
-  final String name;
-  final String station;
-
-  LocationFilter({required this.name, String? station})
-      : station = station ?? "";
-
-  @override
-  List<Object> get props => [name, station];
-  @override
-  bool get stringify => true;
-}
-
 class Filter extends Equatable {
   final MainFilter mainFilter;
-  final List subFilterList;
-  LocationFilter? locationFilter;
+  final String subFilter;
 
-  Filter({required this.mainFilter, this.locationFilter, List? subFilterList})
-      : subFilterList = subFilterList ?? [];
+  Filter({required this.mainFilter, String? subFilter})
+      : subFilter = subFilter ?? "전체";
 
   @override
-  List<Object> get props =>
-      [mainFilter, subFilterList, locationFilter ?? "none"];
+  List<Object> get props => [mainFilter, subFilter];
   @override
   bool get stringify => true;
 }

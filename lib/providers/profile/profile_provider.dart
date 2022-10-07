@@ -1,3 +1,4 @@
+import 'package:hangeureut/repositories/restaurant_repository.dart';
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../models/custom_error.dart';
@@ -43,40 +44,38 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
         plugin: 'flutter_error/server_error',
       );
     }
-    User newUser = User(
-        id: state.user.id,
-        name: state.user.name,
-        email: state.user.email,
-        onboarding: state.user.onboarding,
-        followings: state.user.followings,
-        followers: state.user.followers,
-        icon: state.user.icon,
-        first: false);
+    User newUser = state.user.copyWith(first: false);
     state = state.copyWith(user: newUser);
   }
 
+  bool isFriends(String id) {
+    for (var i in state.user.followings) {
+      if (i["id"] == id) return true;
+    }
+    return false;
+  }
+
   Future<void> setFriends(String id, String name, int icon) async {
-    List newFriends = state.user.followings;
+    List newFriends = [];
+    for (var i in state.user.followings) {
+      newFriends.add(i);
+      if (i["id"] == id) return;
+    }
+
     newFriends.add({"id": id, "name": name, "icon": icon});
     try {
       await read<ProfileRepository>().setFollowings(
+        myIcon: state.user.icon,
+        myId: state.user.id,
+        myName: state.user.name,
         id: id,
         name: name,
         icon: icon,
       );
       await read<ProfileRepository>()
           .setFollowers(followingId: id, currentUser: state.user);
-      User newUser = User(
-          id: state.user.id,
-          name: state.user.name,
-          email: state.user.email,
-          onboarding: state.user.onboarding,
-          followings: newFriends,
-          followers: state.user.followers,
-          icon: state.user.icon,
-          first: state.user.first);
+      User newUser = state.user.copyWith(followings: newFriends);
       state = state.copyWith(user: newUser);
-      print("profileproviderrrr${state.user}");
     } on CustomError catch (e) {
       state = state.copyWith(profileStatus: ProfileStatus.error, error: e);
       throw CustomError(
@@ -96,17 +95,15 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
     }
 
     try {
-      await read<ProfileRepository>()
-          .setFollowings(id: id, name: name, icon: icon, remove: true);
-      User newUser = User(
-          id: state.user.id,
-          name: state.user.name,
-          email: state.user.email,
-          onboarding: state.user.onboarding,
-          followings: newFriends,
-          followers: state.user.followers,
-          icon: state.user.icon,
-          first: state.user.first);
+      await read<ProfileRepository>().setFollowings(
+          myId: state.user.id,
+          myIcon: state.user.icon,
+          myName: state.user.name,
+          id: id,
+          name: name,
+          icon: icon,
+          remove: true);
+      User newUser = state.user.copyWith(followings: newFriends);
       state = state.copyWith(user: newUser);
     } on CustomError catch (e) {
       state = state.copyWith(profileStatus: ProfileStatus.error, error: e);
@@ -135,15 +132,7 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
         plugin: 'flutter_error/server_error',
       );
     }
-    User newUser = User(
-        id: state.user.id,
-        name: name,
-        email: state.user.email,
-        onboarding: state.user.onboarding,
-        followings: state.user.followings,
-        followers: state.user.followers,
-        icon: state.user.icon,
-        first: state.user.first);
+    User newUser = state.user.copyWith(name: name);
     state = state.copyWith(user: newUser);
   }
 
@@ -173,16 +162,74 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
         plugin: 'flutter_error/server_error',
       );
     }
-    User newUser = User(
-      id: state.user.id,
-      name: state.user.name,
-      email: state.user.email,
-      onboarding: onboarding,
-      followings: state.user.followings,
-      followers: state.user.followers,
-      icon: state.user.icon,
-      first: state.user.first,
-    );
+    User newUser = state.user.copyWith(onboarding: onboarding);
     state = state.copyWith(user: newUser);
+  }
+
+  Future<void> saveRemoveRes(
+      {required String resId,
+      required String imgUrl,
+      required bool isSave}) async {
+    try {
+      await read<RestaurantRepository>().saveRemoveRes(
+          userId: state.user.id, resId: resId, imgUrl: imgUrl, isSave: isSave);
+    } on CustomError {
+      rethrow;
+    }
+    List saved = state.user.saved;
+    List newSaved = [];
+    if (isSave) {
+      print("hi");
+      saved.add({"resId": resId, "imgUrl": imgUrl});
+      newSaved = saved;
+    } else {
+      for (var e in saved) {
+        if (e["resId"] != resId) {
+          newSaved.add(e);
+        }
+      }
+    }
+
+    User newUser = state.user.copyWith(saved: newSaved);
+
+    state = state.copyWith(user: newUser);
+  }
+
+  int findFollowingsIcon({required String id}) {
+    for (var friend in state.user.followings) {
+      if (friend["id"] == id) {
+        return friend["icon"];
+      }
+    }
+    return 21;
+  }
+
+  Future<void> reviewLike(
+      {required String targetId,
+      required String reviewId,
+      required String resName,
+      required bool isAdd}) async {
+    String userId = state.user.id;
+    int userIcon = state.user.icon;
+    String userName = state.user.name;
+    print("profileproviderrerreviewlike");
+
+    await read<RestaurantRepository>().reviewLike(
+        userId: userId,
+        userIcon: userIcon,
+        userName: userName,
+        targetId: targetId,
+        reviewId: reviewId,
+        resName: resName,
+        isAdd: isAdd);
+  }
+
+  Future<List> searchUser({String? value}) async {
+    List result = [];
+    //following 돌기
+    //follower 돌기
+    //모든 계정 돌기
+
+    return result;
   }
 }

@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/user_model.dart';
 import '../../providers/profile/profile_state.dart';
+import '../../repositories/restaurant_repository.dart';
 
 class OthersProfilePage extends StatefulWidget {
   const OthersProfilePage({Key? key, required this.userId}) : super(key: key);
@@ -24,6 +25,7 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
   //option이 false면 남긴기록, true 면 저장한 곳
   bool option = false;
   User? profile;
+  List? otherReviews;
 
   Future<User?> _getProfile(userId) async {
     try {
@@ -37,19 +39,28 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
     }
   }
 
+  void _getReviews() async {
+    otherReviews = await context
+        .read<RestaurantRepository>()
+        .getUsersReviews(userId: widget.userId);
+    setState(() {});
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _getReviews();
+    });
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
   }
 
   @override
   Widget build(BuildContext context) {
     User curUser = context.watch<ProfileState>().user;
-    print(curUser);
 
-    print("line54$profile");
     return FutureBuilder(
         future: _getProfile(widget.userId),
         builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
@@ -59,7 +70,6 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
 
             List curFollowings = curUser.followings;
             List curFollowers = curUser.followers;
-            print("curFollowers$curFollowers");
             List followingsId = [];
             for (var friend in curFollowings) {
               followingsId.add(friend["id"]);
@@ -87,6 +97,18 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                         SizedBox(
                           height: 320,
                         ),
+                        Positioned(
+                            top: 54,
+                            left: 34,
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              child: Icon(
+                                Icons.arrow_back_ios,
+                                color: Colors.white,
+                              ),
+                            )),
                         Positioned(
                             top: 80,
                             left: 0,
@@ -150,15 +172,28 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                                               width: 1))),
                               child: Column(
                                 children: [
-                                  Text(
-                                    "남긴 기록",
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: option
-                                            ? FontWeight.w400
-                                            : FontWeight.w700,
-                                        color: kSecondaryTextColor
-                                            .withOpacity(option ? 0.5 : 1)),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "남긴 기록 ",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: option
+                                                ? FontWeight.w400
+                                                : FontWeight.w700,
+                                            color: kSecondaryTextColor
+                                                .withOpacity(option ? 0.5 : 1)),
+                                      ),
+                                      Text(
+                                        '${otherReviews == null ? 0 : otherReviews!.length}',
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: kBasicColor
+                                                .withOpacity(option ? 0.7 : 1)),
+                                      )
+                                    ],
                                   ),
                                   SizedBox(
                                     height: 8,
@@ -185,15 +220,28 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                                           : BorderSide.none)),
                               child: Column(
                                 children: [
-                                  Text(
-                                    "저장한 곳",
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: option
-                                            ? FontWeight.w700
-                                            : FontWeight.w400,
-                                        color: kSecondaryTextColor
-                                            .withOpacity(option ? 1 : 0.5)),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "저장한 곳 ",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: option
+                                                ? FontWeight.w700
+                                                : FontWeight.w400,
+                                            color: kSecondaryTextColor
+                                                .withOpacity(option ? 1 : 0.5)),
+                                      ),
+                                      Text(
+                                        '${profile!.saved.length}',
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: kBasicColor
+                                                .withOpacity(option ? 1 : 0.7)),
+                                      )
+                                    ],
                                   ),
                                   SizedBox(
                                     height: 8,
@@ -204,6 +252,21 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                           )
                         ],
                       ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 19.5, bottom: 80),
+                      child: option
+                          ? ProfileReviewsView(
+                              reviews: profile!.saved,
+                              count: profile!.saved.length,
+                              forSaved: true)
+                          : ProfileReviewsView(
+                              reviews: otherReviews ?? [],
+                              count: otherReviews == null
+                                  ? 0
+                                  : otherReviews!.length,
+                              forSaved: false,
+                            ),
                     ),
                   ],
                 ));

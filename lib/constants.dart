@@ -64,19 +64,22 @@ Map stationColor = {
   "서울대입구역": Color(0xff009d3e),
 };
 
-List locationFilters = [
-  LocationFilter(name: "고려대", station: "안암역"),
-  LocationFilter(name: "경희대", station: "회기역"),
-  LocationFilter(name: "한국외대", station: "외대앞역"),
-  LocationFilter(name: "서울대", station: "서울대입구역"),
-  LocationFilter(name: "카이스트", station: "회기역"),
-  LocationFilter(name: "연세대", station: "신촌역"),
-  LocationFilter(name: "이화여대", station: "신촌역"),
-  LocationFilter(name: "성신여대", station: "성신여대입구역"),
-  LocationFilter(name: "서강대", station: "광흥창역"),
+const keyWordList = [
+  "taste_baby",
+  "taste_grandmother",
+  "taste_daddy",
+  "taste_bread",
+  "taste_rice",
+  "taste_visual",
+  "taste_raw",
+  "taste_meat",
+  "taste_diet",
+  "taste_spicy1",
+  "taste_spicy2",
+  "taste_sweet",
 ];
 
-const keyWordList = [
+const keyWordList2 = [
   ["taste_baby", "애기입맛"],
   ["taste_grandmother", "할매입맛"],
   ["taste_daddy", "아재입맛"],

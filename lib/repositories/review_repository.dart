@@ -29,27 +29,17 @@ class ReviewRepository {
     required int icon,
     required DateTime date,
   }) async {
+    String reviewId = "$resId$userId";
+    String dirPath = await getStorageDirectory();
     try {
-      String dirPath = await getStorageDirectory();
-      await imgFile.copy("$dirPath/$resId$userId");
+      await imgFile.copy("$dirPath/$reviewId");
     } catch (e) {
       print(e);
     }
-    //   //리뷰를 백엔드 서버에 등록하기
-    //   DocumentReference document =
-    //       await FirebaseFirestore.instance.collection("reviews").add({
-    //     "userId": userId,
-    //     "userName": userName,
-    //     "resId": resId,
-    //     "score": score,
-    //     "image": imgPath,
-    //     "icon": icon,
-    //     "date": date,
-    //   });
-    //   //리뷰 아이디를 사용자 collection에 저장
-    //   String reviewId = document.id;
-    //   final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
-    //   await usersRef.doc(uid).collection("reviews").add({"id": reviewId});
-    // }
+    //리뷰를 백엔드 서버에 등록하기
+
+    //리뷰 아이디를 사용자 collection에 저장
+    final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
+    await usersRef.doc(uid).collection("reviews").add({"id": reviewId});
   }
 }
