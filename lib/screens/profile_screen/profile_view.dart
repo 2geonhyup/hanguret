@@ -61,7 +61,7 @@ class ProfileCard extends StatelessWidget {
           ),
           ProfileIconBox(content: profileIcons[profile.icon]),
           SizedBox(
-            height: 10,
+            height: 12,
           ),
           nameModify
               ? TextFormField(
@@ -69,6 +69,7 @@ class ProfileCard extends StatelessWidget {
                     onNameClicked();
                     context.read<ProfileProvider>().setName(name: val);
                   },
+                  keyboardType: TextInputType.name,
                   textAlign: TextAlign.center,
                   initialValue: profile.name,
                   showCursor: true,
@@ -111,12 +112,36 @@ class ProfileCard extends StatelessWidget {
           SizedBox(
             height: 3,
           ),
-          Text("@${profile.id}",
-              style: TextStyle(
-                  color: kBasicTextColor,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w400,
-                  fontFamily: 'Suit')),
+          idModify
+              ? TextFormField(
+                  onFieldSubmitted: (val) {
+                    onIdClicked();
+                    context.read<ProfileProvider>().setCId(cID: val);
+                  },
+                  textAlign: TextAlign.center,
+                  initialValue: profile.cId,
+                  showCursor: true,
+                  autofocus: true,
+                  cursorColor: kSecondaryTextColor.withOpacity(0.7),
+                  cursorWidth: 0.5,
+                  style: TextStyle(
+                      color: kBasicTextColor.withOpacity(0.7),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w400,
+                      fontFamily: 'Suit'),
+                  decoration: InputDecoration.collapsed(hintText: "아이디 입력"),
+                )
+              : GestureDetector(
+                  onTap: () {
+                    onIdClicked();
+                  },
+                  child: Text("@${profile.cId}",
+                      style: TextStyle(
+                          color: kBasicTextColor,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'Suit')),
+                ),
           SizedBox(
             height: 20,
           ),

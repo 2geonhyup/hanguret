@@ -132,6 +132,7 @@ class Hangeureut extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         home: StartPage(),
         routes: {
+          StartPage.routeName: (context) => StartPage(),
           OnBoarding1Page.routeName: (context) => OnBoarding1Page(),
           OnBoarding2Page.routeName: (context) => OnBoarding2Page(),
           OnBoarding3Page.routeName: (context) => OnBoarding3Page(),

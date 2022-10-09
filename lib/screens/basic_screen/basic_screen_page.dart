@@ -69,6 +69,7 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
 
     return Scaffold(
       extendBody: true,
+      resizeToAvoidBottomInset: false,
       floatingActionButton: _controller.index == 0 && !navBarShow
           ? null
           : ReviewFloatingButton(

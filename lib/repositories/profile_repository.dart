@@ -13,6 +13,7 @@ class ProfileRepository {
   });
 
   Future<User> getProfile({required String uid}) async {
+    print("getprorepo${uid}");
     try {
       List followingList = [];
       List followerList = [];
@@ -51,7 +52,7 @@ class ProfileRepository {
       );
     } catch (e) {
       throw CustomError(
-        code: 'Exception',
+        code: 'getprofilerepo',
         message: e.toString(),
         plugin: 'flutter_error/server_error',
       );
@@ -82,6 +83,25 @@ class ProfileRepository {
     final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
     try {
       await usersRef.doc(uid).update({'name': name});
+    } on FirebaseException catch (e) {
+      throw CustomError(
+        code: e.code,
+        message: e.message!,
+        plugin: e.plugin,
+      );
+    } catch (e) {
+      throw CustomError(
+        code: 'Exception',
+        message: e.toString(),
+        plugin: 'flutter_error/server_error',
+      );
+    }
+  }
+
+  Future<void> setCID({required String cID}) async {
+    final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
+    try {
+      await usersRef.doc(uid).update({'c-id': cID});
     } on FirebaseException catch (e) {
       throw CustomError(
         code: e.code,

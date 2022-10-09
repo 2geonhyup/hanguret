@@ -12,16 +12,16 @@ class ProfileIconBox extends StatelessWidget {
         content,
         style: TextStyle(fontSize: 27),
       )),
-      width: 53,
+      width: 55,
       height: 53,
       decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(53),
+          borderRadius: BorderRadius.circular(55),
           boxShadow: [
             BoxShadow(
                 blurStyle: BlurStyle.outer,
                 color: Colors.black.withOpacity(0.1),
-                blurRadius: 15,
+                blurRadius: 10,
                 spreadRadius: 0,
                 offset: Offset(
                   0,

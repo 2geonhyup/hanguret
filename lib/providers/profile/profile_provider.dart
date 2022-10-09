@@ -136,6 +136,27 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
     state = state.copyWith(user: newUser);
   }
 
+  Future<void> setCId({required String? cID}) async {
+    if (cID == null || cID == "") {
+      throw CustomError(
+        code: 'Exception',
+        message: "아이디는 한글자 이상이어야 합니다",
+      );
+    }
+    try {
+      await read<ProfileRepository>().setCID(cID: cID);
+    } on CustomError catch (e) {
+      state = state.copyWith(profileStatus: ProfileStatus.error, error: e);
+      throw CustomError(
+        code: 'Exception',
+        message: e.toString(),
+        plugin: 'flutter_error/server_error',
+      );
+    }
+    User newUser = state.user.copyWith(cId: cID);
+    state = state.copyWith(user: newUser);
+  }
+
   Future<void> setOnboarding({required Map onboarding}) async {
     final tasteCnt = onboarding["tasteKeyword"]
         .entries

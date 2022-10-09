@@ -41,6 +41,8 @@ dependencies:
   gallery_saver: ^2.3.2
   card_swiper: ^2.0.4
   dots_indicator: ^2.1.0
+  http: ^0.13.5
+  sign_in_with_apple: ^4.1.0
 
 
 dev_dependencies:

@@ -17,11 +17,11 @@ class NewsRepository {
     DateTime newsWatchedTime;
     final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
     final userDoc = await usersRef.doc(uid).get();
-    if (userDoc.data()!.containsKey("newsWatched")) {
-      newsWatchedTime = userDoc.data()!["newsWatched"].toDate();
+    if (userDoc.data()!.containsKey("newsWatchedTime")) {
+      newsWatchedTime = userDoc.data()!["newsWatchedTime"].toDate();
     } else {
       newsWatchedTime = DateTime.now().subtract(Duration(days: 30));
-      await usersRef.doc(uid).set({"newsWatchedTime": DateTime.now()});
+      await usersRef.doc(uid).update({"newsWatchedTime": DateTime.now()});
     }
     Stream<QuerySnapshot> newsStream = usersRef
         .doc(uid)
@@ -69,7 +69,7 @@ class NewsRepository {
 
   Future<void> setWatchedNews() async {
     final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
-    await usersRef.doc(uid).update({"newsWatched": DateTime.now()});
+    await usersRef.doc(uid).update({"newsWatchedTime": DateTime.now()});
   }
 
   Future<List<Map<String, Object>>> getFriendsNews(

@@ -84,7 +84,6 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
                                       width: 1, color: Colors.white)),
                             ),
                             child: TextFormField(
-                              autofocus: true,
                               onChanged: (val) async {
                                 searchTerm = val;
                                 relatedResults = await getRelated(val);
@@ -194,6 +193,7 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
               height: 43,
             ),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
                   padding: const EdgeInsets.only(

@@ -66,6 +66,7 @@ class _ProfilePageState extends State<ProfilePage> {
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
           backgroundColor: Colors.white,
+          resizeToAvoidBottomInset: false,
           body: ListView(
               physics: ClampingScrollPhysics(),
               padding: EdgeInsets.zero,
@@ -104,17 +105,21 @@ class _ProfilePageState extends State<ProfilePage> {
                               onNameClicked: () {
                                 setState(() {
                                   nameModify = !nameModify;
+                                  idModify = false;
                                 });
                               },
                               onIdClicked: () {
                                 setState(() {
                                   idModify = !idModify;
+                                  nameModify = false;
                                 });
                               },
                               onModifyClicked: () {
                                 setState(() {
                                   modifyClicked = !modifyClicked;
                                   modifyingField = ModifyingField.none;
+                                  idModify = false;
+                                  nameModify = false;
                                 });
                               },
                               watchFollow: watchFollow,

@@ -132,7 +132,7 @@ const defaultAlcoholType = {
 
 const kTitleStyle = TextStyle(
     fontFamily: 'Cafe24',
-    color: kBasicColor,
+    color: Colors.white,
     fontSize: 42.0,
     fontWeight: FontWeight.w700);
 

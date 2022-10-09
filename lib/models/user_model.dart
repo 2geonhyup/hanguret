@@ -11,6 +11,7 @@ class User extends Equatable {
   final int icon;
   final bool first;
   final List saved;
+  final String cId;
 
   User({
     required this.id,
@@ -22,6 +23,7 @@ class User extends Equatable {
     required this.icon,
     required this.first,
     required this.saved,
+    required this.cId,
   });
 
   factory User.fromDoc(DocumentSnapshot userDoc, List followers,
@@ -38,7 +40,8 @@ class User extends Equatable {
         followers: followers,
         icon: userData['icon'] ?? 0,
         first: userData['first-login'] ?? false,
-        saved: savedList);
+        saved: savedList,
+        cId: userData["c-id"] ?? "");
   }
 
   // 어떤 state에서 유저정보를 읽어올 때,
@@ -57,6 +60,7 @@ class User extends Equatable {
       icon: 0,
       first: false,
       saved: [],
+      cId: '',
     );
   }
 
@@ -71,7 +75,8 @@ class User extends Equatable {
       followers,
       icon,
       first,
-      saved
+      saved,
+      cId,
     ];
   }
 
@@ -84,7 +89,8 @@ class User extends Equatable {
       List? followers,
       int? icon,
       bool? first,
-      List? saved}) {
+      List? saved,
+      String? cId}) {
     return User(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -95,6 +101,7 @@ class User extends Equatable {
       icon: icon ?? this.icon,
       first: first ?? this.first,
       saved: saved ?? this.saved,
+      cId: cId ?? this.cId,
     );
   }
 

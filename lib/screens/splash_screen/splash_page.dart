@@ -5,6 +5,7 @@ import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/friend/recommend_friend_provider.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding1_page.dart';
+import 'package:hangeureut/screens/start_screen/start_page.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/custom_error.dart';
@@ -22,29 +23,21 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-  bool completed = false;
-  late bool ready;
+  bool ready = false;
   Future<void> _login() async {
-    try {
-      await context.read<SignupProvider>().signup();
-    } on CustomError catch (e) {
-      errorDialog(context, e);
-    }
     final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
-    try {
-      await context.read<ProfileProvider>().getProfile(uid: uid);
-    } on CustomError catch (e) {
-      errorDialog(context, e);
-    }
     try {
       await context.read<RecommendFriendProvider>().getRecommendFriends();
     } on CustomError catch (e) {
       errorDialog(context, e);
+      return;
     }
-
-    setState(() {
-      completed = true;
-    });
+    try {
+      await context.read<ProfileProvider>().getProfile(uid: uid);
+    } on CustomError catch (e) {
+      errorDialog(context, e);
+      return;
+    }
   }
 
   @override
@@ -52,12 +45,13 @@ class _SplashPageState extends State<SplashPage> {
     // TODO: implement initState
     super.initState();
     _login();
-    ready = false;
   }
 
   @override
   Widget build(BuildContext context) {
-    final onBoardingState = context.watch<ProfileState>().user.onboarding;
+    final profileState = context.watch<ProfileState>();
+    final onBoardingState = profileState.user.onboarding;
+    bool completed = profileState.profileStatus == ProfileStatus.loaded;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       //여기서 ready를 체크안해주면 무한루프가 발생함
@@ -65,7 +59,7 @@ class _SplashPageState extends State<SplashPage> {
         setState(() {
           ready = true;
         });
-        await Future.delayed(Duration(milliseconds: 1500));
+        await Future.delayed(Duration(milliseconds: 400));
         if (onBoardingState["level"] == 3) {
           Navigator.pushNamed(context, BasicScreenPage.routeName);
         } else if (onBoardingState["level"] == 2) {

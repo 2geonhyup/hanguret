@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:gallery_saver/files.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/models/custom_error.dart';
 import 'package:hangeureut/screens/main_screen/main_output.dart';
@@ -6,6 +9,9 @@ import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_ou
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
+import 'package:http/http.dart' as http;
+
+String url = 'ec2-3-35-52-247.ap-northeast-2.compute.amazonaws.com:3001';
 
 class RestaurantRepository {
   Future<List<Map>?> getRestaurants(
@@ -13,7 +19,19 @@ class RestaurantRepository {
     // 사용자 위치 찾기
     // input 보내기
     // output 받기
-    await Future.delayed(Duration(milliseconds: 1000));
+
+    try {
+      Uri _uri = Uri.http(url, '/restaurants');
+      print(_uri);
+
+      var response = await http.get(_uri);
+
+      print(response.body);
+    } catch (e) {
+      print(e);
+    }
+
+    //await Future.delayed(Duration(milliseconds: 1000));
     switch (mainFilterNum) {
       case 1:
         return mainOutputList1;

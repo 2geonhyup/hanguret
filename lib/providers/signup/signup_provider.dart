@@ -11,9 +11,19 @@ class SignupProvider extends StateNotifier<SignupState> with LocatorMixin {
   // SignupState get state => _state;
   SignupProvider() : super(SignupState.initial());
 
+  Future<void> appleSignUp() async {
+    state = state.copyWith(signupStatus: SignupStatus.submitting);
+    try {
+      await read<AuthRepository>().appleLogin();
+      state = state.copyWith(signupStatus: SignupStatus.success);
+    } on CustomError catch (e) {
+      state = state.copyWith(signupStatus: SignupStatus.error, error: e);
+      rethrow;
+    }
+  }
+
   Future<void> signup() async {
     state = state.copyWith(signupStatus: SignupStatus.submitting);
-
     try {
       await read<AuthRepository>().loginOrSignup();
       state = state.copyWith(signupStatus: SignupStatus.success);

@@ -6,6 +6,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:hangeureut/models/custom_error.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../constants.dart';
 import 'auth_repositories_functions.dart';
@@ -23,6 +24,43 @@ class AuthRepository {
   // firebase user의 상태가 변할 때마다 알려줌
   // 따라서 listen으로 적절한 조치를 취하면 됨
   Stream<fbAuth.User?> get user => firebaseAuth.userChanges();
+
+  Future<void> appleLogin() async {
+    print("1");
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+      final oauthCredential = fbAuth.OAuthProvider("apple.com").credential(
+        idToken: credential.identityToken,
+        accessToken: credential.authorizationCode,
+      );
+      try {
+        final signedInCredential =
+            await firebaseAuth.signInWithCredential(oauthCredential);
+        final signedInUser = signedInCredential.user;
+        print("signedin${signedInUser!.uid}");
+        final DocumentSnapshot userDoc =
+            await usersRef.doc(signedInUser.uid).get();
+        if (!userDoc.exists) {
+          await usersRef.doc(signedInUser.uid).set({
+            'name': "",
+            'email': signedInUser.email,
+            'first-login': true,
+            'icon': Random().nextInt(78),
+            'c-id': getRandomString(12, signedInUser.uid),
+          });
+        }
+      } catch (e) {
+        print(e);
+      }
+    } catch (e) {
+      throw CustomError(message: "애플 로그인 오류");
+    }
+  }
 
   Future<dynamic> loginOrSignup() async {
     // get user info from kakao
@@ -51,7 +89,7 @@ class AuthRepository {
             'email': signedInUser.email,
             'first-login': true,
             'icon': Random().nextInt(78),
-            'c-id': getRandomString(10, signedInUser.uid),
+            'c-id': getRandomString(12, signedInUser.uid),
           });
         }
       } catch (e) {

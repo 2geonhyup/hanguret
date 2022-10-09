@@ -84,6 +84,7 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
             //내가 상대를 팔로우 하는지
             bool following = followingsId.contains(widget.userId);
             return Scaffold(
+                resizeToAvoidBottomInset: false,
                 backgroundColor: Colors.white,
                 body: ListView(
                   padding: EdgeInsets.zero,
@@ -125,7 +126,7 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                               child: ProfileCard(
                                 icon: profile != null ? profile!.icon : 0,
                                 name: profile != null ? profile!.name : "",
-                                id: profile != null ? profile!.id : "",
+                                id: profile != null ? profile!.cId : "",
                                 followed: followed,
                                 following: following,
                               ),

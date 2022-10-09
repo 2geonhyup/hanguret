@@ -3,6 +3,7 @@ import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:hangeureut/repositories/contents_repository.dart';
 import 'package:hangeureut/restaurants.dart';
+import 'package:hangeureut/screens/main_screen/recommend_place_page.dart';
 import 'package:hangeureut/screens/profile_screen/others_profile_page.dart';
 import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_page.dart';
 import 'package:hangeureut/widgets/profile_icon_box.dart';
@@ -110,7 +111,7 @@ class _UnivContentsState extends State<UnivContents> {
     return Column(
       children: [
         SizedBox(
-          height: 488,
+          height: MediaQuery.of(context).size.width + 100,
           child: Swiper(
             itemCount: 3,
             pagination: null,
@@ -136,11 +137,11 @@ class _UnivContentsState extends State<UnivContents> {
                     const SizedBox(
                       height: 25,
                     ),
-                    univImage(context, contentsMap),
+                    univImage(context, contentsMap, univList[index]),
                     const SizedBox(
                       height: 14,
                     ),
-                    univCard(context, getUniv(univList[index])),
+                    univCard(context, univList[index]),
                   ],
                 ),
               );
@@ -163,14 +164,17 @@ class _UnivContentsState extends State<UnivContents> {
     );
   }
 
-  Widget univImage(context, contentsMap) {
+  Widget univImage(context, contentsMap, univNum) {
     return contentsMap != {} && contentsMap["imgUrl"] != null
         ? GestureDetector(
             onTap: () {
+              // pushNewScreen(context,
+              //     screen: RestaurantDetailPage(
+              //         resId: contentsMap["resId"], option: true),
+              //     withNavBar: false);
+              print(univNum);
               pushNewScreen(context,
-                  screen: RestaurantDetailPage(
-                      resId: contentsMap["resId"], option: true),
-                  withNavBar: false);
+                  screen: RecommendPlacePage(univIndex: univNum));
             },
             child: Stack(
               children: [
@@ -251,81 +255,95 @@ class _UnivContentsState extends State<UnivContents> {
           );
   }
 
-  Widget univCard(context, univName) {
-    return Container(
-      clipBehavior: Clip.hardEdge,
-      height: 105,
-      width: double.infinity,
-      decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(20)),
-      child: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 30.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(
-                  height: 29,
-                ),
-                Row(
-                  children: [
-                    const Padding(
-                      padding: const EdgeInsets.only(bottom: 4.0),
-                      child: Icon(Icons.done_rounded,
-                          size: 20, color: Color(0xff4169E1)),
-                    ),
-                    Text(
-                      univName,
-                      style: _regularStyle.copyWith(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 13,
-                          color: Color(0xff4169E1)),
-                    ),
-                    Text(
-                      "과 한그릇이 함께 고른",
-                      style: _regularStyle.copyWith(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 3,
-                ),
-                Text(
-                  "#여긴꼭가야해",
-                  style: _regularStyle.copyWith(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 22,
+  Widget univCard(context, int index) {
+    Color _color = index == 1
+        ? const Color(0xff4169E1)
+        : index == 2
+            ? const Color(0xff016c41)
+            : const Color(0xffa03332);
+    String univName = getUniv(index);
+    return GestureDetector(
+      onTap: () {
+        pushNewScreen(context, screen: RecommendPlacePage(univIndex: index));
+      },
+      child: Container(
+        clipBehavior: Clip.hardEdge,
+        height: 105,
+        width: double.infinity,
+        decoration: BoxDecoration(
+            color: Colors.white, borderRadius: BorderRadius.circular(20)),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 30.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                    height: 29,
                   ),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            top: 20,
-            right: -38,
-            child: Transform.rotate(
-              angle: -7.474,
-              child: Container(
-                height: 87.64,
-                width: 143.35,
-                color: kSecondaryTextColor.withOpacity(0.8),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4.0),
+                        child: Icon(
+                          Icons.done_rounded,
+                          size: 20,
+                          color: _color,
+                        ),
+                      ),
+                      Text(
+                        univName,
+                        style: _regularStyle.copyWith(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 13,
+                            color: _color),
+                      ),
+                      Text(
+                        "과 한그릇이 함께 고른",
+                        style: _regularStyle.copyWith(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 3,
+                  ),
+                  Text(
+                    "#여긴꼭가야해",
+                    style: _regularStyle.copyWith(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 22,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          Positioned(
-            top: 46,
-            right: 19,
-            child: Image.asset(
-              'images/icons/arrow_right.png',
-              width: 38,
-              height: 28,
+            Positioned(
+              top: 20,
+              right: -38,
+              child: Transform.rotate(
+                angle: -7.474,
+                child: Container(
+                  height: 87.64,
+                  width: 143.35,
+                  color: kSecondaryTextColor.withOpacity(0.8),
+                ),
+              ),
             ),
-          )
-        ],
+            Positioned(
+              top: 46,
+              right: 19,
+              child: Image.asset(
+                'images/icons/arrow_right.png',
+                width: 38,
+                height: 28,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

@@ -775,6 +775,7 @@ class MainScreenPageState extends State<MainScreenPage> {
       BuildContext context, MainFilter filter, MainFilter curFilter) {
     return GestureDetector(
       onTap: () async {
+        print(context.read<ProfileState>().user);
         setState(() {
           searching = false;
         });
