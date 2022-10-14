@@ -109,7 +109,6 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                 setState(() {
                   likes[index] = !likes[index];
                 });
-                print(likes);
               },
               likes: likes[index] == review["liked"]
                   ? review["likes"]

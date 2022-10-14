@@ -24,10 +24,11 @@ enum CoffeeSubFilter { study, talk, vibe, desert, coffee, cheap }
 
 class Filter extends Equatable {
   final MainFilter mainFilter;
-  final String subFilter;
+  final int subFilter;
 
-  Filter({required this.mainFilter, String? subFilter})
-      : subFilter = subFilter ?? "전체";
+  Filter({required this.mainFilter, int? subFilter})
+      : subFilter = subFilter ?? -1;
+  //-1 은 전체를 의미
 
   @override
   List<Object> get props => [mainFilter, subFilter];

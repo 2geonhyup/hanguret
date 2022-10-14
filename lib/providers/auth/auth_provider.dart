@@ -17,6 +17,7 @@ class AuthProvider extends StateNotifier<AuthState> with LocatorMixin {
         authStatus: AuthStatus.authenticated,
         user: user,
       );
+      //print("user의 인증정보 변화");
     } else {
       state = state.copyWith(authStatus: AuthStatus.unauthenticated);
     }

@@ -168,11 +168,6 @@ class _UnivContentsState extends State<UnivContents> {
     return contentsMap != {} && contentsMap["imgUrl"] != null
         ? GestureDetector(
             onTap: () {
-              // pushNewScreen(context,
-              //     screen: RestaurantDetailPage(
-              //         resId: contentsMap["resId"], option: true),
-              //     withNavBar: false);
-              print(univNum);
               pushNewScreen(context,
                   screen: RecommendPlacePage(univIndex: univNum));
             },

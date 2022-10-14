@@ -29,10 +29,17 @@ class _StartPageState extends State<StartPage> {
   bool _visible = false;
   bool _detail = false;
   bool _kakao = false;
+  bool _loggedIn = false;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    fbAuth.User? user = fbAuth.FirebaseAuth.instance.currentUser;
+    if (user == null) {
+    } else {
+      _loggedIn = false;
+    }
 
     Future.delayed(const Duration(milliseconds: 600), () {
       setState(() {
@@ -46,12 +53,17 @@ class _StartPageState extends State<StartPage> {
       });
     });
 
+    Future.delayed(const Duration(milliseconds: 2000), () {
+      if (_loggedIn) {
+        Navigator.pushNamed(context, SplashPage.routeName);
+      }
+    });
+
     Future.delayed(const Duration(milliseconds: 1100), () {
       setState(() {
         _detail = true;
       });
     });
-
     Future.delayed(const Duration(milliseconds: 1300), () {
       setState(() {
         _kakao = true;
@@ -153,7 +165,7 @@ class _StartPageState extends State<StartPage> {
             left: 0,
             right: 0,
             child: AnimatedOpacity(
-              opacity: _kakao ? 1 : 0,
+              opacity: _kakao && !_loggedIn ? 1 : 0,
               duration: Duration(milliseconds: 500),
               child: Center(child: LoginButtons()),
             ),
@@ -171,48 +183,49 @@ class LoginButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 170.0,
-          child: GestureDetector(
-              child: Image.asset('images/kakao_login_large_narrow.png'),
-              onTap: () async {
-                try {
-                  await context.read<SignupProvider>().signup();
-                  SignupStatus status =
-                      context.read<SignupState>().signupStatus;
-                  if (status == SignupStatus.success) {
-                    Navigator.pushNamed(context, SplashPage.routeName);
-                  }
-                } on CustomError catch (e) {
-                  errorDialog(context, e);
-                  return;
-                }
-              }),
-        ),
-        SizedBox(
-          height: 7.2,
-        ),
-        SizedBox(
-          width: 170,
-          child: GestureDetector(
-            onTap: () async {
-              try {
-                await context.read<SignupProvider>().appleSignUp();
-                SignupStatus status = context.read<SignupState>().signupStatus;
-                if (status == SignupStatus.success) {
-                  Navigator.pushNamed(context, SplashPage.routeName);
-                }
-              } on CustomError catch (e) {
-                errorDialog(context, e);
-                return;
-              }
-            },
-            child: Image.asset('images/apple_login.png'),
-          ),
-        ),
-      ],
-    );
+    SignupStatus status = context.watch<SignupState>().signupStatus;
+    if (status == SignupStatus.success) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushNamed(context, SplashPage.routeName);
+      });
+    }
+    return status == SignupStatus.submitting
+        ? CircularProgressIndicator(
+            color: Colors.white,
+          )
+        : Column(
+            children: [
+              Container(
+                width: 170.0,
+                child: GestureDetector(
+                    child: Image.asset('images/kakao_login_large_narrow.png'),
+                    onTap: () async {
+                      try {
+                        await context.read<SignupProvider>().signup();
+                      } on CustomError catch (e) {
+                        errorDialog(context, e);
+                        return;
+                      }
+                    }),
+              ),
+              SizedBox(
+                height: 7.2,
+              ),
+              SizedBox(
+                width: 170,
+                child: GestureDetector(
+                  onTap: () async {
+                    try {
+                      await context.read<SignupProvider>().appleSignUp();
+                    } on CustomError catch (e) {
+                      errorDialog(context, e);
+                      return;
+                    }
+                  },
+                  child: Image.asset('images/apple_login.png'),
+                ),
+              ),
+            ],
+          );
   }
 }

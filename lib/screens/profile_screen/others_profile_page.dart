@@ -126,7 +126,8 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                               child: ProfileCard(
                                 icon: profile != null ? profile!.icon : 0,
                                 name: profile != null ? profile!.name : "",
-                                id: profile != null ? profile!.cId : "",
+                                id: profile != null ? profile!.id : "",
+                                cId: profile != null ? profile!.cId : "",
                                 followed: followed,
                                 following: following,
                               ),

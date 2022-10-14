@@ -174,7 +174,6 @@ class _ReviewPageState extends State<ReviewPage> {
   Widget build(BuildContext context) {
     List optionIconList = resFilterIcons[widget.res["category${category + 1}"]];
     List optionTextList = resFilterTexts[widget.res["category${category + 1}"]];
-    print(optionTextList);
     List _items = [
       GestureDetector(
         onTap: () {
@@ -262,7 +261,6 @@ class _ReviewPageState extends State<ReviewPage> {
         setState(() {
           scrollable = false;
         });
-        print(scrollable);
       }, onDragEnd: (val) {
         setState(() {
           scrollable = true;

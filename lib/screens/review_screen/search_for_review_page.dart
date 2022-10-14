@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
+import 'package:hangeureut/repositories/restaurant_repository.dart';
 import 'package:hangeureut/restaurants.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:provider/provider.dart';
 
 import '../restaurant_detail_screen/restaurant_detail_page.dart';
 
@@ -17,6 +19,8 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
   String searchTerm = "";
   List relatedResults = [];
   Map? selected;
+  List? near;
+  List? popular;
 
   Future<List> getRelated(val) async {
     List results = [];
@@ -35,7 +39,6 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
         results.add(newE);
       }
     }
-    print(results);
     return results;
   }
 
@@ -51,6 +54,25 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
     }
 // the color to return when button is in it's normal/unfocused state
     return Colors.transparent;
+  }
+
+  Future<void> getReco() async {
+    Map<String, List>? recommends =
+        await context.read<RestaurantRepository>().getResForReview();
+    if (recommends != null) {
+      near = recommends["near"];
+      popular = recommends["popular"];
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getReco();
+      setState(() {});
+    });
+    super.initState();
   }
 
   @override
@@ -190,13 +212,13 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
               ),
             ),
             SizedBox(
-              height: 43,
+              height: 39,
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(
+                const Padding(
+                  padding: EdgeInsets.only(
                     left: 30.0,
                   ),
                   child: Text(
@@ -205,11 +227,97 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
                         fontFamily: 'Suit',
                         color: kSecondaryTextColor,
                         fontSize: 15,
-                        fontWeight: FontWeight.w800),
+                        fontWeight: FontWeight.w800,
+                        height: 1),
                   ),
                 ),
+                popular == null || near == null
+                    ? const SizedBox.shrink()
+                    : Padding(
+                        padding: const EdgeInsets.only(top: 21.0, bottom: 60),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: near!
+                                    .map((e) =>
+                                        ResTile(res: e, type: "지금 나와 가까운"))
+                                    .toList(),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: popular!
+                                    .map((e) =>
+                                        ResTile(res: e, type: "요즘 많이 기록된"))
+                                    .toList(),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ResTile extends StatelessWidget {
+  ResTile({Key? key, required this.res, required this.type}) : super(key: key);
+
+  Map res;
+  String type;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10.0),
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          pushNewScreen(context,
+              screen: RestaurantDetailPage(
+                  resId: res["resId"].toString(), option: false));
+        },
+        child: Stack(
+          children: [
+            AspectRatio(
+              aspectRatio: 1,
+              child: Container(
+                width: double.infinity,
+                child: Image.asset(
+                  res["imgUrl"],
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            Positioned(
+                left: 12,
+                bottom: 14,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      type,
+                      style: regularTextStyle.copyWith(fontSize: 10),
+                    ),
+                    SizedBox(
+                      height: 3,
+                    ),
+                    Text(
+                      res["name"],
+                      style: eBoldTextStyle.copyWith(fontSize: 15),
+                    )
+                  ],
+                )),
           ],
         ),
       ),

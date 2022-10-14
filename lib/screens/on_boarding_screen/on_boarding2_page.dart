@@ -65,7 +65,6 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
 
   @override
   Widget build(BuildContext context) {
-    print(tasteKeyword);
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(

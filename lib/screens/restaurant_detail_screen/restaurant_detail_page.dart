@@ -111,8 +111,6 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    print(context.read<ProfileState>().user);
-    print(savedList);
     if (res != null && !savedSet) {
       savedSet = true;
       for (var e in savedList) {

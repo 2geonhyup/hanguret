@@ -17,6 +17,7 @@ class ProfileCard extends StatefulWidget {
       required this.icon,
       required this.name,
       required this.id,
+      required this.cId,
       required this.followed,
       required this.following})
       : super(key: key);
@@ -24,6 +25,7 @@ class ProfileCard extends StatefulWidget {
   int icon;
   String name;
   String id;
+  String cId;
   //내가 이 사람에게 찜을 당했는지
   bool followed;
   //내가 이 사람을 찜 하는지
@@ -85,7 +87,7 @@ class _ProfileCardState extends State<ProfileCard> {
           SizedBox(
             height: 3,
           ),
-          Text("@${widget.id}",
+          Text("@${widget.cId}",
               style: TextStyle(
                   color: kBasicTextColor,
                   fontSize: 11,

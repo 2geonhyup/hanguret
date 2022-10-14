@@ -49,6 +49,8 @@ class MainScreenPageState extends State<MainScreenPage> {
   bool scrollEnd = false;
   bool sortType = false;
   bool searching = false;
+  int mainFilterIndex = 0;
+  int subFilterNum = -1;
   Future<void> _launchUrl(url) async {
     if (!await launchUrl(url)) {
       throw 'Could not launch $url';
@@ -104,7 +106,8 @@ class MainScreenPageState extends State<MainScreenPage> {
     final currentState = context.watch<SearchFilterState>();
 
     final mainFilter = currentState.filter.mainFilter;
-
+    mainFilterIndex = mainFilter.index - 1;
+    subFilterNum = currentState.filter.subFilter;
     bool selected = mainFilter != MainFilter.none;
 
     return Scaffold(
@@ -313,24 +316,20 @@ class MainScreenPageState extends State<MainScreenPage> {
         pinned: true,
         elevation: 0,
         flexibleSpace: FlexibleSpaceBar(
-          background: PageButtonRow(mainFilter.index, subFilterText),
+          background: PageButtonRow(),
         ),
       ));
     }
     return result;
   }
 
-  Widget PageButtonRow(mainFilterIndex, subFilterText) {
+  Widget PageButtonRow() {
     List<Widget> pageButtons = [];
     pageButtons.add(SizedBox(
       width: 26,
     ));
     for (var i = 0; i < 7; i++) {
-      pageButtons.add(pageButton(
-          i,
-          resFilterTextsSh[mainFilterIndex - 1][i],
-          i == 0 ? "" : resFilterIcons[mainFilterIndex - 1][i - 1],
-          subFilterText));
+      pageButtons.add(pageButton(i));
     }
     pageButtons.add(SizedBox(
       width: 26,
@@ -409,11 +408,11 @@ class MainScreenPageState extends State<MainScreenPage> {
     );
   }
 
-  Widget pageButton(index, text, icon, subFilterText) {
-    bool selected = text == subFilterText;
+  Widget pageButton(index) {
+    bool selected = index == subFilterNum + 1;
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () => pageBtnOnTap(index, text),
+      onTap: () => pageBtnOnTap(index),
       child: Container(
         decoration: BoxDecoration(
             border: selected
@@ -426,7 +425,7 @@ class MainScreenPageState extends State<MainScreenPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                "$icon$text",
+                "${index == 0 ? "" : resFilterIcons[mainFilterIndex][index - 1]}${resFilterTextsSh[mainFilterIndex][index]}",
                 style: TextStyle(
                   height: 1,
                   fontFamily: 'Suit',
@@ -447,17 +446,13 @@ class MainScreenPageState extends State<MainScreenPage> {
     );
   }
 
-  pageBtnOnTap(int page, String text) {
-    print("onTapppp");
+  pageBtnOnTap(int page) {
     setState(() {
       pageIndex = page;
-      // pageController.animateToPage(pageIndex,
-      //     duration: Duration(milliseconds: 700), curve: Curves.easeOutCirc);
     });
-
     if (scrollEnd) scrollController.jumpTo(360);
 
-    context.read<SearchFilterProvider>().changeFilter(subFilter: text);
+    context.read<SearchFilterProvider>().changeFilter(subFilter: page - 1);
   }
 
   Widget contentsView(mainFilterIndex) {
@@ -478,9 +473,7 @@ class MainScreenPageState extends State<MainScreenPage> {
         });
         if (scrollEnd) scrollController.jumpTo(360);
 
-        context
-            .read<SearchFilterProvider>()
-            .changeFilter(subFilter: resFilterTextsSh[mainFilterIndex][index]);
+        context.read<SearchFilterProvider>().changeFilter(subFilter: index - 1);
       },
     );
   }
@@ -488,7 +481,7 @@ class MainScreenPageState extends State<MainScreenPage> {
   Widget pageItem(int index) {
     final status = context.watch<RestaurantsState>().resStatus;
     if (status == ResStatus.loading) {
-      return Center(
+      return const Center(
         child: CircularProgressIndicator(
           color: kBasicColor,
           strokeWidth: 2,
@@ -567,12 +560,11 @@ class MainScreenPageState extends State<MainScreenPage> {
     resInfoTiles = makeTiles(res);
     return GestureDetector(
       onTap: () {
-        print(res);
         pushNewScreen(context,
             //option true일 때 error
 
             screen: RestaurantDetailPage(
-              resId: res["id"],
+              resId: res["resId"],
               option: true,
             ),
             withNavBar: false);
@@ -685,7 +677,7 @@ class MainScreenPageState extends State<MainScreenPage> {
           padding: const EdgeInsets.only(right: 4.0),
           child: Container(
             child: Center(
-              child: Text(res["score"],
+              child: Text(res["score"].toString(),
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 10,
@@ -708,7 +700,7 @@ class MainScreenPageState extends State<MainScreenPage> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 8),
             child: Center(
-              child: Text(res["tag1"],
+              child: Text(resFilterTextsSh[mainFilterIndex][res["tag1"] + 1],
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 10,
@@ -723,15 +715,15 @@ class MainScreenPageState extends State<MainScreenPage> {
           ),
         ),
       );
-    if (res["tag2"] != null)
+    if (res["tag2"] != null) {
       resInfoList.add(
         Padding(
           padding: const EdgeInsets.only(right: 4.0),
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 8),
             child: Center(
-              child: Text(res["tag2"],
-                  style: TextStyle(
+              child: Text(resFilterTextsSh[mainFilterIndex][res["tag2"] + 1],
+                  style: const TextStyle(
                       color: Colors.white,
                       fontSize: 10,
                       fontWeight: FontWeight.w400,
@@ -745,6 +737,7 @@ class MainScreenPageState extends State<MainScreenPage> {
           ),
         ),
       );
+    }
     return resInfoList;
   }
 
@@ -775,7 +768,6 @@ class MainScreenPageState extends State<MainScreenPage> {
       BuildContext context, MainFilter filter, MainFilter curFilter) {
     return GestureDetector(
       onTap: () async {
-        print(context.read<ProfileState>().user);
         setState(() {
           searching = false;
         });
@@ -787,7 +779,7 @@ class MainScreenPageState extends State<MainScreenPage> {
         }
         context
             .read<SearchFilterProvider>()
-            .changeFilter(mainFilter: filter, subFilter: "전체");
+            .changeFilter(mainFilter: filter, subFilter: -1);
         await context
             .read<RestaurantsProvider>()
             .getRes(mainFilter: filter, sortType: false);

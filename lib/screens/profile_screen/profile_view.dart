@@ -475,7 +475,7 @@ class _FriendModalState extends State<FriendModal> {
   @override
   Widget build(BuildContext context) {
     final following = context.watch<ProfileState>().user.followings;
-    final follower = [];
+    final follower = context.watch<ProfileState>().user.followers;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

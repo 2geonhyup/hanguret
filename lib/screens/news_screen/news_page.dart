@@ -64,7 +64,6 @@ class _NewsPageState extends State<NewsPage> {
         int icon = context
             .read<ProfileProvider>()
             .findFollowingsIcon(id: news["userId"]);
-        print(icon);
         newsWidgets.add(Column(
           children: [
             NewsInfoBox(

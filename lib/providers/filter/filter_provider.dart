@@ -7,7 +7,7 @@ class SearchFilterProvider extends StateNotifier<SearchFilterState>
     with LocatorMixin {
   SearchFilterProvider() : super(SearchFilterState.initial());
 
-  void changeFilter({MainFilter? mainFilter, String? subFilter}) {
+  void changeFilter({MainFilter? mainFilter, int? subFilter}) {
     state = state.copyWith(
         filter: Filter(
             mainFilter: mainFilter ?? state.filter.mainFilter,

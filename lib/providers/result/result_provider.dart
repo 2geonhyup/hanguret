@@ -14,7 +14,7 @@ class ResultProvider extends StateNotifier<ResultState> with LocatorMixin {
 
     List<Map> _filteredResult;
 
-    if (filter.subFilter == "전체") {
+    if (filter.subFilter == -1) {
       _filteredResult = _allResult;
     } else {
       _filteredResult = _allResult

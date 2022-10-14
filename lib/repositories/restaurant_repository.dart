@@ -9,9 +9,10 @@ import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_ou
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
+import 'package:hangeureut/screens/review_screen/review_output.dart';
 import 'package:http/http.dart' as http;
 
-String url = 'ec2-3-35-52-247.ap-northeast-2.compute.amazonaws.com:3001';
+String _url = 'ec2-3-35-52-247.ap-northeast-2.compute.amazonaws.com:3001';
 
 class RestaurantRepository {
   Future<List<Map>?> getRestaurants(
@@ -21,8 +22,7 @@ class RestaurantRepository {
     // output 받기
 
     try {
-      Uri _uri = Uri.http(url, '/restaurants');
-      print(_uri);
+      Uri _uri = Uri.http(_url, '/restaurants');
 
       var response = await http.get(_uri);
 
@@ -121,5 +121,22 @@ class RestaurantRepository {
         .collection("newRestaurants")
         .doc()
         .set({"content": content, "userId": userId});
+  }
+
+  Future<Map<String, List>?> getResForReview() async {
+    List popularResList = [];
+    List nearResList = [];
+
+    //백엔드 연결시 수정
+    popularResList = popularRes;
+    nearResList = nearRes;
+    return {
+      "popular": popularResList,
+      "near": nearResList,
+    };
+  }
+
+  Future<List<Map>?> getResByPopularity() async {
+    return mainOutputList0;
   }
 }

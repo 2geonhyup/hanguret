@@ -4,6 +4,19 @@ import 'package:hangeureut/models/search_model.dart';
 
 final usersRef = FirebaseFirestore.instance.collection('users');
 
+const regularTextStyle = TextStyle(
+  fontWeight: FontWeight.w400,
+  fontFamily: 'Suit',
+  color: Colors.white,
+  height: 1,
+);
+const eBoldTextStyle = TextStyle(
+  fontWeight: FontWeight.w800,
+  fontFamily: 'Suit',
+  color: Colors.white,
+  height: 1,
+);
+
 const kBackgroundColor = Color(0xFFFFFFFF);
 
 const kBackgroundColor2 = Color(0xFFF6F3EE);

@@ -200,7 +200,6 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
     List saved = state.user.saved;
     List newSaved = [];
     if (isSave) {
-      print("hi");
       saved.add({"resId": resId, "imgUrl": imgUrl});
       newSaved = saved;
     } else {
@@ -233,7 +232,6 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
     String userId = state.user.id;
     int userIcon = state.user.icon;
     String userName = state.user.name;
-    print("profileproviderrerreviewlike");
 
     await read<RestaurantRepository>().reviewLike(
         userId: userId,

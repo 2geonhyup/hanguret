@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
@@ -9,6 +11,7 @@ import 'package:hangeureut/repositories/restaurant_repository.dart';
 import 'package:hangeureut/screens/profile_screen/others_profile_page.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 import '../../models/news_model.dart';
 
@@ -250,7 +253,6 @@ class _NoticePageState extends State<NoticePage> {
                   )),
                   GestureDetector(
                     onTap: () {
-                      print(sendingController.text);
                       if (sendingController.text != "") {
                         context.read<RestaurantRepository>().sendNewRes(
                             content: sendingController.text,
@@ -276,6 +278,21 @@ class _NoticePageState extends State<NoticePage> {
     );
   }
 
+  Map newRes = {
+    "resId": 15,
+    "name": "돈천동식당",
+    "category1": 0,
+    "tag1": 1,
+    "tag2": 2,
+    "detail": "신촌돈까스 원탑",
+    "score": 4.5,
+    "address": "혜화동 144번지 종로구 서울특별시 KR",
+    "imgUrl":
+        "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.diningcode.com%2Fprofile.php%3Frid%3Dg21VrdrVoupx&psig=AOvVaw3na3bIvf2j5Iok8ACJaElC&ust=1665621076379000&source=images&cd=vfe&ved=0CAwQjRxqFwoTCIDBtpa42foCFQAAAAAdAAAAABAE",
+    "kakaoId": "27495281",
+    "univ": 1
+  };
+
   List<Widget> newsWidget(news) {
     List<Widget> result = [
       recommendWidget(),
@@ -284,14 +301,33 @@ class _NoticePageState extends State<NoticePage> {
       ),
       Padding(
         padding: const EdgeInsets.only(left: 30.0, bottom: 27),
-        child: Text(
-          "알림",
-          style: TextStyle(
-              fontSize: 27,
-              fontWeight: FontWeight.w900,
-              color: kBasicColor,
-              fontFamily: 'Suit',
-              height: 1),
+        child: GestureDetector(
+          onTap: () async {
+            String _url =
+                'ec2-3-35-52-247.ap-northeast-2.compute.amazonaws.com:3001';
+            try {
+              Uri _uri = Uri.http(_url, '/restaurants');
+
+              var response = await http.post(
+                _uri,
+                //headers: {"Content-Type": "application/json"},
+                body: jsonEncode(newRes),
+              );
+
+              print(response.body);
+            } catch (e) {
+              print(e);
+            }
+          },
+          child: Text(
+            "알림",
+            style: TextStyle(
+                fontSize: 27,
+                fontWeight: FontWeight.w900,
+                color: kBasicColor,
+                fontFamily: 'Suit',
+                height: 1),
+          ),
         ),
       )
     ];
@@ -311,7 +347,6 @@ class _NoticePageState extends State<NoticePage> {
   @override
   Widget build(BuildContext context) {
     List<News> news = context.watch<NewsState>().newsList;
-    print(news);
 
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),

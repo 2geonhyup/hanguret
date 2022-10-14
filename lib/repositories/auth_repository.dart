@@ -26,7 +26,6 @@ class AuthRepository {
   Stream<fbAuth.User?> get user => firebaseAuth.userChanges();
 
   Future<void> appleLogin() async {
-    print("1");
     try {
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
@@ -42,9 +41,9 @@ class AuthRepository {
         final signedInCredential =
             await firebaseAuth.signInWithCredential(oauthCredential);
         final signedInUser = signedInCredential.user;
-        print("signedin${signedInUser!.uid}");
+
         final DocumentSnapshot userDoc =
-            await usersRef.doc(signedInUser.uid).get();
+            await usersRef.doc(signedInUser!.uid).get();
         if (!userDoc.exists) {
           await usersRef.doc(signedInUser.uid).set({
             'name': "",
