@@ -149,9 +149,8 @@ class _ProfileCardState extends State<ProfileCard> {
               : GestureDetector(
                   behavior: HitTestBehavior.translucent,
                   onTap: () async {
-                    await context
-                        .read<ProfileProvider>()
-                        .setFriends(widget.id, widget.name, widget.icon);
+                    await context.read<ProfileProvider>().setFriends(
+                        widget.id, widget.name, widget.icon, widget.cId);
                   },
                   child: Container(
                     width: 220,

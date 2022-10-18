@@ -35,7 +35,7 @@ class ReviewPage extends StatefulWidget {
 
   final res;
   int score;
-  String? reviewId;
+  int? reviewId;
 
   @override
   State<ReviewPage> createState() => _ReviewPageState();
@@ -569,7 +569,7 @@ class _ScoringBox extends StatelessWidget {
           ),
           Text(
             resScoreIcons[score - 1][0],
-            style: TextStyle(
+            style: const TextStyle(
                 height: 1,
                 fontFamily: 'Suit',
                 fontWeight: FontWeight.w800,

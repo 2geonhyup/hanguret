@@ -6,12 +6,16 @@ class FriendsNews extends Equatable {
   final String userId;
   final String userName;
   final int userIcon;
+  final String cId;
 
   FriendsNews(
-      {required this.userId, required this.userName, required this.userIcon});
+      {required this.userId,
+      required this.userName,
+      required this.userIcon,
+      required this.cId});
 
   @override
-  List<Object> get props => [userId, userName, userIcon];
+  List<Object> get props => [userId, userName, userIcon, cId];
   @override
   bool get stringify => true;
 }
@@ -21,12 +25,14 @@ class ReviewNews extends Equatable {
   final String userName;
   final int userIcon;
   final String resName;
+  final String cId;
 
   ReviewNews(
       {required this.userId,
       required this.userName,
       required this.userIcon,
-      required this.resName});
+      required this.resName,
+      required this.cId});
 
   @override
   List<Object> get props => [userName, userIcon];

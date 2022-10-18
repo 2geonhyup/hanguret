@@ -5,6 +5,7 @@ import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/providers/signup/signup_state.dart';
 import 'package:hangeureut/repositories/auth_repository.dart';
 import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
+import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/splash_screen/splash_page.dart';
 import 'package:hangeureut/screens/start_screen/start_view_model.dart';
 import 'package:provider/provider.dart';
@@ -35,10 +36,9 @@ class _StartPageState extends State<StartPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    fbAuth.User? user = fbAuth.FirebaseAuth.instance.currentUser;
-    if (user == null) {
-    } else {
-      _loggedIn = false;
+    ProfileStatus state = context.read<ProfileState>().profileStatus;
+    if (state == ProfileStatus.loaded) {
+      Navigator.pushNamed(context, BasicScreenPage.routeName);
     }
 
     Future.delayed(const Duration(milliseconds: 600), () {
@@ -55,7 +55,7 @@ class _StartPageState extends State<StartPage> {
 
     Future.delayed(const Duration(milliseconds: 2000), () {
       if (_loggedIn) {
-        Navigator.pushNamed(context, SplashPage.routeName);
+        Navigator.pushNamed(context, BasicScreenPage.routeName);
       }
     });
 
@@ -80,8 +80,10 @@ class _StartPageState extends State<StartPage> {
     //     Navigator.popAndPushNamed(context, SplashPage.routeName);
     //   });
     // }
+    print(11);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           AnimatedContainer(
@@ -91,7 +93,8 @@ class _StartPageState extends State<StartPage> {
             duration: Duration(milliseconds: 1000),
           ),
           Positioned(
-            bottom: MediaQuery.of(context).size.height / 2.3,
+            top: 315,
+            //MediaQuery.of(context).size.height / 2.3,
             left: 0,
             right: 0,
             child: AnimatedOpacity(
@@ -106,7 +109,8 @@ class _StartPageState extends State<StartPage> {
             ),
           ),
           Positioned(
-            bottom: MediaQuery.of(context).size.height / 2.4,
+            top: 355,
+            //bottom: MediaQuery.of(context).size.height / 2.4,
             left: 0,
             right: 0,
             child: Column(
@@ -183,13 +187,17 @@ class LoginButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(12);
     SignupStatus status = context.watch<SignupState>().signupStatus;
+    bool loading =
+        status == SignupStatus.success || status == SignupStatus.submitting;
     if (status == SignupStatus.success) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushNamed(context, SplashPage.routeName);
       });
+      loading = false;
     }
-    return status == SignupStatus.submitting
+    return loading
         ? CircularProgressIndicator(
             color: Colors.white,
           )

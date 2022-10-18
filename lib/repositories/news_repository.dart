@@ -41,8 +41,9 @@ class NewsRepository {
               watched: newsWatchedTime.compareTo(newsDoc["date"].toDate()) > 0,
               content: FriendsNews(
                 userId: content["id"],
-                userName: content["name"],
-                userIcon: content["icon"],
+                userName: content["name"] ?? "",
+                userIcon: content["icon"] ?? 0,
+                cId: content["cId"] ?? "",
               )));
         } else if (newsDoc["type"] == 1) {
           newsToReturn.add(News(
@@ -50,9 +51,10 @@ class NewsRepository {
               watched: newsWatchedTime.compareTo(newsDoc["date"].toDate()) > 0,
               content: ReviewNews(
                   userId: content["id"],
-                  userIcon: content["icon"],
-                  userName: content["name"],
-                  resName: content["resName"])));
+                  userIcon: content["icon"] ?? 0,
+                  userName: content["name"] ?? "",
+                  resName: content["resName"] ?? "",
+                  cId: content["cId"] ?? "")));
         } else if (newsDoc["type"] == 2) {
           newsToReturn.add(News(
               type: newsDoc["type"],

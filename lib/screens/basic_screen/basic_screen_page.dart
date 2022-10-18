@@ -65,31 +65,30 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
 
   @override
   Widget build(BuildContext context) {
-    bool navBarShow = context.watch<NavBarState>().show;
+    //bool navBarShow = context.watch<NavBarState>().show;
+    //print(navBarShow);
 
     return Scaffold(
       extendBody: true,
       resizeToAvoidBottomInset: false,
-      floatingActionButton: _controller.index == 0 && !navBarShow
-          ? null
-          : ReviewFloatingButton(
-              onTap: () {
-                pushNewScreen(
-                  context,
-                  screen: BasicScreenPage(
-                    initialIndex: 0,
-                    reviewing: true,
-                  ),
-                  withNavBar: true, // OPTIONAL VALUE. True by default.
-                );
-              },
-              buttonColor: kSecondaryTextColor,
+      floatingActionButton: ReviewFloatingButton(
+        onTap: () {
+          pushNewScreen(
+            context,
+            screen: BasicScreenPage(
+              initialIndex: 0,
+              reviewing: true,
             ),
+            withNavBar: true, // OPTIONAL VALUE. True by default.
+          );
+        },
+        buttonColor: kSecondaryTextColor,
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       body: AnimatedPadding(
         curve: Curves.easeInCirc,
         duration: Duration(milliseconds: 200),
-        padding: EdgeInsets.only(bottom: navBarShow ? 30.0 : 0),
+        padding: EdgeInsets.only(bottom: 30.0),
         child: PersistentTabView.custom(
           context,
           controller: _controller,
@@ -97,12 +96,12 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
           bottomScreenMargin: 0,
           screens: buildScreens(reviewing, widget.page),
           confineInSafeArea: false,
+          resizeToAvoidBottomInset: false,
           handleAndroidBackButtonPress: true,
           screenTransitionAnimation:
               ScreenTransitionAnimation(animateTabTransition: true),
           backgroundColor: reviewing ? Colors.white : Colors.transparent,
           hideNavigationBarWhenKeyboardShows: true,
-          hideNavigationBar: !navBarShow,
           customWidget: CustomNavBarWidget(
             // Your custom widget goes here
             items: navBarsItems(),
@@ -125,6 +124,11 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
                 _controller.index =
                     index; // NOTE: THIS IS CRITICAL!! Don't miss it!
               });
+              if (_controller.index == 0) {
+                setState(() {
+                  reviewing = false;
+                });
+              }
             },
           ),
         ),

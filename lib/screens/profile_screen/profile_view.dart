@@ -1,13 +1,13 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
-import 'package:hangeureut/repositories/friend_repository.dart';
 import 'package:hangeureut/screens/profile_screen/modify_taste.dart';
 import 'package:hangeureut/screens/profile_screen/review_detail_page.dart';
+import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/custom_error.dart';
 import '../../providers/profile/profile_state.dart';
 import '../../widgets/profile_icon_box.dart';
 import '../friend_screen/friend_recommend_page.dart';
@@ -17,7 +17,7 @@ import 'others_profile_page.dart';
 enum ModifyingField { none, favorite, hate, alcohol, spicy }
 
 class ProfileCard extends StatelessWidget {
-  ProfileCard(
+  const ProfileCard(
       {Key? key,
       required this.onNameClicked,
       required this.onIdClicked,
@@ -27,13 +27,13 @@ class ProfileCard extends StatelessWidget {
       required this.modifyClicked,
       required this.watchFollow})
       : super(key: key);
-  Function onNameClicked;
-  Function onIdClicked;
-  Function onModifyClicked;
-  bool nameModify;
-  bool idModify;
-  bool modifyClicked;
-  bool watchFollow;
+  final Function onNameClicked;
+  final Function onIdClicked;
+  final Function onModifyClicked;
+  final bool nameModify;
+  final bool idModify;
+  final bool modifyClicked;
+  final bool watchFollow;
 
   @override
   Widget build(BuildContext context) {
@@ -44,10 +44,10 @@ class ProfileCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-                color: Color(0xff000000).withOpacity(0.08),
+                color: const Color(0xff000000).withOpacity(0.08),
                 blurRadius: 6,
                 spreadRadius: 0,
-                offset: Offset(
+                offset: const Offset(
                   0,
                   4,
                 )),
@@ -56,11 +56,11 @@ class ProfileCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(
+          const SizedBox(
             height: 24,
           ),
           ProfileIconBox(content: profileIcons[profile.icon]),
-          SizedBox(
+          const SizedBox(
             height: 12,
           ),
           nameModify
@@ -73,7 +73,6 @@ class ProfileCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   initialValue: profile.name,
                   showCursor: true,
-                  autofocus: true,
                   cursorColor: kSecondaryTextColor.withOpacity(0.7),
                   cursorWidth: 0.5,
                   style: TextStyle(
@@ -81,7 +80,8 @@ class ProfileCard extends StatelessWidget {
                       fontFamily: 'Suit',
                       fontSize: 20,
                       fontWeight: FontWeight.w700),
-                  decoration: InputDecoration.collapsed(hintText: "이름 입력"),
+                  decoration:
+                      const InputDecoration.collapsed(hintText: "이름 입력"),
                 )
               : GestureDetector(
                   onTap: () {
@@ -92,13 +92,13 @@ class ProfileCard extends StatelessWidget {
                     children: [
                       Text(
                         profile.name,
-                        style: TextStyle(
+                        style: const TextStyle(
                             color: kBasicColor,
                             fontFamily: 'Suit',
                             fontSize: 20,
                             fontWeight: FontWeight.w700),
                       ),
-                      Text(
+                      const Text(
                         "의 식탁",
                         style: TextStyle(
                             color: kSecondaryTextColor,
@@ -109,7 +109,7 @@ class ProfileCard extends StatelessWidget {
                     ],
                   ),
                 ),
-          SizedBox(
+          const SizedBox(
             height: 3,
           ),
           idModify
@@ -129,20 +129,21 @@ class ProfileCard extends StatelessWidget {
                       fontSize: 11,
                       fontWeight: FontWeight.w400,
                       fontFamily: 'Suit'),
-                  decoration: InputDecoration.collapsed(hintText: "아이디 입력"),
+                  decoration:
+                      const InputDecoration.collapsed(hintText: "아이디 입력"),
                 )
               : GestureDetector(
                   onTap: () {
                     onIdClicked();
                   },
                   child: Text("@${profile.cId}",
-                      style: TextStyle(
+                      style: const TextStyle(
                           color: kBasicTextColor,
                           fontSize: 11,
                           fontWeight: FontWeight.w400,
                           fontFamily: 'Suit')),
                 ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           modifyClicked
@@ -155,9 +156,9 @@ class ProfileCard extends StatelessWidget {
                       width: 220,
                       height: 28,
                       decoration: BoxDecoration(
-                          color: Color(0xffE5E5E5),
+                          color: const Color(0xffE5E5E5),
                           borderRadius: BorderRadius.circular(6)),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           "수정 완료",
                           style: TextStyle(
@@ -178,7 +179,7 @@ class ProfileCard extends StatelessWidget {
                             onTap: () {
                               pushNewScreen(
                                 context,
-                                screen: FriendRecommendPage(),
+                                screen: const FriendRecommendPage(),
                                 withNavBar: false,
                               );
                             },
@@ -188,7 +189,7 @@ class ProfileCard extends StatelessWidget {
                               decoration: BoxDecoration(
                                   color: kBasicColor.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(6)),
-                              child: Center(
+                              child: const Center(
                                 child: Text(
                                   "찜하기 추천",
                                   style: TextStyle(
@@ -208,9 +209,9 @@ class ProfileCard extends StatelessWidget {
                               width: 154,
                               height: 28,
                               decoration: BoxDecoration(
-                                  color: Color(0xffe5e5e5),
+                                  color: const Color(0xffe5e5e5),
                                   borderRadius: BorderRadius.circular(6)),
-                              child: Center(
+                              child: const Center(
                                 child: Text(
                                   "프로필 수정",
                                   style: TextStyle(
@@ -222,7 +223,7 @@ class ProfileCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                    SizedBox(
+                    const SizedBox(
                       width: 10,
                     ),
                     GestureDetector(
@@ -231,9 +232,9 @@ class ProfileCard extends StatelessWidget {
                         width: 55,
                         height: 28,
                         decoration: BoxDecoration(
-                            color: Color(0xfff2f2f2),
+                            color: const Color(0xfff2f2f2),
                             borderRadius: BorderRadius.circular(6)),
-                        child: Center(
+                        child: const Center(
                           child: Text(
                             "공유",
                             style: TextStyle(
@@ -247,7 +248,7 @@ class ProfileCard extends StatelessWidget {
                     ),
                   ],
                 ),
-          SizedBox(
+          const SizedBox(
             height: 24,
           ),
         ],
@@ -257,20 +258,20 @@ class ProfileCard extends StatelessWidget {
 }
 
 class ScoreBar extends StatelessWidget {
-  ScoreBar(
+  const ScoreBar(
       {Key? key,
       required this.tapped,
       required this.followerCnt,
       required this.followingCnt})
       : super(key: key);
-  bool tapped;
-  int followerCnt;
-  int followingCnt;
+  final bool tapped;
+  final int followerCnt;
+  final int followingCnt;
 //TODO: 진짜 데이터로 바꿔야 함!!!!!!!!!
   @override
   Widget build(BuildContext context) {
     return tapped
-        ? Center(
+        ? const Center(
             child: Text(
               "돌아가기",
               style: TextStyle(
@@ -284,16 +285,16 @@ class ScoreBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "나를 찜한 ${followerCnt}   |",
-                style: TextStyle(
+                "나를 찜한 $followerCnt   |",
+                style: const TextStyle(
                     color: Colors.white,
                     fontFamily: 'Suit',
                     fontSize: 13,
                     fontWeight: FontWeight.w500),
               ),
               Text(
-                "   내가 찜한 ${followingCnt}",
-                style: TextStyle(
+                "   내가 찜한 $followingCnt",
+                style: const TextStyle(
                     color: Colors.white,
                     fontFamily: 'Suit',
                     fontSize: 13,
@@ -327,7 +328,7 @@ class TasteProfile extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
+        SizedBox(
           height: 44,
           child: Padding(
             padding: const EdgeInsets.only(left: 30.0),
@@ -337,12 +338,12 @@ class TasteProfile extends StatelessWidget {
                       onTap: () {
                         pushNewScreen(
                           context,
-                          screen: ModifyTaste(),
+                          screen: const ModifyTaste(),
                           withNavBar: false,
                         );
                       },
                       child: Padding(
-                        padding: EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(4),
                         child: Container(
                           width: 48,
                           height: 36,
@@ -353,7 +354,7 @@ class TasteProfile extends StatelessWidget {
                                   color: kBasicColor.withOpacity(0.3),
                                   blurRadius: 6,
                                   spreadRadius: 0,
-                                  offset: Offset(
+                                  offset: const Offset(
                                     0,
                                     1,
                                   )),
@@ -362,7 +363,7 @@ class TasteProfile extends StatelessWidget {
                             border: Border.all(
                                 color: kSecondaryTextColor.withOpacity(0.2)),
                           ),
-                          child: Center(
+                          child: const Center(
                               child: Text(
                             "+",
                             style: TextStyle(
@@ -374,16 +375,16 @@ class TasteProfile extends StatelessWidget {
                         ),
                       ),
                     )
-                  : SizedBox.shrink(),
+                  : const SizedBox.shrink(),
               for (var keyword in keyWordList2)
                 RoundedButton(
-                    iconPath: "${tasteProfileIconPath}/${keyword[0]}.png",
+                    iconPath: "$tasteProfileIconPath/${keyword[0]}.png",
                     text: keyword[1],
                     selected: tasteKeyword[keyword[0]],
                     modifying: modifyClicked),
               for (var alcohol in alcoholTypeList2)
                 RoundedButton(
-                    iconPath: "${tasteProfileIconPath}/${alcohol[0]}.png",
+                    iconPath: "$tasteProfileIconPath/${alcohol[0]}.png",
                     text: alcohol[1],
                     selected: alcoholType[alcohol[0]],
                     modifying: modifyClicked)
@@ -403,16 +404,16 @@ class RoundedButton extends StatelessWidget {
       required this.selected,
       required this.modifying})
       : super(key: key);
-  final iconPath;
-  final text;
-  final selected;
-  final modifying;
+  final String iconPath;
+  final String text;
+  final bool selected;
+  final bool modifying;
   @override
   Widget build(BuildContext context) {
     return selected
         ? GestureDetector(
             child: Padding(
-              padding: EdgeInsets.all(4),
+              padding: const EdgeInsets.all(4),
               child: Container(
                 height: 36,
                 decoration: BoxDecoration(
@@ -420,9 +421,9 @@ class RoundedButton extends StatelessWidget {
                     boxShadow: [
                       BoxShadow(
                           color: kBasicColor.withOpacity(0.3),
-                          blurRadius: 6,
+                          blurRadius: 3,
                           spreadRadius: 0,
-                          offset: Offset(
+                          offset: const Offset(
                             0,
                             1,
                           )),
@@ -442,12 +443,12 @@ class RoundedButton extends StatelessWidget {
                         iconPath,
                         height: 18,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 5,
                       ),
                       Text(
                         text,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontFamily: 'Suit',
                             fontWeight: FontWeight.w300,
                             fontSize: 12,
@@ -459,23 +460,57 @@ class RoundedButton extends StatelessWidget {
               ),
             ),
           )
-        : SizedBox.shrink();
+        : const SizedBox.shrink();
   }
 }
 
 class FriendModal extends StatefulWidget {
-  FriendModal({Key? key, required this.option}) : super(key: key);
-  bool option;
+  const FriendModal(
+      {Key? key,
+      required this.option,
+      required this.friendSearching,
+      required this.searchedTap})
+      : super(key: key);
+  final bool option;
+  final Function searchedTap;
+  final bool friendSearching;
 
   @override
   State<FriendModal> createState() => _FriendModalState();
 }
 
 class _FriendModalState extends State<FriendModal> {
+  final FocusNode _focus = FocusNode();
+  List searchUserList = [];
+  TextEditingController _textEditingController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(() => _onFocusChange(_focus.hasFocus));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _focus.removeListener(() => _onFocusChange(_focus.hasFocus));
+    _focus.dispose();
+  }
+
+  void _onFocusChange(bool hasFocus) {
+    widget.searchedTap(hasFocus);
+    return;
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (!widget.friendSearching) {
+      _textEditingController.clear();
+    }
     final following = context.watch<ProfileState>().user.followings;
     final follower = context.watch<ProfileState>().user.followers;
+
+    print(following);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -495,14 +530,27 @@ class _FriendModalState extends State<FriendModal> {
                 children: [
                   Expanded(
                     child: TextFormField(
+                      controller: _textEditingController,
+                      focusNode: _focus,
                       onChanged: (val) async {
-                        List searchUserList = await context
-                            .read<ProfileProvider>()
-                            .searchUser(value: val);
-                        setState(() {});
+                        print("user");
+                        try {
+                          searchUserList = await context
+                              .read<ProfileProvider>()
+                              .searchUser(value: val);
+                          setState(() {});
+                        } on CustomError catch (e) {
+                          errorDialog(context, e);
+                        }
                       },
                       cursorColor: kBasicColor,
                       cursorWidth: 1,
+                      // onFieldSubmitted: (val) {
+                      //   _focus.requestFocus();
+                      // },
+                      // onEditingComplete: () {
+                      //   _focus.requestFocus();
+                      // },
                       decoration: InputDecoration(
                           hintText: '친구 이름',
                           hintStyle: TextStyle(
@@ -518,7 +566,7 @@ class _FriendModalState extends State<FriendModal> {
                           color: kSecondaryTextColor),
                     ),
                   ),
-                  Icon(
+                  const Icon(
                     Icons.search,
                     color: kBasicColor,
                     size: 20,
@@ -528,15 +576,23 @@ class _FriendModalState extends State<FriendModal> {
             ),
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
         //TODO: 검색창에 focus되어 있다면, 검색 결과가 떠야함(배열 순서: 서로 찜->내가 찜->상대가 찜-> 상관없는 사람)
-        for (var user in widget.option ? following : follower)
+        for (var user in widget.friendSearching
+            ? searchUserList
+            : widget.option
+                ? following
+                : follower)
           Padding(
             padding: const EdgeInsets.only(bottom: 15.0),
             child: FriendRow(
-                icon: user["icon"], name: user["name"], id: user["id"]),
+              icon: user["icon"],
+              name: user["name"],
+              id: user["id"],
+              cId: user["cId"],
+            ),
           ),
       ],
     );
@@ -544,12 +600,17 @@ class _FriendModalState extends State<FriendModal> {
 }
 
 class FriendRow extends StatelessWidget {
-  FriendRow(
-      {Key? key, required this.icon, required this.name, required this.id})
+  const FriendRow(
+      {Key? key,
+      required this.icon,
+      required this.name,
+      required this.id,
+      required this.cId})
       : super(key: key);
-  int icon;
-  String name;
-  String id;
+  final int icon;
+  final String name;
+  final String id;
+  final String cId;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -561,52 +622,50 @@ class FriendRow extends StatelessWidget {
             ),
             withNavBar: true);
       },
-      child: Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            SizedBox(
-              width: 33,
-            ),
-            FriendIconBox(content: profileIcons[icon]),
-            SizedBox(
-              width: 12,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                      color: kSecondaryTextColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Suit'),
-                ),
-                SizedBox(
-                  height: 3,
-                ),
-                Text(
-                  "@$id",
-                  style: TextStyle(
-                      color: kSecondaryTextColor,
-                      fontFamily: 'Suit',
-                      fontWeight: FontWeight.w400,
-                      fontSize: 11),
-                )
-              ],
-            )
-          ],
-        ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          const SizedBox(
+            width: 33,
+          ),
+          FriendIconBox(content: profileIcons[icon]),
+          const SizedBox(
+            width: 12,
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                style: const TextStyle(
+                    color: kSecondaryTextColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Suit'),
+              ),
+              const SizedBox(
+                height: 3,
+              ),
+              Text(
+                "@$cId",
+                style: const TextStyle(
+                    color: kSecondaryTextColor,
+                    fontFamily: 'Suit',
+                    fontWeight: FontWeight.w400,
+                    fontSize: 11),
+              )
+            ],
+          )
+        ],
       ),
     );
   }
 }
 
 class FriendIconBox extends StatelessWidget {
-  FriendIconBox({Key? key, required this.content}) : super(key: key);
-  String content;
+  const FriendIconBox({Key? key, required this.content}) : super(key: key);
+  final String content;
 
   @override
   Widget build(BuildContext context) {
@@ -614,12 +673,12 @@ class FriendIconBox extends StatelessWidget {
       child: Center(
           child: Text(
         content,
-        style: TextStyle(fontSize: 27),
+        style: const TextStyle(fontSize: 27),
       )),
       width: 50,
       height: 50,
       decoration: BoxDecoration(
-        color: Color(0xffe5e5e5).withOpacity(0.5),
+        color: const Color(0xffe5e5e5).withOpacity(0.5),
         borderRadius: BorderRadius.circular(50),
       ),
     );
@@ -770,7 +829,7 @@ class ProfileReviewsView extends StatelessWidget {
   }
 
   Widget reviewTile(width, height, imgUrl) {
-    return Container(
+    return SizedBox(
       width: width,
       height: height,
       child: Image.asset(
@@ -782,7 +841,7 @@ class ProfileReviewsView extends StatelessWidget {
 }
 
 class SavedTile extends StatelessWidget {
-  SavedTile(this.width, this.height, this.resId, this.imgUrl);
+  const SavedTile(this.width, this.height, this.resId, this.imgUrl);
 
   final double width;
   final double height;
@@ -798,7 +857,7 @@ class SavedTile extends StatelessWidget {
         },
         child: Stack(
           children: [
-            Container(
+            SizedBox(
               width: width,
               height: height,
               child: Image.asset(

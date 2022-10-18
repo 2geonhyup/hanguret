@@ -1,6 +1,6 @@
 const myReviewList = [
   {
-    "reviewId": "12",
+    "reviewId": 12,
     "resId": "1",
     "resName": "돈천동식당",
     "resTag": "기름칠", //해당 식당의 기본 태그(tag1)
@@ -13,7 +13,7 @@ const myReviewList = [
     "liked": true, //현 사용자가 좋아요를 누른 리뷰인지?
   },
   {
-    "reviewId": "13",
+    "reviewId": 13,
     "resId": "4",
     "resName": "리피토리아",
     "resTag": "분위기",
@@ -26,7 +26,7 @@ const myReviewList = [
     "liked": false, //현 사용자가 좋아요를 누른 리뷰인지?
   },
   {
-    "reviewId": "14",
+    "reviewId": 14,
     "resId": "2",
     "resName": "돈천동식당",
     "resTag": "기름칠",
@@ -39,7 +39,7 @@ const myReviewList = [
     "liked": false, //현 사용자가 좋아요를 누른 리뷰인지?
   },
   {
-    "reviewId": "15",
+    "reviewId": 15,
     "resId": "3",
     "resName": "리피토리아",
     "resTag": "분위기",
@@ -52,7 +52,7 @@ const myReviewList = [
     "liked": true, //현 사용자가 좋아요를 누른 리뷰인지?
   },
   {
-    "reviewId": "16",
+    "reviewId": 16,
     "resId": "4",
     "resName": "라플로레종",
     "resTag": "디저트",
@@ -65,7 +65,7 @@ const myReviewList = [
     "liked": false, //현 사용자가 좋아요를 누른 리뷰인지?
   },
   {
-    "reviewId": "17",
+    "reviewId": 17,
     "resId": "3",
     "resName": "리피토리아",
     "resTag": "분위기",
@@ -78,7 +78,7 @@ const myReviewList = [
     "liked": true, //현 사용자가 좋아요를 누른 리뷰인지?
   },
   {
-    "reviewId": "18",
+    "reviewId": 18,
     "resId": "3",
     "resName": "리피토리아",
     "resTag": "분위기",

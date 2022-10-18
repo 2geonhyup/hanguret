@@ -4,7 +4,6 @@ import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/repositories/restaurant_repository.dart';
 import 'package:hangeureut/restaurants.dart';
-import 'package:hangeureut/screens/restaurant_detail_screen/thumb_shape.dart';
 import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
@@ -59,11 +58,6 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
       res = await context
           .read<RestaurantRepository>()
           .getRestaurantsDetail(resId: widget.resId);
-      myReview = res!["myReview"];
-      myReview != null ? preReview = true : null;
-      if (myReview != null) {
-        myLike = myReview!["liked"];
-      }
 
       setState(() {});
     } on CustomError catch (e) {
@@ -72,14 +66,23 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
   }
 
   Future<void> _getReviews() async {
-    if (opt && otherReviews == null) {
+    String myId = context.read<ProfileState>().user.id;
+    if (otherReviews == null) {
       try {
         otherReviews = await context
             .read<RestaurantRepository>()
             .getRestaurantsReviews(resId: widget.resId);
         likes = [];
         for (var e in otherReviews!) {
+          if (myId == e["userId"]) {
+            myReview = e;
+          }
           likes.add(e["liked"]);
+        }
+
+        myReview != null ? preReview = true : null;
+        if (myReview != null) {
+          myLike = myReview!["liked"];
         }
       } on CustomError catch (e) {
         print(e);
@@ -94,11 +97,9 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
       _getResDetail();
     });
 
-    if (widget.option) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _getReviews();
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _getReviews();
+    });
 
     opt = widget.option;
     score = 5;
@@ -239,9 +240,10 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                     date: myReview!["date"],
                     score: myReview!["score"],
                     imgUrl: myReview!["imgUrl"],
-                    tag: myReview!["icon"],
-                    icon: resFilterTextIconMap[myReview!["category"]]
-                        [myReview!["icon"]]!,
+                    tag: resFilterTextsSh[myReview!["category"]]
+                        [myReview!["icon"]],
+                    icon: resFilterIcons[myReview!["category"]]
+                        [myReview!["icon"]],
                     onLike: () {
                       setState(() {
                         myLike = !myLike;
@@ -507,8 +509,8 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
               date: review["date"],
               score: review["score"],
               imgUrl: review["imgUrl"],
-              icon: resFilterTextIconMap[review["category"]][review["icon"]]!,
-              tag: review["icon"],
+              icon: resFilterIcons[review["category"]][review["icon"]],
+              tag: resFilterTextsSh[review["category"]][review["icon"]],
               onLike: () {
                 setState(() {
                   likes[index] = !likes[index];

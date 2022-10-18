@@ -1,3 +1,4 @@
+import 'package:hangeureut/repositories/friend_repository.dart';
 import 'package:hangeureut/repositories/restaurant_repository.dart';
 import 'package:state_notifier/state_notifier.dart';
 
@@ -55,14 +56,14 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
     return false;
   }
 
-  Future<void> setFriends(String id, String name, int icon) async {
+  Future<void> setFriends(String id, String name, int icon, String cId) async {
     List newFriends = [];
     for (var i in state.user.followings) {
       newFriends.add(i);
       if (i["id"] == id) return;
     }
 
-    newFriends.add({"id": id, "name": name, "icon": icon});
+    newFriends.add({"id": id, "name": name, "icon": icon, "cId": cId});
     try {
       await read<ProfileRepository>().setFollowings(
         myIcon: state.user.icon,
@@ -226,7 +227,7 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
 
   Future<void> reviewLike(
       {required String targetId,
-      required String reviewId,
+      required int reviewId,
       required String resName,
       required bool isAdd}) async {
     String userId = state.user.id;
@@ -244,10 +245,37 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
   }
 
   Future<List> searchUser({String? value}) async {
-    List result = [];
+    if (value == null || value == "") return [];
+    List semiResult = [];
+    List allSearch = [];
+    List followers = state.user.followers;
+    List followings = state.user.followings;
     //following 돌기
+    List followingSearch = followings.where((u) {
+      if (u["cId"] == value || u["name"] == value) {
+        return true;
+      }
+      return false;
+    }).toList();
     //follower 돌기
-    //모든 계정 돌기
+    List followerSearch = followers.where((u) {
+      if (u["cId"] == value || u["name"] == value) {
+        return true;
+      }
+      return false;
+    }).toList();
+
+    semiResult = [...followingSearch, ...followerSearch];
+    List preSearchedId = semiResult.map((e) => e["id"]).toList();
+
+    try {
+      allSearch = await read<ProfileRepository>()
+          .allUserSearch(searchTerm: value, preSearchedId: preSearchedId);
+    } catch (e) {
+      rethrow;
+    }
+
+    List result = [...semiResult, ...allSearch];
 
     return result;
   }

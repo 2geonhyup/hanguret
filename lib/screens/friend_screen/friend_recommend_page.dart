@@ -96,7 +96,7 @@ class _FriendRecommendPageState extends State<FriendRecommendPage> {
                     onTap: () {
                       context
                           .read<ProfileProvider>()
-                          .setFriends(e.id, e.name, e.icon);
+                          .setFriends(e.id, e.name, e.icon, e.cId);
                       setState(() {});
                     },
                     child: Container(
@@ -129,17 +129,17 @@ class _FriendRecommendPageState extends State<FriendRecommendPage> {
           children: [
             Row(
               children: [
-                GestureDetector(
-                  onTap: () async {
-                    await context.read<ProfileProvider>().setLogin();
-                    pushNewScreen(context,
-                        screen: BasicScreenPage(
-                          initialIndex: 2,
-                        ));
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 34.0, top: 54),
-                    child: Icon(Icons.arrow_back_ios),
+                Padding(
+                  padding: const EdgeInsets.only(left: 34.0, top: 54),
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_back_ios),
+                    onPressed: () async {
+                      await context.read<ProfileProvider>().setLogin();
+                      pushNewScreen(context,
+                          screen: BasicScreenPage(
+                            initialIndex: 2,
+                          ));
+                    },
                   ),
                 ),
               ],

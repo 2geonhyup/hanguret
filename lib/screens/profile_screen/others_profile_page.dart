@@ -101,14 +101,14 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                         Positioned(
                             top: 54,
                             left: 34,
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              child: Icon(
+                            child: IconButton(
+                              icon: Icon(
                                 Icons.arrow_back_ios,
                                 color: Colors.white,
                               ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
                             )),
                         Positioned(
                             top: 80,

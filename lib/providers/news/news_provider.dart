@@ -10,8 +10,12 @@ class NewsProvider extends StateNotifier<NewsState> with LocatorMixin {
   @override
   void update(Locator watch) {
     final newsList = watch<List<News>>();
+    bool watched = true;
+    for (var i in state.newsList) {
+      if (!i.watched) watched = false;
+    }
 
-    state = state.copyWith(newsList: newsList, watched: false);
+    state = state.copyWith(newsList: newsList, watched: watched);
     super.update(watch);
   }
 

@@ -40,6 +40,8 @@ class _ProfilePageState extends State<ProfilePage> {
   bool option = false;
   bool watchFollow = false;
   List? myReviews;
+  bool friendSearching = false;
+  bool keyBoardShowing = false;
 
   void _getReviews() async {
     myReviews = await context
@@ -63,10 +65,15 @@ class _ProfilePageState extends State<ProfilePage> {
     final follower = context.watch<ProfileState>().user.followers;
     final saved = context.watch<ProfileState>().user.saved;
     return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      onTap: () {
+        setState(() {
+          friendSearching = false;
+        });
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
       child: Scaffold(
           backgroundColor: Colors.white,
-          resizeToAvoidBottomInset: false,
+          // resizeToAvoidBottomInset: false,
           body: ListView(
               physics: ClampingScrollPhysics(),
               padding: EdgeInsets.zero,
@@ -88,6 +95,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           onTap: () {
                             setState(() {
                               watchFollow = !watchFollow;
+                              option = false;
                             });
                           },
                           child: ScoreBar(
@@ -203,6 +211,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       GestureDetector(
                         behavior: HitTestBehavior.translucent,
                         onTap: () {
+                          FocusManager.instance.primaryFocus?.unfocus();
                           setState(() {
                             option = false;
                           });
@@ -211,11 +220,10 @@ class _ProfilePageState extends State<ProfilePage> {
                           width: 152,
                           decoration: BoxDecoration(
                               border: Border(
-                                  bottom: option
-                                      ? BorderSide.none
-                                      : BorderSide(
-                                          color: kSecondaryTextColor,
-                                          width: 1))),
+                                  bottom: !option && !friendSearching
+                                      ? BorderSide(
+                                          color: kSecondaryTextColor, width: 1)
+                                      : BorderSide.none)),
                           child: Column(
                             children: [
                               watchFollow
@@ -227,17 +235,21 @@ class _ProfilePageState extends State<ProfilePage> {
                                           "나를 찜한 ",
                                           style: TextStyle(
                                               fontSize: 14,
-                                              fontWeight: option
-                                                  ? FontWeight.w400
-                                                  : FontWeight.w700,
+                                              fontWeight:
+                                                  !option && !friendSearching
+                                                      ? FontWeight.w700
+                                                      : FontWeight.w400,
                                               color: kSecondaryTextColor
-                                                  .withOpacity(
-                                                      option ? 0.5 : 1)),
+                                                  .withOpacity(!option &&
+                                                          !friendSearching
+                                                      ? 1
+                                                      : 0.5)),
                                         ),
                                         Text(
                                           "${follower.length}",
-                                          style:
-                                              option ? countStyle2 : countStyle,
+                                          style: !option && !friendSearching
+                                              ? countStyle
+                                              : countStyle2,
                                         )
                                       ],
                                     )
@@ -277,15 +289,17 @@ class _ProfilePageState extends State<ProfilePage> {
                       GestureDetector(
                         behavior: HitTestBehavior.translucent,
                         onTap: () {
+                          FocusManager.instance.primaryFocus?.unfocus();
                           setState(() {
                             option = true;
+                            friendSearching = false;
                           });
                         },
                         child: Container(
                           width: 152,
                           decoration: BoxDecoration(
                               border: Border(
-                                  bottom: option
+                                  bottom: option && !friendSearching
                                       ? BorderSide(
                                           color: kSecondaryTextColor, width: 1)
                                       : BorderSide.none)),
@@ -300,17 +314,21 @@ class _ProfilePageState extends State<ProfilePage> {
                                           "내가 찜한 ",
                                           style: TextStyle(
                                               fontSize: 14,
-                                              fontWeight: option
-                                                  ? FontWeight.w700
-                                                  : FontWeight.w400,
+                                              fontWeight:
+                                                  option && !friendSearching
+                                                      ? FontWeight.w700
+                                                      : FontWeight.w400,
                                               color: kSecondaryTextColor
                                                   .withOpacity(
-                                                      option ? 1 : 0.5)),
+                                                      option && !friendSearching
+                                                          ? 1
+                                                          : 0.5)),
                                         ),
                                         Text(
                                           "${following.length}",
-                                          style:
-                                              option ? countStyle : countStyle2,
+                                          style: option && !friendSearching
+                                              ? countStyle
+                                              : countStyle2,
                                         )
                                       ],
                                     )
@@ -365,7 +383,17 @@ class _ProfilePageState extends State<ProfilePage> {
                                 forSaved: false,
                               ),
                       ),
-                watchFollow ? FriendModal(option: option) : SizedBox.shrink()
+                watchFollow
+                    ? FriendModal(
+                        option: option,
+                        friendSearching: friendSearching,
+                        searchedTap: (hasFocus) {
+                          setState(() {
+                            hasFocus ? keyBoardShowing = true : null;
+                            hasFocus ? friendSearching = true : null;
+                          });
+                        })
+                    : SizedBox.shrink()
               ])),
     );
   }

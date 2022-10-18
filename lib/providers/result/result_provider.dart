@@ -10,14 +10,16 @@ class ResultProvider extends StateNotifier<ResultState> with LocatorMixin {
   @override
   void update(Locator watch) {
     final Filter filter = watch<SearchFilterState>().filter;
-    final List<Map> _allResult = watch<RestaurantsState>().allResult;
+    final Map _allResult = watch<RestaurantsState>().allResult;
+    final List<Map> mainFilteredList =
+        _allResult[filter.mainFilter.index - 1] ?? [];
 
     List<Map> _filteredResult;
 
     if (filter.subFilter == -1) {
-      _filteredResult = _allResult;
+      _filteredResult = mainFilteredList;
     } else {
-      _filteredResult = _allResult
+      _filteredResult = mainFilteredList
           .where((Map restaurant) =>
               restaurant["tag1"] == filter.subFilter ||
               restaurant["tag2"] == filter.subFilter)

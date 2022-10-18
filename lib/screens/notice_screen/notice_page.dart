@@ -101,7 +101,8 @@ class _NoticePageState extends State<NoticePage> {
                         : context.read<ProfileProvider>().setFriends(
                             i.content.userId,
                             i.content.userName,
-                            i.content.userIcon);
+                            i.content.userIcon,
+                            i.content.cId);
                   },
                   behavior: HitTestBehavior.translucent,
                   child: Container(

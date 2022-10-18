@@ -15,28 +15,14 @@ class RestaurantsProvider extends StateNotifier<RestaurantsState>
   //   state = state.copyWith(todos: newTodos);
   //   print(state);
   // }
-  Future<void> getRes(
-      {required MainFilter mainFilter, required bool sortType}) async {
-    List<Map>? restaurants;
-    int mainFilterNum = 0;
+  Future<void> getRes({required bool sortType}) async {
+    Map? restaurants;
     state = state.copyWith(resStatus: ResStatus.loading);
-    switch (mainFilter) {
-      case MainFilter.alcohol:
-        {
-          mainFilterNum = 1;
-          break;
-        }
-      case MainFilter.coffee:
-        {
-          mainFilterNum = 2;
-          break;
-        }
-      default:
-        break;
-    }
-    restaurants = await read<RestaurantRepository>()
-        .getRestaurants(mainFilterNum: mainFilterNum, sortType: sortType);
+    Future.delayed(Duration(milliseconds: 3000));
+    restaurants =
+        await read<RestaurantRepository>().getRestaurants(sortType: sortType);
     state = state.copyWith(
-        resStatus: ResStatus.loaded, allResult: restaurants ?? []);
+        resStatus: ResStatus.loaded,
+        allResult: restaurants ?? {0: [], 1: [], 2: []});
   }
 }

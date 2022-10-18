@@ -1,11 +1,10 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
-import 'package:hangeureut/repositories/contents_repository.dart';
+
 import 'package:hangeureut/restaurants.dart';
 import 'package:hangeureut/screens/main_screen/recommend_place_page.dart';
 import 'package:hangeureut/screens/profile_screen/others_profile_page.dart';
-import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_page.dart';
 import 'package:hangeureut/widgets/profile_icon_box.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
@@ -457,7 +456,7 @@ class UserContents extends StatelessWidget {
             children: userWidget,
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 100,
         ),
       ],

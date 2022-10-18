@@ -1,8 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
+import 'package:hangeureut/providers/contents/content_state.dart';
 import 'package:hangeureut/providers/navbar/navbar_provider.dart';
-import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/providers/restaurants/restaurants_provider.dart';
 import 'package:hangeureut/providers/restaurants/restaurants_state.dart';
 import 'package:hangeureut/providers/result/result_state.dart';
@@ -14,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/custom_error.dart';
 import '../../models/search_model.dart';
+import '../../providers/contents/content_provider.dart';
 import '../../providers/filter/filter_provider.dart';
 import '../../providers/filter/filter_state.dart';
 import '../../repositories/contents_repository.dart';
@@ -21,7 +22,7 @@ import '../../widgets/error_dialog.dart';
 import 'hangerut_post.dart';
 
 const double filterBarTopPadding = 35;
-const double filterBarTop2Padding = 35;
+const double filterBarTop2Padding = 15;
 const double changeOffsetDown = 360;
 const double changeOffsetSearchingDown = 484;
 const double changeOffsetUp = 320;
@@ -44,24 +45,40 @@ class MainScreenPage extends StatefulWidget {
 class MainScreenPageState extends State<MainScreenPage> {
   ScrollController scrollController = ScrollController();
   PageController pageController = PageController(initialPage: 0);
-  ScrollController pageButtonScrollController = ScrollController();
+  //ScrollController pageButtonScrollController = ScrollController();
   int pageIndex = 0;
   bool scrollEnd = false;
   bool sortType = false;
   bool searching = false;
   int mainFilterIndex = 0;
   int subFilterNum = -1;
+  final ScrollController _pBtnController = ScrollController();
+
+// This is what you're looking for!
+  void _scrollDown(index) {
+    if (index > 3) {
+      _pBtnController.animateTo(
+        _pBtnController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.fastOutSlowIn,
+      );
+    } else {
+      _pBtnController.animateTo(
+        0,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.fastOutSlowIn,
+      );
+    }
+  }
+
   Future<void> _launchUrl(url) async {
     if (!await launchUrl(url)) {
       throw 'Could not launch $url';
     }
   }
 
-  Map _contents = {};
-
   Future<void> _getContents() async {
-    _contents = await context.read<ContentsRepository>().getContents();
-    setState(() {});
+    await context.read<ContentProvider>().getContents();
   }
 
   @override
@@ -76,14 +93,14 @@ class MainScreenPageState extends State<MainScreenPage> {
       double offset2 = searching ? changeOffsetSearchingUp : changeOffsetUp;
       if (scrollController.offset > offset1) {
         if (scrollEnd == false) {
-          context.read<NavBarProvider>().changeNavBarShow();
+          //context.read<NavBarProvider>().changeNavBarShow();
           setState(() {
             scrollEnd = true;
           });
         }
       } else if (scrollController.offset < offset2) {
         if (scrollEnd == true) {
-          context.read<NavBarProvider>().changeNavBarShow();
+          //context.read<NavBarProvider>().changeNavBarShow();
           setState(() {
             scrollEnd = false;
           });
@@ -104,33 +121,47 @@ class MainScreenPageState extends State<MainScreenPage> {
   @override
   Widget build(BuildContext context) {
     final currentState = context.watch<SearchFilterState>();
+    final _contents = context.watch<ContentState>().contents ?? {};
 
     final mainFilter = currentState.filter.mainFilter;
     mainFilterIndex = mainFilter.index - 1;
     subFilterNum = currentState.filter.subFilter;
+
     bool selected = mainFilter != MainFilter.none;
 
-    return Scaffold(
-      backgroundColor: kBackgroundColor2,
-      body: MediaQuery.removePadding(
-        context: context,
-        removeTop: true,
-        removeBottom: true,
-        child: NestedScrollView(
-          controller: selected ? scrollController : null,
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            return abbBarList(
-                selected, mainFilter, currentState.filter.subFilter);
-          },
-          body: selected
-              ? MediaQuery.removePadding(
-                  context: context,
-                  removeTop: true,
-                  child: contentsView(mainFilter.index - 1),
-                )
-              : HangerutPostWidget(
-                  contents: _contents,
-                ),
+    return WillPopScope(
+      onWillPop: () async {
+        if (searching) {
+          setState(() {
+            searching = false;
+          });
+        }
+        return false;
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        backgroundColor: kBackgroundColor2,
+        body: MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          removeBottom: true,
+          child: NestedScrollView(
+            controller: selected ? scrollController : null,
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
+              return abbBarList(
+                  selected, mainFilter, currentState.filter.subFilter);
+            },
+            body: selected
+                ? MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    child: contentsView(mainFilter.index - 1),
+                  )
+                : HangerutPostWidget(
+                    contents: _contents,
+                  ),
+          ),
         ),
       ),
     );
@@ -141,15 +172,7 @@ class MainScreenPageState extends State<MainScreenPage> {
       SliverAppBar(
         bottom: null,
         backgroundColor: kBackgroundColor2,
-        // collapsedHeight: 387, //287+100
-        // expandedHeight: 387.0,
-        toolbarHeight: searching
-            ? scrollEnd
-                ? 355
-                : 524
-            : scrollEnd
-                ? 360
-                : 429,
+        toolbarHeight: searching ? 524 : 429,
         elevation: 0,
         flexibleSpace: FlexibleSpaceBar(
           background: Column(
@@ -281,24 +304,15 @@ class MainScreenPageState extends State<MainScreenPage> {
               Padding(
                 padding: const EdgeInsets.only(
                     left: 30.0, right: 30, top: 42, bottom: 0),
-                child: AnimatedOpacity(
-                  opacity: scrollEnd ? 0 : 1,
-                  duration: const Duration(milliseconds: 400),
-                  child: scrollEnd
-                      ? const SizedBox.shrink()
-                      : Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            mainFilterButton(
-                                context, MainFilter.meal, mainFilter),
-                            mainFilterButton(
-                                context, MainFilter.alcohol, mainFilter),
-                            mainFilterButton(
-                                context, MainFilter.coffee, mainFilter)
-                          ],
-                        ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    mainFilterButton(context, MainFilter.meal, mainFilter),
+                    mainFilterButton(context, MainFilter.alcohol, mainFilter),
+                    mainFilterButton(context, MainFilter.coffee, mainFilter)
+                  ],
                 ),
               ),
             ],
@@ -308,9 +322,8 @@ class MainScreenPageState extends State<MainScreenPage> {
     ];
     if (selected) {
       result.add(SliverAppBar(
-        toolbarHeight: scrollEnd
-            ? filterBarTopPadding + filterBarTop2Padding + 29 + 28 + 1
-            : 82, // 28(앱바 두께)+53(위쪽 패딩)+1(overflow 대비 여유분)
+        toolbarHeight:
+            filterBarTopPadding + filterBarTop2Padding + 29 + 28 + 1 + 20,
         backgroundColor: kBackgroundColor2,
         floating: false,
         pinned: true,
@@ -342,63 +355,64 @@ class MainScreenPageState extends State<MainScreenPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          scrollEnd
-              ? Column(
-                  children: [
-                    SizedBox(
-                      height: filterBarTopPadding,
-                    ),
-                    GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () {
-                        setState(() {
-                          sortType = !sortType;
-                        });
-                      },
-                      child: Container(
-                        margin: EdgeInsets.only(right: 23),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(11),
-                            border: Border.all(color: kSecondaryTextColor)),
-                        height: 29,
-                        width: 70,
-                        child: Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                sortType ? "거리순" : "인기순",
-                                style: TextStyle(
-                                    height: 1.25,
-                                    fontWeight: FontWeight.w400,
-                                    color: kSecondaryTextColor,
-                                    fontFamily: 'Suit',
-                                    fontSize: 12),
-                              ),
-                              SizedBox(
-                                width: 3,
-                              ),
-                              Image.asset(
-                                "images/polygon1.png",
-                                width: 11,
-                                height: 11,
-                              )
-                            ],
+          Column(
+            children: [
+              SizedBox(
+                height: filterBarTopPadding,
+              ),
+              AnimatedOpacity(
+                opacity: scrollEnd ? 1 : 0,
+                duration: Duration(milliseconds: 300),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    setState(() {
+                      sortType = !sortType;
+                    });
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(right: 23),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(11),
+                        border: Border.all(
+                            color: kSecondaryTextColor.withOpacity(0.7))),
+                    height: 29,
+                    width: 70,
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            sortType ? "거리순" : "인기순",
+                            style: TextStyle(
+                                height: 1.25,
+                                fontWeight: FontWeight.w400,
+                                color: kSecondaryTextColor,
+                                fontFamily: 'Suit',
+                                fontSize: 12),
                           ),
-                        ),
+                          SizedBox(
+                            width: 3,
+                          ),
+                          Image.asset(
+                            "images/polygon1.png",
+                            width: 11,
+                            height: 11,
+                          )
+                        ],
                       ),
                     ),
-                    SizedBox(
-                      height: filterBarTop2Padding,
-                    )
-                  ],
-                )
-              : SizedBox(
-                  height: 53,
+                  ),
                 ),
+              ),
+              SizedBox(
+                height: filterBarTop2Padding,
+              )
+            ],
+          ),
           Expanded(
             child: ListView(
-              controller: pageButtonScrollController,
+              controller: _pBtnController,
               scrollDirection: Axis.horizontal,
               children: pageButtons,
             ),
@@ -420,7 +434,7 @@ class MainScreenPageState extends State<MainScreenPage> {
                     bottom: BorderSide(width: 1, color: kSecondaryTextColor))
                 : null),
         child: Padding(
-          padding: EdgeInsets.only(left: 13, right: 13),
+          padding: EdgeInsets.only(left: 13, right: 13, top: 20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -447,10 +461,12 @@ class MainScreenPageState extends State<MainScreenPage> {
   }
 
   pageBtnOnTap(int page) {
+    _scrollDown(page);
+
     setState(() {
       pageIndex = page;
     });
-    if (scrollEnd) scrollController.jumpTo(360);
+    if (scrollEnd) scrollController.jumpTo(430);
 
     context.read<SearchFilterProvider>().changeFilter(subFilter: page - 1);
   }
@@ -468,10 +484,11 @@ class MainScreenPageState extends State<MainScreenPage> {
         pageItem(6)
       ],
       onPageChanged: (index) {
+        _scrollDown(index);
         setState(() {
           pageIndex = index;
         });
-        if (scrollEnd) scrollController.jumpTo(360);
+        if (scrollEnd) scrollController.jumpTo(430);
 
         context.read<SearchFilterProvider>().changeFilter(subFilter: index - 1);
       },
@@ -501,56 +518,40 @@ class MainScreenPageState extends State<MainScreenPage> {
             crossAxisSpacing: 10,
             children: List.generate(
                 resTileList.length, (index) => resTileList[index])),
-        scrollEnd
-            ? Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                    height: 233,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withOpacity(0),
-                            Colors.black.withOpacity(0.23)
-                          ]),
-                    )))
-            : SizedBox.shrink(),
-        scrollEnd
-            ? Positioned.fill(
-                bottom: 65,
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () {
-                      scrollController.animateTo(0,
-                          duration: Duration(milliseconds: 500),
-                          curve: Curves.easeOutSine);
-                    },
-                    child: Container(
-                      width: 90,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Center(
-                          child: Text(
-                        "닫기",
-                        style: TextStyle(
-                            fontFamily: 'Suit',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                            color: kSecondaryTextColor),
-                      )),
-                    ),
-                  ),
-                ),
-              )
-            : SizedBox.shrink(),
+
+        // scrollEnd
+        //     ? Positioned.fill(
+        //         bottom: 65,
+        //         child: Align(
+        //           alignment: Alignment.bottomCenter,
+        //           child: GestureDetector(
+        //             behavior: HitTestBehavior.translucent,
+        //             onTap: () {
+        //               scrollController.animateTo(0,
+        //                   duration: Duration(milliseconds: 500),
+        //                   curve: Curves.easeOutSine);
+        //             },
+        //             child: Container(
+        //               width: 90,
+        //               height: 44,
+        //               decoration: BoxDecoration(
+        //                 color: Colors.white,
+        //                 borderRadius: BorderRadius.circular(30),
+        //               ),
+        //               child: Center(
+        //                   child: Text(
+        //                 "닫기",
+        //                 style: TextStyle(
+        //                     fontFamily: 'Suit',
+        //                     fontWeight: FontWeight.w700,
+        //                     fontSize: 15,
+        //                     color: kSecondaryTextColor),
+        //               )),
+        //             ),
+        //           ),
+        //         ),
+        //       )
+        //     : SizedBox.shrink(),
       ],
     );
   }
@@ -564,7 +565,7 @@ class MainScreenPageState extends State<MainScreenPage> {
             //option true일 때 error
 
             screen: RestaurantDetailPage(
-              resId: res["resId"],
+              resId: res["resId"].toString(),
               option: true,
             ),
             withNavBar: false);
@@ -606,19 +607,19 @@ class MainScreenPageState extends State<MainScreenPage> {
                     ),
                     Text(
                       res["name"],
-                      style: TextStyle(
+                      style: const TextStyle(
                           height: 1.357,
                           fontWeight: FontWeight.w900,
                           color: kSecondaryTextColor,
                           fontFamily: 'Suit',
                           fontSize: 14),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 3,
                     ),
                     Row(
                       children: [
-                        Text(
+                        const Text(
                           "지금 내 위치에서 ",
                           style: TextStyle(
                               fontWeight: FontWeight.w400,
@@ -628,7 +629,7 @@ class MainScreenPageState extends State<MainScreenPage> {
                         ),
                         Text(
                           "${res["distance"]}m",
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               color: kBasicColor,
                               fontFamily: 'Suit',
@@ -780,9 +781,6 @@ class MainScreenPageState extends State<MainScreenPage> {
         context
             .read<SearchFilterProvider>()
             .changeFilter(mainFilter: filter, subFilter: -1);
-        await context
-            .read<RestaurantsProvider>()
-            .getRes(mainFilter: filter, sortType: false);
       },
       child: Container(
         width: 100,

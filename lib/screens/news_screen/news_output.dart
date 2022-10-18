@@ -1,6 +1,6 @@
 const newsOutputFriends = [
   {
-    "reviewId": "23",
+    "reviewId": 23,
     "userId": "kakao:2318981232",
     "userName": "다은",
     "date": "2022년 5월 1일",
@@ -13,7 +13,7 @@ const newsOutputFriends = [
     "liked": false,
   },
   {
-    "reviewId": "23",
+    "reviewId": 23,
     "userId": "kakao:2318981232",
     "userName": "다은",
     "date": "2022년 5월 1일",
@@ -26,7 +26,7 @@ const newsOutputFriends = [
     "liked": false,
   },
   {
-    "reviewId": "23",
+    "reviewId": 23,
     "userId": "kakao:2318981232",
     "userName": "다은",
     "date": "2022년 5월 1일",
@@ -42,7 +42,7 @@ const newsOutputFriends = [
 
 const newsOutputReco = [
   {
-    "reviewId": "23",
+    "reviewId": 23,
     "userId": "kakao:2318981232",
     "userName": "다은",
     "date": "2022년 5월 1일",

@@ -12,7 +12,10 @@ Future<List<MealFriend>> getFriendsDoc(friendsId) async {
     final DocumentSnapshot userDoc = await usersRef.doc(element).get();
     Map? data = userDoc.data() as Map<String, dynamic>?;
     MealFriend newFriend = MealFriend(
-        id: userDoc.id, name: data!["name"], icon: data["icon"] ?? 1);
+        id: userDoc.id,
+        name: data!["name"],
+        icon: data["icon"],
+        cId: data["c-id"] ?? 1);
     friendsList.add(newFriend);
   }
   return friendsList;

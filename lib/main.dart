@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_state_notifier/flutter_state_notifier.dart';
 import 'package:hangeureut/providers/auth/auth_provider.dart';
 import 'package:hangeureut/providers/auth/auth_state.dart';
+import 'package:hangeureut/providers/contents/content_provider.dart';
+import 'package:hangeureut/providers/contents/content_state.dart';
 import 'package:hangeureut/providers/filter/filter_provider.dart';
 import 'package:hangeureut/providers/filter/filter_state.dart';
 import 'package:hangeureut/providers/friend/recommend_friend_provider.dart';
@@ -126,6 +128,9 @@ class Hangeureut extends StatelessWidget {
         ),
         StateNotifierProvider<NavBarProvider, NavBarState>(
           create: (context) => NavBarProvider(),
+        ),
+        StateNotifierProvider<ContentProvider, ContentState>(
+          create: (context) => ContentProvider(),
         ),
       ],
       child: MaterialApp(

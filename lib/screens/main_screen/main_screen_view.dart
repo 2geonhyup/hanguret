@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../constants.dart';
 import '../../providers/profile/profile_provider.dart';
 import '../../widgets/profile_icon_box.dart';
 
 class WelcomeDialog extends StatefulWidget {
-  WelcomeDialog({Key? key, required this.onMoreTap}) : super(key: key);
+  const WelcomeDialog({Key? key, required this.onMoreTap}) : super(key: key);
   final onMoreTap;
 
   @override
@@ -28,14 +27,14 @@ class _WelcomeDialogState extends State<WelcomeDialog> {
             children: [
               Column(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     height: 46,
                   ),
                   ProfileIconBox(content: "🍎"),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
-                  Text(
+                  const Text(
                     "반가워요!",
                     style: TextStyle(
                         color: kSecondaryTextColor,
@@ -43,10 +42,10 @@ class _WelcomeDialogState extends State<WelcomeDialog> {
                         fontSize: 20,
                         fontWeight: FontWeight.w700),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 15,
                   ),
-                  Text(
+                  const Text(
                     "밥친구를 맺으면 서로의 플레이스를 확인하고,",
                     style: TextStyle(
                         color: kSecondaryTextColor,
@@ -54,7 +53,7 @@ class _WelcomeDialogState extends State<WelcomeDialog> {
                         fontSize: 10,
                         fontWeight: FontWeight.w400),
                   ),
-                  Text(
+                  const Text(
                     "친구의 식사 기록을 구경할 수 있습니다.",
                     style: TextStyle(
                         color: kSecondaryTextColor,
@@ -78,10 +77,10 @@ class _WelcomeDialogState extends State<WelcomeDialog> {
                     onTap: () {
                       widget.onMoreTap();
                       // context.read<ProfileProvider>().setLogin();
-                      //Navigator.pop(context);
+                      // Navigator.pop(context);
                     },
                     child: Column(
-                      children: [
+                      children: const [
                         Text(
                           "친구 더 찾기",
                           style: TextStyle(
@@ -97,7 +96,7 @@ class _WelcomeDialogState extends State<WelcomeDialog> {
                       ],
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 25,
                   ),
                   GestureDetector(
@@ -111,7 +110,7 @@ class _WelcomeDialogState extends State<WelcomeDialog> {
                       decoration: BoxDecoration(
                           color: kBasicColor,
                           borderRadius: BorderRadius.circular(50)),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           "다음에 하기",
                           style: TextStyle(
@@ -122,7 +121,7 @@ class _WelcomeDialogState extends State<WelcomeDialog> {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 32,
                   )
                 ],

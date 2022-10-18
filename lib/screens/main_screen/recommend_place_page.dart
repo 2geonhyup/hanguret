@@ -1,6 +1,7 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
+import 'package:hangeureut/providers/restaurants/restaurants_state.dart';
 import 'package:hangeureut/repositories/restaurant_repository.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
@@ -61,7 +62,7 @@ class _RecommendPlacePageState extends State<RecommendPlacePage> {
   List? allRes;
 
   Future<void> _getAllRes() async {
-    allRes = await context.read<RestaurantRepository>().getResByPopularity();
+    allRes = await context.read<RestaurantsState>().allResult[0];
   }
 
   List _getShowingRes() {

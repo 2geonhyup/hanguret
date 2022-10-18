@@ -13,7 +13,6 @@ class ProfileRepository {
   });
 
   Future<User> getProfile({required String uid}) async {
-    print("getprorepo${uid}");
     try {
       List followingList = [];
       List followerList = [];
@@ -23,12 +22,16 @@ class ProfileRepository {
       final QuerySnapshot followings =
           await usersRef.doc(uid).collection('followings').get();
       if (followings.docs.isNotEmpty) {
-        followingList = followings.docs.map((e) => e.data()).toList();
+        for (var e in followings.docs) {
+          followingList.add(await getUserViewInfo(id: e.id));
+        }
       }
       final QuerySnapshot followers =
           await usersRef.doc(uid).collection('followers').get();
       if (followers.docs.isNotEmpty) {
-        followerList = followers.docs.map((e) => e.data()).toList();
+        for (var e in followers.docs) {
+          followerList.add(await getUserViewInfo(id: e.id));
+        }
       }
       final QuerySnapshot saved =
           await usersRef.doc(uid).collection('saved').get();
@@ -155,7 +158,7 @@ class ProfileRepository {
             .doc(myId)
             .collection('followings')
             .doc(id)
-            .set({"id": id, "name": name, "icon": icon});
+            .set({"id": id});
         await usersRef.doc(id).collection('news').doc(myId).set({
           "type": 1,
           "date": DateTime.now(),
@@ -190,8 +193,6 @@ class ProfileRepository {
           .doc(currentUser.id)
           .set({
         "id": currentUser.id,
-        "name": currentUser.name,
-        "icon": currentUser.icon
       });
     } on FirebaseException catch (e) {
       throw CustomError(
@@ -206,5 +207,79 @@ class ProfileRepository {
         plugin: 'flutter_error/server_error',
       );
     }
+  }
+
+  Future<Map> getUserViewInfo({required String id}) async {
+    try {
+      DocumentSnapshot searchById = await usersRef.doc(id).get();
+      Map? data = searchById.data() as Map<String, dynamic>?;
+      return {
+        "id": searchById.id,
+        "cId": data!["c-id"] ?? "",
+        "name": data["name"] ?? "",
+        "icon": data["icon"] ?? 0,
+      };
+    } catch (e) {
+      throw CustomError(code: "알림", message: "유저 정보를 가져오지 못했습니다.");
+    }
+  }
+
+  //all user search
+  Future<List> allUserSearch(
+      {required String searchTerm, required List preSearchedId}) async {
+    List searchByNameList = [];
+    List searchByCIdList = [];
+
+    try {
+      Query searchByName = usersRef.where("name", isEqualTo: searchTerm);
+      QuerySnapshot dataN = await searchByName.get();
+      bool nameSearched = dataN.docs.isNotEmpty;
+
+      if (nameSearched) {
+        QuerySnapshot searchByNameFt = preSearchedId.isNotEmpty
+            ? await searchByName
+                .where(FieldPath.documentId, whereNotIn: preSearchedId)
+                .get()
+            : await searchByName.get();
+        searchByNameList = searchByNameFt.docs.map((e) {
+          Map? user = e.data() as Map<String, dynamic>?;
+          return {
+            "id": e.id,
+            "cId": user!["c-id"],
+            "icon": user["icon"] ?? 0,
+            "name": user["name"] ?? "",
+          };
+        }).toList();
+      }
+
+      Query searchByCId = usersRef.where("c-id", isEqualTo: searchTerm);
+      QuerySnapshot dataI = await searchByCId.get();
+      bool cIdSearched = dataI.docs.isNotEmpty;
+
+      if (cIdSearched) {
+        QuerySnapshot searchByCIdFt = preSearchedId.isNotEmpty
+            ? await searchByCId
+                .where(FieldPath.documentId, whereNotIn: preSearchedId)
+                .get()
+            : await searchByCId.get();
+
+        searchByCIdList = searchByCIdFt.docs.map((e) {
+          Map? user = e.data() as Map<String, dynamic>?;
+          return {
+            "id": e.id,
+            "cId": user!["c-id"],
+            "icon": user["icon"] ?? 0,
+            "name": user["name"] ?? "",
+          };
+        }).toList();
+      }
+    } catch (e) {
+      throw CustomError(
+        code: "알림",
+        message: e.toString(),
+      );
+    }
+
+    return [...searchByNameList, ...searchByCIdList];
   }
 }

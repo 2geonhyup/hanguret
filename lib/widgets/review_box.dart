@@ -27,7 +27,7 @@ class ReviewBox extends StatefulWidget {
 
   String resName;
   String? userId;
-  String reviewId;
+  int reviewId;
   String? date;
   bool isDate;
   int? score;

@@ -138,7 +138,7 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
   Widget reviewModal(
       {required BuildContext pContext,
       required int index,
-      required String reviewId,
+      required int reviewId,
       required String resId,
       required String resImgUrl,
       required int score}) {

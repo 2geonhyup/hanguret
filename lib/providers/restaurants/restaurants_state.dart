@@ -7,7 +7,7 @@ enum ResStatus {
 }
 
 class RestaurantsState extends Equatable {
-  final List<Map> allResult;
+  final Map allResult;
   final ResStatus resStatus;
   RestaurantsState({
     required this.resStatus,
@@ -15,7 +15,8 @@ class RestaurantsState extends Equatable {
   });
 
   factory RestaurantsState.initial() {
-    return RestaurantsState(resStatus: ResStatus.initial, allResult: []);
+    return RestaurantsState(
+        resStatus: ResStatus.initial, allResult: {0: [], 1: [], 2: []});
   }
 
   @override
@@ -26,7 +27,7 @@ class RestaurantsState extends Equatable {
 
   RestaurantsState copyWith({
     ResStatus? resStatus,
-    List<Map>? allResult,
+    Map? allResult,
   }) {
     return RestaurantsState(
       resStatus: resStatus ?? this.resStatus,
