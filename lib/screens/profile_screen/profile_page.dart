@@ -73,7 +73,7 @@ class _ProfilePageState extends State<ProfilePage> {
       },
       child: Scaffold(
           backgroundColor: Colors.white,
-          // resizeToAvoidBottomInset: false,
+          resizeToAvoidBottomInset: false,
           body: ListView(
               physics: ClampingScrollPhysics(),
               padding: EdgeInsets.zero,
