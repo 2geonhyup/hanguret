@@ -21,11 +21,12 @@ class _NewsPageState extends State<NewsPage> {
   List? friendsNews;
   List? recommendNews;
   List likes = [];
+  List originLikes = [];
   List<Widget> newsWidgets = [];
   List followings = [];
   List followingsId = [];
   bool loading = true;
-  bool showReco = true;
+  bool showReco = false;
 
   Future<void> _getNews() async {
     followings = context.read<ProfileState>().user.followings;
@@ -35,11 +36,21 @@ class _NewsPageState extends State<NewsPage> {
       friendsNews = await context
           .read<NewsRepository>()
           .getFriendsNews(friendsIds: followingsId);
-      for (var e in friendsNews!) {
-        likes.add(e["liked"]);
-      }
     } on CustomError catch (e) {
       errorDialog(context, e);
+    }
+
+    String myId = context.read<ProfileState>().user.id;
+    if (friendsNews != []) {
+      for (var e in friendsNews!) {
+        if (e["likes"].contains(myId)) {
+          likes.add(true);
+          originLikes.add(true);
+        } else {
+          likes.add(false);
+          originLikes.add(false);
+        }
+      }
     }
 
     try {
@@ -64,35 +75,38 @@ class _NewsPageState extends State<NewsPage> {
         int icon = context
             .read<ProfileProvider>()
             .findFollowingsIcon(id: news["userId"]);
+        print(news);
         newsWidgets.add(Column(
           children: [
+            //수정
             NewsInfoBox(
                 icon: icon,
                 userId: news["userId"],
                 name: news["userName"],
                 date: news["date"],
                 resId: news["resId"],
-                resName: news["resName"]),
+                resName: ""),
             SizedBox(
               height: 23,
             ),
+            //수정
             ReviewBox(
-              resName: news["resName"],
+              resName: "",
               userId: news["userId"],
               reviewId: news["reviewId"],
               imgUrl: news["imgUrl"],
-              icon: resFilterTextIconMap[news["category"]][news!["icon"]]!,
-              tag: news["icon"],
+              icon: resFilterIcons[news!["category"]][news!["icon"]],
+              tag: resFilterTextsSh[news!["category"]][news!["icon"]],
               onLike: () {
                 setState(() {
                   likes[index] = !likes[index];
                 });
               },
-              likes: likes[index] == news["liked"]
-                  ? news["likes"]
-                  : !likes[index] && news["liked"]
-                      ? news["likes"] - 1
-                      : news["likes"] + 1,
+              likes: likes[index] == originLikes[index]
+                  ? news["likes"].length
+                  : !likes[index] && originLikes[index]
+                      ? news["likes"].length - 1
+                      : news["likes"].length + 1,
               liked: likes[index],
               isDate: false,
             ),
@@ -174,6 +188,7 @@ class _NewsPageState extends State<NewsPage> {
         newsWidgets.add(showReco
             ? Column(
                 children: [
+                  //수정
                   NewsInfoBox(
                     icon: 21,
                     userId: news["userId"],
@@ -186,6 +201,7 @@ class _NewsPageState extends State<NewsPage> {
                   SizedBox(
                     height: 23,
                   ),
+                  //수정
                   ReviewBox(
                     resName: news["resName"],
                     userId: news["userId"],

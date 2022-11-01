@@ -13,9 +13,9 @@ import 'package:provider/provider.dart';
 
 import '../../widgets/nav_custom_painter.dart';
 
-List<Widget> buildScreens(reviewing, page) {
+List<Widget> buildScreens(reviewing) {
   return [
-    reviewing ? SearchForReviewPage() : page ?? MainScreenPage(),
+    reviewing ? SearchForReviewPage() : MainScreenPage(),
     NewsPage(),
     ProfilePage(),
     NoticePage(),

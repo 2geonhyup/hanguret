@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hangeureut/constants.dart';
@@ -8,6 +9,9 @@ import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/screens/news_screen/news_output.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+
+String _url = 'ec2-3-35-52-247.ap-northeast-2.compute.amazonaws.com:3001';
 
 class NewsRepository {
   final FirebaseFirestore firebaseFirestore;
@@ -74,15 +78,33 @@ class NewsRepository {
     await usersRef.doc(uid).update({"newsWatchedTime": DateTime.now()});
   }
 
-  Future<List<Map<String, Object>>> getFriendsNews(
-      {required List friendsIds}) async {
+  Future<List<Map>> getFriendsNews({required List friendsIds}) async {
+    List<Map> responseList = [];
     // 유저의 친구들 목록 보내는 코드
-    await Future.delayed(Duration(milliseconds: 500));
-    return newsOutputFriends;
+    for (var userId in friendsIds) {
+      try {
+        Uri _uri = Uri.http(_url, '/reviews/user/$userId');
+        var response = await http.get(_uri);
+        print(response.body);
+        List reviewList = jsonDecode(response.body) as List;
+        for (Map review in reviewList) {
+          var date = review["date"];
+          DateTime val = DateTime.parse(date);
+          if (val.difference(DateTime.now()).inDays > 10) continue;
+          review["date"] = "${val.year}년 ${val.month}월 ${val.day}일";
+          responseList.add(review);
+        }
+      } catch (e) {
+        throw const CustomError(
+            code: "알림", message: "소식을 받아오는 과정에서 문제가 발생했습니다");
+      }
+    }
+    print("hi$responseList");
+    return responseList;
   }
 
   Future<List<Map>> getRecoNews() async {
-    await Future.delayed(Duration(milliseconds: 500));
+    // await Future.delayed(Duration(milliseconds: 500));
 
     return newsOutputReco;
   }

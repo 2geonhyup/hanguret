@@ -1,5 +1,6 @@
 import 'package:hangeureut/models/search_model.dart';
 import 'package:hangeureut/providers/restaurants/restaurants_state.dart';
+import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../repositories/restaurant_repository.dart';
@@ -18,9 +19,13 @@ class RestaurantsProvider extends StateNotifier<RestaurantsState>
   Future<void> getRes({required bool sortType}) async {
     Map? restaurants;
     state = state.copyWith(resStatus: ResStatus.loading);
-    Future.delayed(Duration(milliseconds: 3000));
-    restaurants =
-        await read<RestaurantRepository>().getRestaurants(sortType: sortType);
+    try {
+      restaurants =
+          await read<RestaurantRepository>().getRestaurants(sortType: sortType);
+    } catch (e) {
+      rethrow;
+    }
+
     state = state.copyWith(
         resStatus: ResStatus.loaded,
         allResult: restaurants ?? {0: [], 1: [], 2: []});

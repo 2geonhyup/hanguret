@@ -13,7 +13,7 @@ class ResTitle extends StatelessWidget {
       this.detail})
       : super(key: key);
   int category;
-  String icon;
+  int icon;
   String name;
   String? score;
   String? detail;
@@ -23,7 +23,7 @@ class ResTitle extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          resFilterTextIconMap[category][icon] ?? "🍚",
+          resFilterIcons[category][icon],
           style: TextStyle(fontSize: 35, fontFamily: 'Suit', height: 1),
         ),
         SizedBox(

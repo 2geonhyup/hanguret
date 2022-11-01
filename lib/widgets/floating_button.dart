@@ -24,10 +24,10 @@ class ReviewFloatingButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(56),
               color: kSecondaryTextColor),
           child: Center(
-            child: Icon(
-              MdiIcons.pencilOutline,
-              color: Colors.white,
-              size: 30.0,
+            child: Image.asset(
+              "images/pencil.png",
+              width: 28,
+              height: 28,
             ),
           ),
         ),

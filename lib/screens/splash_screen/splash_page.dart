@@ -49,7 +49,6 @@ class _SplashPageState extends State<SplashPage> {
     final profileState = context.read<ProfileState>();
     final onBoardingState = profileState.user.onboarding;
 
-    await Future.delayed(const Duration(milliseconds: 300));
     if (onBoardingState["level"] == 3) {
       Navigator.pushReplacementNamed(context, BasicScreenPage.routeName);
     } else if (onBoardingState["level"] == 2) {
@@ -57,47 +56,47 @@ class _SplashPageState extends State<SplashPage> {
     } else {
       Navigator.pushReplacementNamed(context, OnBoarding1Page.routeName);
     }
+
     return "login";
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _login();
+    });
+    _login();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: _login(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            errorDialog(
-                context,
-                CustomError(
-                    code: "알림",
-                    message: "유저 정보를 가져오는 과정에서 오류가 발생했습니다",
-                    plugin: snapshot.error.toString()));
-          }
-          return Scaffold(
-              resizeToAvoidBottomInset: false,
-              body: Center(
-                child: Stack(
-                  children: [
-                    Center(
-                        child: Image.asset(
-                      "images/fork.png",
-                      width: 50,
-                      color: snapshot.hasData
-                          ? kBasicColor
-                          : kBasicColor.withOpacity(0.6),
+    ProfileStatus state = context.watch<ProfileState>().profileStatus;
+    return Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Center(
+          child: Stack(
+            children: [
+              Center(
+                  child: Image.asset(
+                "images/fork.png",
+                width: 50,
+                color: state == ProfileStatus.loaded
+                    ? kBasicColor
+                    : kBasicColor.withOpacity(0.6),
+              )),
+              Center(
+                child: SizedBox(
+                    width: 114,
+                    height: 114,
+                    child: CircularProgressIndicator(
+                      value: state == ProfileStatus.loaded ? 1 : null,
+                      color: kBasicColor,
                     )),
-                    Center(
-                      child: SizedBox(
-                          width: 114,
-                          height: 114,
-                          child: CircularProgressIndicator(
-                            value: snapshot.hasData ? 1 : null,
-                            color: kBasicColor,
-                          )),
-                    ),
-                  ],
-                ),
-              ));
-        });
+              ),
+            ],
+          ),
+        ));
   }
 }

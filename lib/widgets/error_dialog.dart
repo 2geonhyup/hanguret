@@ -30,7 +30,7 @@ void errorDialog(BuildContext context, CustomError e) {
             content: Text(e.plugin + '\n' + e.message),
             actions: [
               TextButton(
-                  onPressed: () => Navigator.pop(context), child: Text('OK'))
+                  onPressed: () => Navigator.pop(context), child: Text('확인'))
             ],
           );
         });

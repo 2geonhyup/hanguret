@@ -16,7 +16,7 @@ class ReviewBox extends StatefulWidget {
       this.date, //isDate가 트루라면 받아야함
       this.isDate = true,
       this.score, //isDate 가 트루라면 받아야함
-      required this.imgUrl,
+      this.imgUrl,
       required this.icon,
       required this.tag,
       required this.onLike,
@@ -31,7 +31,7 @@ class ReviewBox extends StatefulWidget {
   String? date;
   bool isDate;
   int? score;
-  String imgUrl;
+  String? imgUrl;
   String icon;
   String tag;
   final onLike;
@@ -75,7 +75,7 @@ class _ReviewBoxState extends State<ReviewBox> {
                           color: kSecondaryTextColor),
                     ),
                     Text(
-                      " | ${resScoreIcons[widget.score!][0]} ${resScoreIcons[widget.score!][1]}",
+                      " | ${resScoreIcons[widget.score! - 1][0]} ${resScoreIcons[widget.score! - 1][1]}",
                       style: TextStyle(
                           height: 1,
                           fontFamily: 'Suit',
@@ -108,12 +108,18 @@ class _ReviewBoxState extends State<ReviewBox> {
                         ]),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(19),
-                          child: Image.asset(
-                            widget.imgUrl,
-                            width: 324,
-                            height: 324,
-                            fit: BoxFit.fill,
-                          ),
+                          child: widget.imgUrl == null
+                              ? Container(
+                                  width: 324,
+                                  height: 324,
+                                  color: Colors.grey,
+                                )
+                              : Image.network(
+                                  widget.imgUrl!,
+                                  width: 324,
+                                  height: 324,
+                                  fit: BoxFit.fill,
+                                ),
                         ),
                       ),
                     ),

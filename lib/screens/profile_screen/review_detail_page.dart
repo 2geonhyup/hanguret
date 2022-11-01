@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
+import 'package:hangeureut/providers/profile/profile_state.dart';
+import 'package:hangeureut/repositories/review_repository.dart';
 import 'package:hangeureut/screens/review_screen/review_page.dart';
+import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:hangeureut/widgets/res_title.dart';
 import 'package:hangeureut/widgets/review_box.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
@@ -12,9 +16,9 @@ import '../../restaurants.dart';
 import '../restaurant_detail_screen/restaurant_detail_page.dart';
 
 class ReviewDetailPage extends StatefulWidget {
-  const ReviewDetailPage({Key? key, required this.reviews}) : super(key: key);
+  ReviewDetailPage({Key? key, required this.reviews}) : super(key: key);
 
-  final List reviews;
+  List reviews;
 
   @override
   State<ReviewDetailPage> createState() => _ReviewDetailPageState();
@@ -22,13 +26,34 @@ class ReviewDetailPage extends StatefulWidget {
 
 class _ReviewDetailPageState extends State<ReviewDetailPage> {
   List<bool> likes = [];
+  List<bool> originLikes = [];
+
+  void _setLikes() {
+    likes = [];
+    originLikes = [];
+    for (var review in widget.reviews) {
+      if (review["likes"].contains(context.read<ProfileState>().user.id)) {
+        likes.add(true);
+        originLikes.add(true);
+      } else {
+        likes.add(false);
+        originLikes.add(false);
+      }
+    }
+  }
+
+  Future<void> _updateReviews() async {
+    widget.reviews = await context
+        .read<RestaurantRepository>()
+        .getUsersReviews(userId: context.read<ProfileState>().user.id);
+    _setLikes();
+    setState(() {});
+  }
 
   @override
   void initState() {
     // TODO: implement initState
-    for (var review in widget.reviews) {
-      likes.add(review["liked"]);
-    }
+    _setLikes();
 
     super.initState();
   }
@@ -92,29 +117,29 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
           ),
           ResTitle(
             category: review["category"],
-            icon: review["resTag"],
-            name: review["resName"],
+            icon: review["icon"],
+            name: review["resName"] ?? "아뜨뜨",
           ),
           ReviewBox(
-              resName: review["resName"],
+              resName: review["resName"] ?? "",
               userId: review["userId"],
               paddingHeight: 46,
               reviewId: review["reviewId"],
               date: review["date"],
               score: review["score"],
               imgUrl: review["imgUrl"],
-              icon: resFilterTextIconMap[review["category"]][review["icon"]]!,
-              tag: review["icon"],
+              icon: resFilterIcons[review["category"]][review["icon"]],
+              tag: resFilterTextsSh[review["category"]][review["icon"] + 1],
               onLike: () {
                 setState(() {
                   likes[index] = !likes[index];
                 });
               },
-              likes: likes[index] == review["liked"]
-                  ? review["likes"]
-                  : !likes[index] && review["liked"]
-                      ? review["likes"] - 1
-                      : review["likes"] + 1,
+              likes: likes[index] == originLikes[index]
+                  ? likes.length
+                  : !likes[index] && originLikes[index]
+                      ? likes.length - 1
+                      : likes.length + 1,
               liked: likes[index]),
           SizedBox(
             height: 70,
@@ -198,18 +223,18 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                   res = await context
                       .read<RestaurantRepository>()
                       .getRestaurantsDetail(resId: resId);
-                } on CustomError catch (e) {
-                  print(e);
-                  return;
-                }
 
-                pushNewScreen(context,
-                    screen: ReviewPage(
-                      res: res,
-                      score: score,
-                      reviewId: reviewId,
-                    ));
-                setState(() {});
+                  pushNewScreen(context,
+                      screen: ReviewPage(
+                        res: res,
+                        score: score,
+                        reviewId: reviewId,
+                        imgUrl: resImgUrl,
+                      ));
+                  setState(() {});
+                } on CustomError catch (e) {
+                  errorDialog(context, e);
+                }
               },
               child: Container(
                 height: 60,
@@ -231,10 +256,16 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
               ),
             ),
             GestureDetector(
-              onTap: () {
+              onTap: () async {
                 //삭제 repository
-                //다시 리뷰 받아오는 함수(덮어쓰기)
-                setState(() {});
+                try {
+                  await context.read<ReviewRepository>().deleteReview(
+                      resId: resId, reviewId: reviewId.toString());
+                  Navigator.pop(context);
+                  await _updateReviews();
+                } on CustomError catch (e) {
+                  errorDialog(context, e);
+                }
               },
               child: Container(
                 height: 60,

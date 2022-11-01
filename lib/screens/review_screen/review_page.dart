@@ -23,19 +23,22 @@ import '../../repositories/review_repository.dart';
 import '../../widgets/bottom_navigation_bar.dart';
 import '../../widgets/custom_round_rect_slider_thumb_shape.dart';
 import '../../widgets/res_title.dart';
+import '../profile_screen/profile_page.dart';
 
 class ReviewPage extends StatefulWidget {
-  ReviewPage({
-    Key? key,
-    required this.res,
-    required this.score,
-    this.reviewId,
-  }) : super(key: key);
+  ReviewPage(
+      {Key? key,
+      required this.res,
+      required this.score,
+      this.reviewId,
+      this.imgUrl})
+      : super(key: key);
   static const String routeName = "review";
 
   final res;
   int score;
   int? reviewId;
+  String? imgUrl;
 
   @override
   State<ReviewPage> createState() => _ReviewPageState();
@@ -74,42 +77,68 @@ class _ReviewPageState extends State<ReviewPage> {
   Widget ImageBox({required onDrag, required onDragEnd}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 33.0),
-      child: Container(
-          clipBehavior: Clip.hardEdge,
-          width: 324,
-          height: _sample == null ? 196 : 324,
-          decoration: BoxDecoration(
-              color: Color(0xffececec),
-              borderRadius: BorderRadius.circular(19)),
-          child: _sample == null ? _buildOpenImage() : _buildCropImage()),
+      child: widget.imgUrl != null && _sample == null
+          ? GestureDetector(
+              onTap: () async {
+                try {
+                  await _openImage();
+                } catch (e) {
+                  errorDialog(context,
+                      CustomError(code: "알림", plugin: "해당 사진을 가져올 수 없습니다"));
+                }
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(19),
+                child: Image.network(
+                  widget.imgUrl!,
+                  width: 324,
+                  height: 324,
+                  fit: BoxFit.fill,
+                ),
+              ),
+            )
+          : Container(
+              clipBehavior: Clip.hardEdge,
+              width: 324,
+              height: _sample == null ? 196 : 324,
+              decoration: BoxDecoration(
+                  color: Color(0xffececec),
+                  borderRadius: BorderRadius.circular(19)),
+              child: _sample == null ? _buildOpenImage() : _buildCropImage()),
     );
   }
 
   Widget _buildOpenImage() {
     return Center(
       child: TextButton(
-        style: ButtonStyle(
-            overlayColor: MaterialStateProperty.all(Colors.transparent)),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              "images/download.png",
-              width: 24,
-              height: 24,
-            ),
-            Text(
-              '사진 추가',
-              style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  color: kSecondaryTextColor,
-                  fontFamily: 'Suit',
-                  fontSize: 15),
-            ),
-          ],
-        ),
-        onPressed: () => _openImage(),
-      ),
+          style: ButtonStyle(
+              overlayColor: MaterialStateProperty.all(Colors.transparent)),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                "images/download.png",
+                width: 24,
+                height: 24,
+              ),
+              const Text(
+                '사진 추가',
+                style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: kSecondaryTextColor,
+                    fontFamily: 'Suit',
+                    fontSize: 15),
+              ),
+            ],
+          ),
+          onPressed: () async {
+            try {
+              await _openImage();
+            } catch (e) {
+              errorDialog(context,
+                  CustomError(code: "알림", plugin: "해당 사진을 가져올 수 없습니다"));
+            }
+          }),
     );
   }
 
@@ -121,11 +150,14 @@ class _ReviewPageState extends State<ReviewPage> {
         file: file, preferredWidth: 324, preferredHeight: 324);
 
     _sample?.delete();
+
     _file?.delete();
     setState(() {
       _sample = sample;
       _file = file;
     });
+    print("sam${_sample!.path}");
+    print("file${_file!.path}");
   }
 
   Widget _buildCropImage() {
@@ -175,6 +207,25 @@ class _ReviewPageState extends State<ReviewPage> {
     List optionIconList = resFilterIcons[widget.res["category${category + 1}"]];
     List optionTextList = resFilterTexts[widget.res["category${category + 1}"]];
     List _items = [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 34.0, top: 54),
+            child: IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: SizedBox(
+                  height: 18,
+                  child: Icon(
+                    Icons.arrow_back_ios,
+                    color: kBasicTextColor.withOpacity(0.8),
+                  ),
+                )),
+          ),
+        ],
+      ),
       GestureDetector(
         onTap: () {
           setState(() {
@@ -347,27 +398,6 @@ class _ReviewPageState extends State<ReviewPage> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 34.0, top: 54),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: Icon(
-                        Icons.arrow_back_ios,
-                        color: kBasicTextColor.withOpacity(0.8),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
           Expanded(
             child: ListView.separated(
                 physics: scrollable
@@ -397,29 +427,41 @@ class _ReviewPageState extends State<ReviewPage> {
               Expanded(
                 child: GestureDetector(
                   onTap: () async {
-                    if (_sample == null) {
+                    if (_sample == null && widget.imgUrl == null) {
                       errorDialog(context, CustomError(message: "사진을 선택해주세요!"));
                       return;
                     }
-                    await _cropImage();
+                    _sample != null ? await _cropImage() : null;
                     User user = context.read<ProfileState>().user;
-                    await context.read<ReviewRepository>().reviewComplete(
-                        userId: user.id,
-                        userName: user.name,
-                        resId: widget.res["id"],
-                        score: widget.score,
-                        imgFile: _lastCropped!,
-                        icon: option,
-                        date: DateTime.now());
-                    pushNewScreen(context,
-                        screen: BasicScreenPage(
-                          initialIndex: 0,
-                          page: RestaurantDetailPage(
-                            resId: widget.res["id"],
-                            option: false,
-                          ),
-                        ),
-                        withNavBar: true);
+                    try {
+                      await context.read<ReviewRepository>().reviewComplete(
+                            userId: user.id,
+                            userName: user.name,
+                            resId: widget.res["resId"].toString(),
+                            score: widget.score,
+                            imgFile: _lastCropped,
+                            icon: option,
+                            date: DateTime.now(),
+                            reviewId: widget.reviewId,
+                            imgUrl: widget.imgUrl,
+                          );
+                    } on CustomError catch (e) {
+                      errorDialog(context, e);
+                      return;
+                    }
+                    //수정화면의 경우에는 완료 시 pop
+                    widget.reviewId == null
+                        ? Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => RestaurantDetailPage(
+                                    resId: widget.res["resId"].toString(),
+                                    option: false)),
+                          )
+                        : pushNewScreen(context,
+                            screen: BasicScreenPage(
+                              initialIndex: 2,
+                            ));
                   },
                   child: OptionCard(
                     optionText: "완료",

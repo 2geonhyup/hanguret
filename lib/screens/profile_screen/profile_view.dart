@@ -832,7 +832,7 @@ class ProfileReviewsView extends StatelessWidget {
     return SizedBox(
       width: width,
       height: height,
-      child: Image.asset(
+      child: Image.network(
         imgUrl,
         fit: BoxFit.fill,
       ),
@@ -860,7 +860,7 @@ class SavedTile extends StatelessWidget {
             SizedBox(
               width: width,
               height: height,
-              child: Image.asset(
+              child: Image.network(
                 imgUrl,
                 fit: BoxFit.fill,
               ),

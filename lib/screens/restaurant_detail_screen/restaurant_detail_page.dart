@@ -41,11 +41,13 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
   List? otherReviews;
   List<Widget> otherReviewWidgets = [];
   List<bool> likes = [];
+  List<bool> originLikes = [];
   bool myLike = false;
   bool detailView = false;
   bool saved = false;
   bool savedSet = false; // save가 이미 한번 세팅되었는지 확인
   List savedList = [];
+  bool myOriginLiked = false;
 
   Future<void> _launchUrl(url) async {
     if (!await launchUrl(url)) {
@@ -73,19 +75,33 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
             .read<RestaurantRepository>()
             .getRestaurantsReviews(resId: widget.resId);
         likes = [];
-        for (var e in otherReviews!) {
-          if (myId == e["userId"]) {
-            myReview = e;
+        originLikes = [];
+
+        if (otherReviews != []) {
+          bool comp = false;
+          for (var e in otherReviews!) {
+            // 내 아이디가 두번 이상 나오는 경우를 대비해서 comp설정
+            if (myId == e["userId"] && !comp) {
+              myReview = e;
+              comp = true;
+            }
+            if (e["likes"].contains(myId)) {
+              likes.add(true);
+              originLikes.add(true);
+            } else {
+              likes.add(false);
+              originLikes.add(false);
+            }
           }
-          likes.add(e["liked"]);
         }
 
         myReview != null ? preReview = true : null;
         if (myReview != null) {
-          myLike = myReview!["liked"];
+          myOriginLiked = myReview!["likes"].contains(myId);
+          myLike = myOriginLiked;
         }
       } on CustomError catch (e) {
-        print(e);
+        errorDialog(context, e);
       }
     }
     setState(() {});
@@ -106,6 +122,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
     scrollScore = 0;
     // TODO: implement initState
     savedList = context.read<ProfileState>().user.saved;
+    print(savedList);
 
     super.initState();
   }
@@ -113,13 +130,13 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
   @override
   Widget build(BuildContext context) {
     if (res != null && !savedSet) {
+      print(res!["resId"].runtimeType);
       savedSet = true;
       for (var e in savedList) {
-        if (res!["id"] == e["resId"]) {
+        if (widget.resId == e["resId"]) {
           setState(() {
             saved = true;
           });
-
           break;
         }
       }
@@ -155,7 +172,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                       });
                       try {
                         await context.read<ProfileProvider>().saveRemoveRes(
-                            resId: res!["id"],
+                            resId: res!["resId"].toString(),
                             imgUrl: res!["imgUrl"],
                             isSave: saved);
                       } on CustomError catch (e) {
@@ -196,7 +213,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                   category: res!["category1"],
                   icon: res!["tag1"],
                   name: res!["name"],
-                  score: res!["score"],
+                  score: res!["score"].toString(),
                   detail: res!["detail"]),
             ),
       SizedBox(
@@ -210,11 +227,10 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
             )
           : OptionRow(
               reviewed: preReview,
-              onTap: () async {
+              onTap: () {
                 setState(() {
                   opt = !opt;
                 });
-                if (opt) _getReviews();
               },
               option: opt,
             ),
@@ -231,32 +247,34 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                       child: reviewsDetailView())
                   : reviewsView())
           : preReview
-              ? Padding(
-                  padding: const EdgeInsets.only(top: 30.0),
-                  child: ReviewBox(
-                    resName: res!["name"],
-                    userId: null,
-                    reviewId: myReview!["reviewId"],
-                    date: myReview!["date"],
-                    score: myReview!["score"],
-                    imgUrl: myReview!["imgUrl"],
-                    tag: resFilterTextsSh[myReview!["category"]]
-                        [myReview!["icon"]],
-                    icon: resFilterIcons[myReview!["category"]]
-                        [myReview!["icon"]],
-                    onLike: () {
-                      setState(() {
-                        myLike = !myLike;
-                      });
-                    },
-                    likes: myLike == myReview!["liked"]
-                        ? myReview!["likes"]
-                        : !myLike && myReview!["liked"]
-                            ? myReview!["likes"] - 1
-                            : myReview!["likes"] + 1,
-                    liked: myLike,
-                  ),
-                )
+              ? res == null
+                  ? SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 30.0),
+                      child: ReviewBox(
+                        resName: res!["name"],
+                        userId: null,
+                        reviewId: myReview!["reviewId"],
+                        date: myReview!["date"],
+                        score: myReview!["score"],
+                        imgUrl: myReview!["imgUrl"],
+                        tag: resFilterTextsSh[myReview!["category"]]
+                            [myReview!["icon"]],
+                        icon: resFilterIcons[myReview!["category"]]
+                            [myReview!["icon"]],
+                        onLike: () {
+                          setState(() {
+                            myLike = !myLike;
+                          });
+                        },
+                        likes: myLike == myOriginLiked
+                            ? myReview!["likes"].length
+                            : !myLike && myOriginLiked
+                                ? myReview!["likes"].length - 1
+                                : myReview!["likes"].length + 1,
+                        liked: myLike,
+                      ),
+                    )
               : Padding(
                   padding:
                       const EdgeInsets.only(top: 66.0, left: 38, right: 38),
@@ -292,6 +310,11 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
         children: [
           Expanded(
             child: ListView.builder(
+                //shrinkWrap: true,
+
+                physics: opt
+                    ? AlwaysScrollableScrollPhysics()
+                    : NeverScrollableScrollPhysics(),
                 padding: EdgeInsets.zero,
                 itemCount: items.length,
                 itemBuilder: (context, int index) {
@@ -405,7 +428,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
     List<Widget> reviewWidgets1 = [];
     List<Widget> reviewWidgets2 = [];
 
-    if (otherReviews != null) {
+    if (otherReviews != [] && otherReviews != null) {
       otherReviews!.asMap().forEach((key, e) {
         if (key % 2 == 0) {
           reviewWidgets1.add(reviewTile(key, e));
@@ -416,19 +439,23 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(top: 18, bottom: 40),
+      padding: const EdgeInsets.only(top: 18, bottom: 40, left: 10, right: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            //crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: reviewWidgets1,
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              //crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: reviewWidgets1,
+            ),
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: reviewWidgets2,
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: reviewWidgets2,
+            ),
           )
         ],
       ),
@@ -451,12 +478,11 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
         },
         child: Stack(
           children: [
-            Container(
-              width: 165,
-              height: 165,
+            AspectRatio(
+              aspectRatio: 1,
               child: ClipRRect(
                   borderRadius: BorderRadius.circular(7),
-                  child: Image.asset(
+                  child: Image.network(
                     e["imgUrl"],
                     fit: BoxFit.fill,
                   )),
@@ -478,7 +504,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
 
   Widget reviewsDetailView() {
     List<Widget> reviewTileWidgets = [];
-    if (otherReviews != null) {
+    if (otherReviews != [] && otherReviews != null) {
       otherReviews!.asMap().forEach((index, review) {
         reviewTileWidgets.add(Column(
           children: [
@@ -516,11 +542,11 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                   likes[index] = !likes[index];
                 });
               },
-              likes: likes[index] == review["liked"]
-                  ? review["likes"]
-                  : !likes[index] && review["liked"]
-                      ? review["likes"] - 1
-                      : review["likes"] + 1,
+              likes: likes[index] == originLikes[index]
+                  ? review["likes"].length
+                  : !likes[index] && originLikes[index]
+                      ? review["likes"].length - 1
+                      : review["likes"].length + 1,
               liked: likes[index],
             ),
             SizedBox(
@@ -671,42 +697,44 @@ class ScoringBox extends StatelessWidget {
           SizedBox(
             height: 30,
           ),
-          Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 34.0, right: 34, top: 5),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    color: Color(0xffd9d9d9).withOpacity(0.5),
+          GestureDetector(
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 34.0, right: 34, top: 5),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      color: Color(0xffd9d9d9).withOpacity(0.5),
+                    ),
+                    height: 6,
                   ),
-                  height: 6,
                 ),
-              ),
-              SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                    overlayShape: SliderComponentShape.noOverlay,
-                    trackHeight: 0,
-                    thumbColor: kBasicColor,
-                    thumbShape: CustomRoundSliderThumbShape(
-                      enabledThumbRadius: 8,
-                      elevation: 0,
-                    )),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 50.0),
-                  child: Slider(
-                      value: scrollScore,
-                      min: 0.0,
-                      max: 4.0,
-                      onChangeEnd: (val) {
-                        onScrollEnd(val);
-                      },
-                      onChanged: (val) {
-                        onScroll(val);
-                      }),
+                SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                      overlayShape: SliderComponentShape.noOverlay,
+                      trackHeight: 0,
+                      thumbColor: kBasicColor,
+                      thumbShape: CustomRoundSliderThumbShape(
+                        enabledThumbRadius: 8,
+                        elevation: 0,
+                      )),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 50.0),
+                    child: Slider(
+                        value: scrollScore,
+                        min: 0.0,
+                        max: 4.0,
+                        onChangeEnd: (val) {
+                          onScrollEnd(val);
+                        },
+                        onChanged: (val) {
+                          onScroll(val);
+                        }),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           SizedBox(
             height: 6,

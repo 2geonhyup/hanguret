@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/models/custom_error.dart';
 import 'package:hangeureut/screens/main_screen/main_output.dart';
@@ -15,40 +17,81 @@ class RestaurantRepository {
     // 사용자 위치 찾기
     // input 보내기
     // output 받기
+    List<Map>? responseR;
+    List<Map>? responseB;
+    List<Map>? responseC;
 
     try {
-      Uri _uri = Uri.http(_url, '/restaurants');
+      Uri _uri = Uri.http(_url, '/restaurants/onlyRestaurant');
 
       var response = await http.get(_uri);
-
       //print(response.body);
+      responseR =
+          (jsonDecode(response.body) as List).map((e) => e as Map).toList();
     } catch (e) {
-      print("gogo$e");
+      throw const CustomError(code: "알림", message: "식당 정보 받기 오류");
+    }
+    try {
+      Uri _uri = Uri.http(_url, '/restaurants/onlyBar');
+
+      var response = await http.get(_uri);
+      responseB =
+          (jsonDecode(response.body) as List).map((e) => e as Map).toList();
+    } catch (e) {
+      throw const CustomError(code: "알림", message: "식당 정보 받기 오류");
+    }
+    try {
+      Uri _uri = Uri.http(_url, '/restaurants/onlyCafe');
+
+      var response = await http.get(_uri);
+      responseC =
+          (jsonDecode(response.body) as List).map((e) => e as Map).toList();
+    } catch (e) {
+      throw const CustomError(code: "알림", message: "식당 정보 받기 오류");
     }
 
     //await Future.delayed(Duration(milliseconds: 1000));
-    return mainOutput;
+    var map = {0: responseR, 1: responseB, 2: responseC};
+
+    return map;
   }
 
   Future<Map> getRestaurantsDetail({
     required String resId,
   }) async {
     //input 보내기 -> 백엔드 연동시 추가(userId, location, resId 보냄)
+    try {
+      Uri _uri = Uri.http(_url, '/restaurants/id/$resId');
 
-    //output 받기 -> 백엔드 연동시 수정 (현재는 라플로레종 아니면 리피토리아만 뜨게 둠)
-    if (resId == "4")
-      return resDetailOutputMy4;
-    else
-      return resDetailOutputMy3;
+      var response = await http.get(_uri);
+      Map body = jsonDecode(response.body) as Map;
+
+      return body;
+    } catch (e) {
+      throw const CustomError(code: "알림", message: "식당 정보 받기 오류");
+    }
   }
 
   Future<List> getRestaurantsReviews({
     required String resId,
   }) async {
-    //input 보내기 -> 백엔드 연동시 추가
+    //input 보내기 -> 백엔드 연동시 추가(userId, location, resId 보냄
+    try {
+      Uri _uri = Uri.http(_url, '/reviews/restaurant/$resId');
 
-    //output 받기 -> 백엔드 연동시 수정
-    return resDetailOutputAll3;
+      var response = await http.get(_uri);
+      List body = (jsonDecode(response.body) as List).map((e) {
+        final eMap = e as Map;
+        var date = eMap["date"];
+        var val = DateTime.parse(date);
+        eMap["date"] = "${val.year}년 ${val.month}월 ${val.day}일";
+        return eMap;
+      }).toList();
+      return body.reversed.toList();
+    } catch (e) {
+      throw CustomError(
+          code: "알림", message: "리뷰 정보 받기 오류", plugin: e.toString());
+    }
   }
 
   Future<void> reviewLike(
@@ -59,29 +102,50 @@ class RestaurantRepository {
       required int reviewId,
       required String resName,
       required bool isAdd}) async {
-    //input 보내기 (reviewId, 좋아요+-)
+    try {
+      Uri _uri = Uri.http(_url, '/reviews/$reviewId/user/$userId');
+      await http.put(_uri);
 
-    if (isAdd) {
-      await usersRef
-          .doc(targetId)
-          .collection('news')
-          .doc("$userId$reviewId")
-          .set({
-        "type": 1,
-        "date": DateTime.now(),
-        "content": {
-          "id": userId,
-          "name": userName,
-          "icon": userIcon,
-          "resName": resName
-        }
-      });
+      if (isAdd) {
+        await usersRef
+            .doc(targetId)
+            .collection('news')
+            .doc("$userId$reviewId")
+            .set({
+          "type": 1,
+          "date": DateTime.now(),
+          "content": {
+            "id": userId,
+            "name": userName,
+            "icon": userIcon,
+            "resName": resName
+          }
+        });
+      }
+    } catch (e) {
+      throw const CustomError(code: "알림", message: "좋아요를 누르지 못함");
     }
   }
 
   Future<List> getUsersReviews({required String userId}) async {
     //백엔드 연동 한 후, userId에 따라 다른 리뷰를 보내줘야 함
-    return myReviewList;
+
+    try {
+      Uri _uri = Uri.http(_url, '/reviews/user/$userId');
+
+      var response = await http.get(_uri);
+      List body = (jsonDecode(response.body) as List).map((e) {
+        final eMap = e as Map;
+        var date = eMap["date"];
+        var val = DateTime.parse(date);
+        eMap["date"] = "${val.year}년 ${val.month}월 ${val.day}일";
+        return eMap;
+      }).toList();
+      return body.reversed.toList();
+    } catch (e) {
+      throw CustomError(
+          code: "알림", message: "리뷰 정보 받기 오류", plugin: e.toString());
+    }
   }
 
   Future<void> saveRemoveRes(
@@ -100,7 +164,7 @@ class RestaurantRepository {
         await usersRef.doc(userId).collection("saved").doc(resId).delete();
       }
     } catch (e) {
-      throw CustomError(code: "통신 오류", message: "제대로 저장되지 않았습니다!");
+      throw CustomError(code: "알림", message: "제대로 저장되지 않았습니다!");
     }
   }
 
@@ -122,5 +186,21 @@ class RestaurantRepository {
       "popular": popularResList,
       "near": nearResList,
     };
+  }
+
+  Future<List> getSearchedRestaurants({required String searchTerm}) async {
+    List searchedList = [];
+    try {
+      Uri _uri = Uri.http(_url, '/search/$searchTerm');
+
+      var response = await http.get(_uri);
+
+      searchedList =
+          (jsonDecode(response.body) as List).map((e) => e as Map).toList();
+
+      return searchedList;
+    } catch (e) {
+      throw const CustomError(code: "알림", message: "식당 정보 받기 오류");
+    }
   }
 }

@@ -111,10 +111,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Container(
                           child: ProfileCard(
                               onNameClicked: () {
-                                setState(() {
-                                  nameModify = !nameModify;
-                                  idModify = false;
-                                });
+                                // setState(() {
+                                //   nameModify = !nameModify;
+                                //   idModify = false;
+                                // });
                               },
                               onIdClicked: () {
                                 setState(() {
@@ -214,6 +214,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           FocusManager.instance.primaryFocus?.unfocus();
                           setState(() {
                             option = false;
+                            friendSearching = false;
                           });
                         },
                         child: Container(
@@ -388,10 +389,12 @@ class _ProfilePageState extends State<ProfilePage> {
                         option: option,
                         friendSearching: friendSearching,
                         searchedTap: (hasFocus) {
-                          setState(() {
-                            hasFocus ? keyBoardShowing = true : null;
-                            hasFocus ? friendSearching = true : null;
-                          });
+                          if (hasFocus) {
+                            setState(() {
+                              keyBoardShowing = true;
+                              friendSearching = true;
+                            });
+                          }
                         })
                     : SizedBox.shrink()
               ])),

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_state_notifier/flutter_state_notifier.dart';
 import 'package:hangeureut/providers/auth/auth_provider.dart';
 import 'package:hangeureut/providers/auth/auth_state.dart';
@@ -56,6 +57,10 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   KakaoSdk.init(nativeAppKey: '14abcd5634ab50141040de728a81c496');
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   runApp(Hangeureut());
 }
 
@@ -142,7 +147,6 @@ class Hangeureut extends StatelessWidget {
           OnBoarding2Page.routeName: (context) => OnBoarding2Page(),
           OnBoarding3Page.routeName: (context) => OnBoarding3Page(),
           MainScreenPage.routeName: (context) => MainScreenPage(),
-          SearchResult.routeName: (context) => SearchResult(),
           BasicScreenPage.routeName: (context) => BasicScreenPage(),
           SplashPage.routeName: (context) => SplashPage(),
           FriendRecommendPage.routeName: (context) => FriendRecommendPage(),

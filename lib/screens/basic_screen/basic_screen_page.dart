@@ -22,11 +22,10 @@ import 'basic_screen_view.dart';
 
 class BasicScreenPage extends StatefulWidget {
   static const String routeName = '/basic';
-  BasicScreenPage({Key? key, this.initialIndex = 0, this.reviewing, this.page})
+  BasicScreenPage({Key? key, this.initialIndex = 0, this.reviewing})
       : super(key: key);
   final initialIndex;
   bool? reviewing;
-  Widget? page;
 
   @override
   State<BasicScreenPage> createState() => _BasicScreenPageState();
@@ -94,13 +93,13 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
           controller: _controller,
           itemCount: 4,
           bottomScreenMargin: 0,
-          screens: buildScreens(reviewing, widget.page),
+          screens: buildScreens(reviewing),
           confineInSafeArea: false,
           resizeToAvoidBottomInset: false,
           handleAndroidBackButtonPress: true,
           screenTransitionAnimation:
               ScreenTransitionAnimation(animateTabTransition: true),
-          backgroundColor: reviewing ? Colors.white : Colors.transparent,
+          backgroundColor: Colors.transparent,
           hideNavigationBarWhenKeyboardShows: true,
           customWidget: CustomNavBarWidget(
             // Your custom widget goes here

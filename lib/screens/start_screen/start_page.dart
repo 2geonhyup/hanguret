@@ -36,9 +36,10 @@ class _StartPageState extends State<StartPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    ProfileStatus state = context.read<ProfileState>().profileStatus;
-    if (state == ProfileStatus.loaded) {
-      Navigator.pushNamed(context, BasicScreenPage.routeName);
+    User? user = context.read<ProfileState>().user;
+    print(user.id);
+    if (user.id != '') {
+      _loggedIn = true;
     }
 
     Future.delayed(const Duration(milliseconds: 600), () {

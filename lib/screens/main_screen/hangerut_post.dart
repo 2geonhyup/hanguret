@@ -55,7 +55,8 @@ class HangerutPostWidget extends StatelessWidget {
               const SizedBox(
                 height: 88,
               ),
-              UserContents(userContents: contents["bestUsers"] ?? {}),
+              //UserContents(userContents: contents["bestUsers"] ?? {}),
+              //나중에 추가하기
             ]
           : [],
     );

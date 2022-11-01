@@ -8,6 +8,7 @@ import 'package:hangeureut/providers/restaurants/restaurants_state.dart';
 import 'package:hangeureut/providers/result/result_state.dart';
 import 'package:hangeureut/restaurants.dart';
 import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_page.dart';
+import 'package:hangeureut/screens/result_screen/search_result.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -46,6 +47,7 @@ class MainScreenPageState extends State<MainScreenPage> {
   ScrollController scrollController = ScrollController();
   PageController pageController = PageController(initialPage: 0);
   //ScrollController pageButtonScrollController = ScrollController();
+  TextEditingController textEditingController = TextEditingController();
   int pageIndex = 0;
   bool scrollEnd = false;
   bool sortType = false;
@@ -222,11 +224,7 @@ class MainScreenPageState extends State<MainScreenPage> {
                                                   color: Colors.white)),
                                         ),
                                         child: TextFormField(
-                                          onChanged: (val) async {
-                                            // searchTerm = val;
-                                            // relatedResults = await getRelated(val);
-                                            // setState(() {});
-                                          },
+                                          controller: textEditingController,
                                           style: TextStyle(
                                               fontFamily: 'Suit',
                                               fontWeight: FontWeight.w700,
@@ -247,10 +245,30 @@ class MainScreenPageState extends State<MainScreenPage> {
                                     Padding(
                                       padding:
                                           const EdgeInsets.only(left: 21.0),
-                                      child: Image.asset(
-                                        "images/icons/searchbig.png",
-                                        width: 33,
-                                        height: 33,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          print(textEditingController.text);
+                                          if (textEditingController.text ==
+                                              "") {
+                                            errorDialog(
+                                                context,
+                                                CustomError(
+                                                    code: "알림",
+                                                    message:
+                                                        "검색어는 하나 이상 입력해주세요"));
+                                            return;
+                                          }
+                                          pushNewScreen(context,
+                                              screen: SearchResult(
+                                                searchTerm:
+                                                    textEditingController.text,
+                                              ));
+                                        },
+                                        child: Image.asset(
+                                          "images/icons/searchbig.png",
+                                          width: 33,
+                                          height: 33,
+                                        ),
                                       ),
                                     )
                                   ],
@@ -518,40 +536,6 @@ class MainScreenPageState extends State<MainScreenPage> {
             crossAxisSpacing: 10,
             children: List.generate(
                 resTileList.length, (index) => resTileList[index])),
-
-        // scrollEnd
-        //     ? Positioned.fill(
-        //         bottom: 65,
-        //         child: Align(
-        //           alignment: Alignment.bottomCenter,
-        //           child: GestureDetector(
-        //             behavior: HitTestBehavior.translucent,
-        //             onTap: () {
-        //               scrollController.animateTo(0,
-        //                   duration: Duration(milliseconds: 500),
-        //                   curve: Curves.easeOutSine);
-        //             },
-        //             child: Container(
-        //               width: 90,
-        //               height: 44,
-        //               decoration: BoxDecoration(
-        //                 color: Colors.white,
-        //                 borderRadius: BorderRadius.circular(30),
-        //               ),
-        //               child: Center(
-        //                   child: Text(
-        //                 "닫기",
-        //                 style: TextStyle(
-        //                     fontFamily: 'Suit',
-        //                     fontWeight: FontWeight.w700,
-        //                     fontSize: 15,
-        //                     color: kSecondaryTextColor),
-        //               )),
-        //             ),
-        //           ),
-        //         ),
-        //       )
-        //     : SizedBox.shrink(),
       ],
     );
   }
@@ -563,7 +547,6 @@ class MainScreenPageState extends State<MainScreenPage> {
       onTap: () {
         pushNewScreen(context,
             //option true일 때 error
-
             screen: RestaurantDetailPage(
               resId: res["resId"].toString(),
               option: true,
@@ -579,9 +562,20 @@ class MainScreenPageState extends State<MainScreenPage> {
                 aspectRatio: 1,
                 child: Container(
                   width: double.infinity,
-                  child: Image.asset(
+                  child: Image.network(
                     res["imgUrl"],
                     fit: BoxFit.cover,
+                    loadingBuilder: (context, widget, _) {
+                      return Container(
+                        color: Colors.black.withOpacity(0.1),
+                        child: widget,
+                      );
+                    },
+                    errorBuilder: (context, widget, _) {
+                      return Container(
+                        color: Colors.black.withOpacity(0.1),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -628,7 +622,7 @@ class MainScreenPageState extends State<MainScreenPage> {
                               fontSize: 11),
                         ),
                         Text(
-                          "${res["distance"]}m",
+                          "${res["distance"] ?? "?"}m",
                           style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               color: kBasicColor,
@@ -667,6 +661,12 @@ class MainScreenPageState extends State<MainScreenPage> {
           )
         ],
       ),
+    );
+  }
+
+  Container loadingContainer() {
+    return Container(
+      color: Colors.grey,
     );
   }
 

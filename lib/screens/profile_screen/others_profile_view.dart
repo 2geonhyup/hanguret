@@ -446,7 +446,7 @@ class ProfileReviewsView extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      child: Image.asset(
+      child: Image.network(
         imgUrl,
         fit: BoxFit.fill,
       ),
