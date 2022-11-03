@@ -16,6 +16,7 @@ import '../../widgets/res_title.dart';
 import '../../widgets/review_box.dart';
 import '../review_screen/review_page.dart';
 import 'dart:math' as math;
+
 // 레이아웃 잡은 것 참고
 
 class RestaurantDetailPage extends StatefulWidget {
@@ -358,10 +359,15 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                             ),
                             GestureDetector(
                               onTap: () async {
+                                print(res!["kakaoId"]); // kakaoId null나옴. 이게 문제인거같은데?
                                 final Uri _url = Uri.parse(
-                                    'https://map.kakao.com/link/to/${res!["kakaoId"]}');
+                                    'https://map.kakao.com/link/to/19358368');
+                                print('실행이 됐습니다');
+                                print(_url);
                                 try {
                                   await _launchUrl(_url);
+                                  print('여기도 실행되니');
+                                  print(_url);
                                 } catch (e) {
                                   final ec = CustomError(
                                       code: '', message: '카카오맵을 열 수 없습니다');

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -71,21 +73,23 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
       extendBody: true,
       resizeToAvoidBottomInset: false,
       floatingActionButton: _controller.index == 0 && !navBarShow
-          ? null
-          : ReviewFloatingButton(
-              onTap: () {
-                pushNewScreen(
-                  context,
-                  screen: BasicScreenPage(
-                    initialIndex: 0,
-                    reviewing: true,
-                  ),
-                  withNavBar: true, // OPTIONAL VALUE. True by default.
-                );
-              },
-              buttonColor: kSecondaryTextColor,
-            ),
+              ? null
+              : ReviewFloatingButton(
+                      onTap: () {
+                        pushNewScreen(
+                          context,
+                          screen: BasicScreenPage(
+                            initialIndex: 0,
+                            reviewing: true,
+                          ),
+                          withNavBar: true, // OPTIONAL VALUE. True by default.
+                        );
+                      },
+                      buttonColor: kSecondaryTextColor,
+                    ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+
+
       body: AnimatedPadding(
         curve: Curves.easeInCirc,
         duration: Duration(milliseconds: 200),
