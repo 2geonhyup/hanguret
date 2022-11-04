@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:flutter/material.dart';
 import 'package:hangeureut/providers/auth/auth_provider.dart';
@@ -220,7 +222,7 @@ class LoginButtons extends StatelessWidget {
               SizedBox(
                 height: 7.2,
               ),
-              SizedBox(
+              Platform. isAndroid ? Container() :SizedBox(
                 width: 170,
                 child: GestureDetector(
                   onTap: () async {
