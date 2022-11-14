@@ -16,6 +16,8 @@ class RestaurantsProvider extends StateNotifier<RestaurantsState>
   //   state = state.copyWith(todos: newTodos);
   //   print(state);
   // }
+
+  //mainfilter의 변화가 있을 때, 해당 필터에 해당하는
   Future<void> getRes({required bool sortType}) async {
     Map? restaurants;
     state = state.copyWith(resStatus: ResStatus.loading);

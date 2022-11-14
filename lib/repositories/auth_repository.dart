@@ -105,6 +105,45 @@ class AuthRepository {
     await firebaseAuth.signOut();
   }
 
+  Future<void> delUser(
+      {required List followings, required List followers}) async {
+    try {
+      await loginOrSignup();
+      fbAuth.User? user = fbAuth.FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+      for (var friend in followings) {
+        await usersRef
+            .doc(friend["id"])
+            .collection("followers")
+            .doc(user.uid)
+            .delete();
+      }
+      for (var friend in followers) {
+        await usersRef
+            .doc(friend["id"])
+            .collection("followings")
+            .doc(user.uid)
+            .delete();
+      }
+      usersRef.doc(user.uid).collection('followers').get().then((snapshot) {
+        for (DocumentSnapshot ds in snapshot.docs) {
+          ds.reference.delete();
+        }
+      });
+      usersRef.doc(user.uid).collection('followings').get().then((snapshot) {
+        for (DocumentSnapshot ds in snapshot.docs) {
+          ds.reference.delete();
+        }
+      });
+      await usersRef.doc(user.uid).delete();
+      await user.delete();
+      await firebaseAuth.signOut();
+    } catch (e) {
+      throw CustomError(
+          message: "탈퇴 중 오류가 발생했습니다", code: "알림", plugin: e.toString());
+    }
+  }
+
   Future<fbAuth.User> _login({
     required String firebaseToken,
   }) async {

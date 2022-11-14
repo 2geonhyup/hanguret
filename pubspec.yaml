@@ -43,6 +43,9 @@ dependencies:
   dots_indicator: ^2.1.0
   http: ^0.13.5
   sign_in_with_apple: ^4.1.0
+  restart_app: ^1.1.0+1
+  cached_network_image: ^3.2.1
+  location: ^4.4.0
 
 
 dev_dependencies:
@@ -60,8 +63,6 @@ flutter:
     - images/filters/alcohol/
     - images/filters/coffee/
     - images/filters/meal/
-    - images/dummies/
-    - images/restaurants/
 
   fonts:
     - family: GmarketSans

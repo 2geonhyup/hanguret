@@ -108,8 +108,8 @@ const keyWordList2 = [
 ];
 
 const alcoholTypeList2 = [
-  ["alcohol_beer", "소주"],
-  ["alcohol_soju", "맥주"],
+  ["alcohol_soju", "소주"],
+  ["alcohol_beer", "맥주"],
   ["alcohol_liquor", "양주"],
   ["alcohol_traditional", "전통주"],
   ["alcohol_wine", "와인"],

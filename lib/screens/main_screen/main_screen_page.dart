@@ -1,14 +1,19 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/contents/content_state.dart';
+import 'package:hangeureut/providers/distance/distance_state.dart';
+import 'package:hangeureut/providers/location/location_provider.dart';
 import 'package:hangeureut/providers/navbar/navbar_provider.dart';
 import 'package:hangeureut/providers/restaurants/restaurants_provider.dart';
 import 'package:hangeureut/providers/restaurants/restaurants_state.dart';
 import 'package:hangeureut/providers/result/result_state.dart';
+import 'package:hangeureut/repositories/location_repository.dart';
 import 'package:hangeureut/restaurants.dart';
 import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_page.dart';
 import 'package:hangeureut/screens/result_screen/search_result.dart';
+import 'package:location/location.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,10 +21,13 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../models/custom_error.dart';
 import '../../models/search_model.dart';
 import '../../providers/contents/content_provider.dart';
+import '../../providers/distance/distance_provider.dart';
 import '../../providers/filter/filter_provider.dart';
 import '../../providers/filter/filter_state.dart';
+import '../../providers/location/location_state.dart';
 import '../../repositories/contents_repository.dart';
 import '../../widgets/error_dialog.dart';
+import '../../widgets/res_tile.dart';
 import 'hangerut_post.dart';
 
 const double filterBarTopPadding = 35;
@@ -54,7 +62,10 @@ class MainScreenPageState extends State<MainScreenPage> {
   bool searching = false;
   int mainFilterIndex = 0;
   int subFilterNum = -1;
+  Map distanceMap = {};
   final ScrollController _pBtnController = ScrollController();
+  late Stream<LocationData?> locationDataStream;
+  LocationData? locationData;
 
 // This is what you're looking for!
   void _scrollDown(index) {
@@ -73,12 +84,6 @@ class MainScreenPageState extends State<MainScreenPage> {
     }
   }
 
-  Future<void> _launchUrl(url) async {
-    if (!await launchUrl(url)) {
-      throw 'Could not launch $url';
-    }
-  }
-
   Future<void> _getContents() async {
     await context.read<ContentProvider>().getContents();
   }
@@ -88,6 +93,12 @@ class MainScreenPageState extends State<MainScreenPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getContents();
     });
+
+    locationDataStream = context.read<LocationRepository>().getLocation;
+    locationDataStream.listen((event) {
+      locationData = event;
+    });
+
     // TODO: implement initState
     scrollController.addListener(() {
       //429-(122-53)
@@ -124,6 +135,7 @@ class MainScreenPageState extends State<MainScreenPage> {
   Widget build(BuildContext context) {
     final currentState = context.watch<SearchFilterState>();
     final _contents = context.watch<ContentState>().contents ?? {};
+    distanceMap = context.watch<DistanceState>().distanceMap;
 
     final mainFilter = currentState.filter.mainFilter;
     mainFilterIndex = mainFilter.index - 1;
@@ -227,7 +239,7 @@ class MainScreenPageState extends State<MainScreenPage> {
                                           controller: textEditingController,
                                           style: TextStyle(
                                               fontFamily: 'Suit',
-                                              fontWeight: FontWeight.w700,
+                                              fontWeight: FontWeight.w500,
                                               fontSize: 15,
                                               color: Colors.white),
                                           decoration: InputDecoration(
@@ -515,6 +527,7 @@ class MainScreenPageState extends State<MainScreenPage> {
 
   Widget pageItem(int index) {
     final status = context.watch<RestaurantsState>().resStatus;
+
     if (status == ResStatus.loading) {
       return const Center(
         child: CircularProgressIndicator(
@@ -524,7 +537,6 @@ class MainScreenPageState extends State<MainScreenPage> {
       );
     }
     final contents = context.watch<ResultState>().filteredResult;
-    final resTileList = contents.map((e) => resTile(e)).toList();
 
     return Stack(
       children: [
@@ -535,132 +547,13 @@ class MainScreenPageState extends State<MainScreenPage> {
             childAspectRatio: 0.709,
             crossAxisSpacing: 10,
             children: List.generate(
-                resTileList.length, (index) => resTileList[index])),
+                contents.length,
+                (index) => ResTile(
+                      res: contents[index],
+                      mainFilterIndex: mainFilterIndex,
+                      locationData: locationData,
+                    ))),
       ],
-    );
-  }
-
-  Widget resTile(Map res) {
-    List<Widget> resInfoTiles = [];
-    resInfoTiles = makeTiles(res);
-    return GestureDetector(
-      onTap: () {
-        pushNewScreen(context,
-            //option true일 때 error
-            screen: RestaurantDetailPage(
-              resId: res["resId"].toString(),
-              option: true,
-            ),
-            withNavBar: false);
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: Container(
-                  width: double.infinity,
-                  child: Image.network(
-                    res["imgUrl"],
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, widget, _) {
-                      return Container(
-                        color: Colors.black.withOpacity(0.1),
-                        child: widget,
-                      );
-                    },
-                    errorBuilder: (context, widget, _) {
-                      return Container(
-                        color: Colors.black.withOpacity(0.1),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 12,
-                top: 12,
-                child: Row(
-                  children: resInfoTiles,
-                ),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 15.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height: 13,
-                    ),
-                    Text(
-                      res["name"],
-                      style: const TextStyle(
-                          height: 1.357,
-                          fontWeight: FontWeight.w900,
-                          color: kSecondaryTextColor,
-                          fontFamily: 'Suit',
-                          fontSize: 14),
-                    ),
-                    const SizedBox(
-                      height: 3,
-                    ),
-                    Row(
-                      children: [
-                        const Text(
-                          "지금 내 위치에서 ",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              color: kSecondaryTextColor,
-                              fontFamily: 'Suit',
-                              fontSize: 11),
-                        ),
-                        Text(
-                          "${res["distance"] ?? "?"}m",
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: kBasicColor,
-                              fontFamily: 'Suit',
-                              fontSize: 11),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 10.0),
-                child: GestureDetector(
-                  onTap: () async {
-                    final Uri _url = Uri.parse(
-                        'https://map.kakao.com/link/to/${res["kakaoId"]}');
-                    try {
-                      await _launchUrl(_url);
-                    } catch (e) {
-                      print(e);
-                      final ec =
-                          CustomError(code: '', message: '카카오맵을 열 수 없습니다');
-                      errorDialog(context, ec);
-                    }
-                  },
-                  child: Image.asset(
-                    "images/location-marker.png",
-                    width: 25,
-                    height: 25,
-                    color: kBasicColor,
-                  ),
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
     );
   }
 
@@ -668,78 +561,6 @@ class MainScreenPageState extends State<MainScreenPage> {
     return Container(
       color: Colors.grey,
     );
-  }
-
-  List<Widget> makeTiles(res) {
-    List<Widget> resInfoList = [];
-    if (res["score"] != null)
-      resInfoList.add(
-        Padding(
-          padding: const EdgeInsets.only(right: 4.0),
-          child: Container(
-            child: Center(
-              child: Text(res["score"].toString(),
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w900,
-                      fontFamily: 'Suit')),
-            ),
-            width: 36,
-            height: 22,
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(15),
-            ),
-          ),
-        ),
-      );
-    if (res["tag1"] != null)
-      resInfoList.add(
-        Padding(
-          padding: const EdgeInsets.only(right: 4.0),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            child: Center(
-              child: Text(resFilterTextsSh[mainFilterIndex][res["tag1"] + 1],
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w400,
-                      fontFamily: 'Suit')),
-            ),
-            height: 22,
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(15),
-            ),
-          ),
-        ),
-      );
-    if (res["tag2"] != null) {
-      resInfoList.add(
-        Padding(
-          padding: const EdgeInsets.only(right: 4.0),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            child: Center(
-              child: Text(resFilterTextsSh[mainFilterIndex][res["tag2"] + 1],
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w400,
-                      fontFamily: 'Suit')),
-            ),
-            height: 22,
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(15),
-            ),
-          ),
-        ),
-      );
-    }
-    return resInfoList;
   }
 
   Widget title = Column(
@@ -778,6 +599,7 @@ class MainScreenPageState extends State<MainScreenPage> {
               .changeFilter(mainFilter: MainFilter.none);
           return;
         }
+
         context
             .read<SearchFilterProvider>()
             .changeFilter(mainFilter: filter, subFilter: -1);

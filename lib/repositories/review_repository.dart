@@ -37,7 +37,9 @@ class ReviewRepository {
       required int icon,
       required DateTime date,
       int? reviewId,
-      String? imgUrl}) async {
+      String? imgUrl,
+      required int category}) async {
+    print(category);
     if (imgFile != null) {
       //사진 등록
       try {
@@ -78,15 +80,16 @@ class ReviewRepository {
           "resId": resId,
           "score": "$score",
           "icon": "$icon",
-          "imgUrl": imgUrl
+          "imgUrl": imgUrl,
+          "category": category.toString(),
         });
         Map responseMap = jsonDecode(response.body) as Map;
         reviewId = responseMap["reviewId"];
       } catch (e) {
         throw CustomError(
-          code: "알림",
-          message: "리뷰를 기록하는 과정에서 오류가 발생했습니다",
-        );
+            code: "알림",
+            message: "리뷰를 기록하는 과정에서 오류가 발생했습니다",
+            plugin: e.toString());
       }
     } else {
       //리뷰 수정

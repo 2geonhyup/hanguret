@@ -4,6 +4,7 @@ import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/repositories/restaurant_repository.dart';
 import 'package:hangeureut/restaurants.dart';
+import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
 import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
@@ -22,10 +23,12 @@ class RestaurantDetailPage extends StatefulWidget {
     Key? key,
     required this.resId,
     required this.option,
+    this.cantPop = false,
   }) : super(key: key);
   final String resId;
   final bool option; // false: 기록, true: 탐색
   static String routeName = "/restaurant_detail_page";
+  bool cantPop;
 
   @override
   State<RestaurantDetailPage> createState() => _RestaurantDetailPageState();
@@ -122,13 +125,13 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
     scrollScore = 0;
     // TODO: implement initState
     savedList = context.read<ProfileState>().user.saved;
-    print(savedList);
 
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    print(myReview);
     if (res != null && !savedSet) {
       print(res!["resId"].runtimeType);
       savedSet = true;
@@ -153,7 +156,13 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                     ? setState(() {
                         detailView = false;
                       })
-                    : Navigator.pop(context);
+                    : widget.cantPop
+                        ? pushNewScreen(context,
+                            screen: BasicScreenPage(),
+                            pageTransitionAnimation:
+                                PageTransitionAnimation.slideRight,
+                            withNavBar: false)
+                        : Navigator.pop(context);
               },
               child: Icon(
                 Icons.arrow_back_ios,
@@ -213,7 +222,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                   category: res!["category1"],
                   icon: res!["tag1"],
                   name: res!["name"],
-                  score: res!["score"].toString(),
+                  score: res!["score"],
                   detail: res!["detail"]),
             ),
       SizedBox(
@@ -253,13 +262,13 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                       padding: const EdgeInsets.only(top: 30.0),
                       child: ReviewBox(
                         resName: res!["name"],
-                        userId: null,
+                        userId: myReview!["userId"],
                         reviewId: myReview!["reviewId"],
                         date: myReview!["date"],
                         score: myReview!["score"],
                         imgUrl: myReview!["imgUrl"],
                         tag: resFilterTextsSh[myReview!["category"]]
-                            [myReview!["icon"]],
+                            [myReview!["icon"] + 1],
                         icon: resFilterIcons[myReview!["category"]]
                             [myReview!["icon"]],
                         onLike: () {
@@ -536,7 +545,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
               score: review["score"],
               imgUrl: review["imgUrl"],
               icon: resFilterIcons[review["category"]][review["icon"]],
-              tag: resFilterTextsSh[review["category"]][review["icon"]],
+              tag: resFilterTextsSh[review["category"]][review["icon"] + 1],
               onLike: () {
                 setState(() {
                   likes[index] = !likes[index];

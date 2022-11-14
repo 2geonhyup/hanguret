@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/repositories/review_repository.dart';
+import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
+import 'package:hangeureut/screens/profile_screen/profile_page.dart';
 import 'package:hangeureut/screens/review_screen/review_page.dart';
+import 'package:hangeureut/widgets/click_dialog.dart';
 import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:hangeureut/widgets/res_title.dart';
 import 'package:hangeureut/widgets/review_box.dart';
@@ -16,9 +19,11 @@ import '../../restaurants.dart';
 import '../restaurant_detail_screen/restaurant_detail_page.dart';
 
 class ReviewDetailPage extends StatefulWidget {
-  ReviewDetailPage({Key? key, required this.reviews}) : super(key: key);
+  ReviewDetailPage({Key? key, required this.reviews, this.others = false})
+      : super(key: key);
 
   List reviews;
+  bool others;
 
   @override
   State<ReviewDetailPage> createState() => _ReviewDetailPageState();
@@ -27,6 +32,7 @@ class ReviewDetailPage extends StatefulWidget {
 class _ReviewDetailPageState extends State<ReviewDetailPage> {
   List<bool> likes = [];
   List<bool> originLikes = [];
+  bool updates = false;
 
   void _setLikes() {
     likes = [];
@@ -79,46 +85,62 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                           color: kBasicTextColor.withOpacity(0.8),
                         ),
                         onPressed: () {
-                          Navigator.pop(context);
+                          updates
+                              ? pushNewScreen(context,
+                                  screen: BasicScreenPage(
+                                    initialIndex: 2,
+                                  ),
+                                  pageTransitionAnimation:
+                                      PageTransitionAnimation.slideRight)
+                              : Navigator.pop(context);
                         },
                       ),
                     )
                   : SizedBox.shrink(),
               Padding(
                 padding: const EdgeInsets.only(right: 26.0),
-                child: IconButton(
-                  onPressed: () {
-                    showModalBottomSheet(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(20),
-                                topRight: Radius.circular(20))),
-                        context: context,
-                        builder: (context) {
-                          return reviewModal(
-                              pContext: context,
-                              index: index,
-                              reviewId: review["reviewId"],
-                              resId: review["resId"],
-                              resImgUrl: review["imgUrl"],
-                              score: review["score"]);
-                        });
-                  },
-                  icon: Icon(
-                    Icons.more_horiz,
-                    color: kBasicTextColor.withOpacity(0.8),
-                  ),
-                ),
+                child: widget.others
+                    ? SizedBox.shrink()
+                    : IconButton(
+                        onPressed: () {
+                          showModalBottomSheet(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(20),
+                                      topRight: Radius.circular(20))),
+                              context: context,
+                              builder: (context) {
+                                return reviewModal(
+                                    pContext: context,
+                                    index: index,
+                                    reviewId: review["reviewId"],
+                                    resId: review["resId"],
+                                    resImgUrl: review["imgUrl"],
+                                    score: review["score"]);
+                              });
+                        },
+                        icon: Icon(
+                          Icons.more_horiz,
+                          color: kBasicTextColor.withOpacity(0.8),
+                        ),
+                      ),
               ),
             ],
           ),
           SizedBox(
             height: 13,
           ),
-          ResTitle(
-            category: review["category"],
-            icon: review["icon"],
-            name: review["resName"] ?? "아뜨뜨",
+          GestureDetector(
+            onTap: () {
+              pushNewScreen(context,
+                  screen: RestaurantDetailPage(
+                      resId: review["resId"], option: true));
+            },
+            child: ResTitle(
+              category: review["category"],
+              icon: review["icon"],
+              name: review["resName"] ?? "아뜨뜨",
+            ),
           ),
           ReviewBox(
               resName: review["resName"] ?? "",
@@ -194,6 +216,9 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
             ),
             GestureDetector(
               onTap: () {
+                setState(() {
+                  updates = true;
+                });
                 pushNewScreen(pContext,
                     screen: RestaurantDetailPage(
                       option: true,
@@ -224,14 +249,19 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
                       .read<RestaurantRepository>()
                       .getRestaurantsDetail(resId: resId);
 
+                  Navigator.pop(context);
                   pushNewScreen(context,
                       screen: ReviewPage(
                         res: res,
                         score: score,
                         reviewId: reviewId,
                         imgUrl: resImgUrl,
-                      ));
-                  setState(() {});
+                      )).then((value) async {
+                    await _updateReviews();
+                    setState(() {
+                      updates = true;
+                    });
+                  });
                 } on CustomError catch (e) {
                   errorDialog(context, e);
                 }
@@ -259,10 +289,19 @@ class _ReviewDetailPageState extends State<ReviewDetailPage> {
               onTap: () async {
                 //삭제 repository
                 try {
-                  await context.read<ReviewRepository>().deleteReview(
-                      resId: resId, reviewId: reviewId.toString());
-                  Navigator.pop(context);
-                  await _updateReviews();
+                  clickDialog(
+                      context: context,
+                      title: "알림",
+                      content: "정말 리뷰를 삭제하시겠어요?",
+                      clicked: () async {
+                        await context.read<ReviewRepository>().deleteReview(
+                            resId: resId, reviewId: reviewId.toString());
+                        Navigator.pop(context);
+                        await _updateReviews();
+                        setState(() {
+                          updates = true;
+                        });
+                      });
                 } on CustomError catch (e) {
                   errorDialog(context, e);
                 }

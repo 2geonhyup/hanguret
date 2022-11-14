@@ -10,6 +10,7 @@ import 'package:hangeureut/models/custom_error.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/restaurants.dart';
 import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
+import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_page.dart';
 import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:image_picker/image_picker.dart';
@@ -57,6 +58,7 @@ class _ReviewPageState extends State<ReviewPage> {
   File? _file;
   File? _sample;
   File? _lastCropped;
+  bool _enabled = true;
 
   @override
   void initState() {
@@ -394,6 +396,7 @@ class _ReviewPageState extends State<ReviewPage> {
         height: 50,
       ),
     ];
+
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -427,6 +430,8 @@ class _ReviewPageState extends State<ReviewPage> {
               Expanded(
                 child: GestureDetector(
                   onTap: () async {
+                    if (!_enabled) return;
+                    setState(() => _enabled = false);
                     if (_sample == null && widget.imgUrl == null) {
                       errorDialog(context, CustomError(message: "사진을 선택해주세요!"));
                       return;
@@ -444,24 +449,23 @@ class _ReviewPageState extends State<ReviewPage> {
                             date: DateTime.now(),
                             reviewId: widget.reviewId,
                             imgUrl: widget.imgUrl,
+                            category: widget.res["category${category + 1}"],
                           );
                     } on CustomError catch (e) {
                       errorDialog(context, e);
                       return;
                     }
                     //수정화면의 경우에는 완료 시 pop
-                    widget.reviewId == null
-                        ? Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => RestaurantDetailPage(
-                                    resId: widget.res["resId"].toString(),
-                                    option: false)),
-                          )
-                        : pushNewScreen(context,
-                            screen: BasicScreenPage(
-                              initialIndex: 2,
-                            ));
+                    if (widget.reviewId == null) {
+                      pushNewScreen(context,
+                          screen: BasicScreenPage(
+                            initialIndex: 0,
+                            resId: widget.res["resId"].toString(),
+                          ));
+                    } else {
+                      Navigator.pop(context);
+                    }
+                    setState(() => _enabled = true);
                   },
                   child: OptionCard(
                     optionText: "완료",

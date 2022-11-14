@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>NSLocationWhenInUseUsageDescription</key>
+	<string>본인의 위치 권한을 허용해주세요</string>
     <key>NSCameraUsageDescription</key>
     <string>Access to take a photo by camera</string>
     <key>NSAppleMusicUsageDescription</key>
@@ -28,6 +30,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
+
 	<array>
 		<dict>
 			<key>CFBundleTypeRole</key>

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,8 @@ import 'package:provider/provider.dart';
 
 import '../../constants.dart';
 import '../../providers/profile/profile_state.dart';
+import 'custom_contents_page.dart';
+import 'dart:math';
 
 TextStyle _eBoldStyle = const TextStyle(
     fontFamily: 'Suit',
@@ -46,11 +49,13 @@ class HangerutPostWidget extends StatelessWidget {
 
     return ListView(
       physics: const NeverScrollableScrollPhysics(),
-      children: contents != {}
+      children: contents != {} && contents.containsKey('customContents')
           ? [
               const SizedBox(
                 height: 112,
               ),
+              CustomContents(contents: contents["customContents"]),
+              const SizedBox(height: 80),
               UnivContents(contents: contents),
               const SizedBox(
                 height: 88,
@@ -59,6 +64,168 @@ class HangerutPostWidget extends StatelessWidget {
               //나중에 추가하기
             ]
           : [],
+    );
+  }
+}
+
+class CustomContents extends StatefulWidget {
+  CustomContents({Key? key, required this.contents}) : super(key: key);
+  List contents;
+  @override
+  State<CustomContents> createState() => _CustomContentsState();
+}
+
+class _CustomContentsState extends State<CustomContents> {
+  int num = 0;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 37,
+            ),
+            Text(
+              "지금 우리 ",
+              style: _regularStyle,
+            ),
+            Text("신촌", style: _eBoldStyle),
+            Text(
+              "은",
+              style: _regularStyle,
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: 25,
+        ),
+        SizedBox(
+          height: MediaQuery.of(context).size.width - 74, // padding 37+37
+          child: Swiper(
+            //loop: false,
+            itemCount: widget.contents.length,
+            pagination: null,
+            onIndexChanged: (index) {
+              setState(() {
+                num = index;
+              });
+            },
+            itemBuilder: (BuildContext context, int index) {
+              Map targetContents = widget.contents[index];
+
+              return customWidget(targetContents, widget.contents);
+            },
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        DotsIndicator(
+          dotsCount: 3,
+          position: (num % 3).toDouble(),
+          decorator: DotsDecorator(
+            color: kSecondaryTextColor.withOpacity(0.2),
+            activeColor: kSecondaryTextColor.withOpacity(0.7),
+            size: const Size.square(10),
+            activeSize: const Size(25, 10),
+            activeShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0)),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget customWidget(targetContents, List allContents) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 37.0),
+      child: GestureDetector(
+        onTap: () {
+          pushNewScreen(
+            context,
+            screen: CustomContentsPage(
+              titleImage: targetContents["titleImage"],
+              images: targetContents["images"],
+              title: targetContents["title"],
+              subTitle: targetContents["subTitle"],
+              icon: targetContents["icon"],
+              tag: targetContents["tag"],
+              allContents: allContents,
+            ),
+          );
+        },
+        child: Stack(
+          children: [
+            AspectRatio(
+              aspectRatio: 1,
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 324),
+                child: ClipRRect(
+                  child: Image.network(targetContents["titleImage"],
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, _, __) => Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.1),
+                            ),
+                          ),
+                      loadingBuilder: (context, widget, __) => Container(
+                            decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.1)),
+                            child: widget,
+                          )),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 27,
+              left: 24,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    targetContents["subTitle"],
+                    style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        //height: 1,
+                        fontSize: 14,
+                        color: Colors.white,
+                        fontFamily: 'Suit'),
+                  ),
+                  Text(
+                    targetContents["title"],
+                    style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        //height: 1,
+                        fontSize: 30,
+                        color: Colors.white,
+                        fontFamily: 'Suit'),
+                  )
+                ],
+              ),
+            ),
+            Positioned(
+              left: 23,
+              top: 17,
+              child: Container(
+                height: 35,
+                width: 82,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(19.5)),
+                child: Center(
+                    child: Text(
+                  "${targetContents["icon"]} ${targetContents["tag"]}",
+                  style: _regularStyle.copyWith(
+                      fontSize: 13, fontWeight: FontWeight.w300),
+                )),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -179,27 +346,29 @@ class _UnivContentsState extends State<UnivContents> {
                     child: Container(
                       constraints: const BoxConstraints(maxWidth: 324),
                       child: ClipRRect(
-                        child: Image.network(
-                          contentsMap["imgUrl"],
-                          fit: BoxFit.cover,
-                          loadingBuilder: (context, widget, _) {
-                            return Container(
-                              color: Colors.black.withOpacity(0.1),
-                              child: widget,
-                            );
-                          },
-                        ),
                         borderRadius: BorderRadius.circular(20),
+                        child: Image.network(contentsMap["imgUrl"],
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, _, __) => Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.1),
+                                  ),
+                                ),
+                            loadingBuilder: (context, widget, __) => Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.1)),
+                                  child: widget,
+                                )),
                       ),
                     ),
                   ),
                 ),
                 Positioned(
-                  left: 22,
-                  top: 17.38,
+                  left: 23,
+                  top: 17,
                   child: Container(
-                    height: 35.77,
-                    width: 79,
+                    height: 35,
+                    width: 82,
                     decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(19.5)),
@@ -380,15 +549,14 @@ class UserContents extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: Image.network(
-                    e["imgUrl"],
+                  child: CachedNetworkImage(
+                    imageUrl: e["imgUrl"],
                     fit: BoxFit.cover,
-                    loadingBuilder: (context, widget, _) {
-                      return Container(
-                        color: Colors.black.withOpacity(0.1),
-                        child: widget,
-                      );
-                    },
+                    progressIndicatorBuilder:
+                        (context, url, downloadProgress) => Container(
+                      color: Colors.black.withOpacity(0.1),
+                    ),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
                   ),
                 ),
                 Positioned(

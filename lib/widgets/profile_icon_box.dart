@@ -10,16 +10,18 @@ class ProfileIconBox extends StatelessWidget {
       child: Center(
           child: Text(
         content,
-        style: TextStyle(fontSize: 27),
+        style: TextStyle(
+          fontSize: 27,
+        ),
       )),
-      width: 55,
+      width: 53,
       height: 53,
       decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(55),
+          borderRadius: BorderRadius.circular(53),
           boxShadow: [
             BoxShadow(
-                blurStyle: BlurStyle.outer,
+                blurStyle: BlurStyle.normal,
                 color: Colors.black.withOpacity(0.1),
                 blurRadius: 10,
                 spreadRadius: 0,

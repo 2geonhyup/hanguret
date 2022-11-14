@@ -15,6 +15,7 @@ import '../../models/custom_error.dart';
 import '../../models/user_model.dart';
 import '../../providers/signup/signup_provider.dart';
 import '../../widgets/error_dialog.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 
 class StartPage extends StatefulWidget {
   const StartPage({Key? key}) : super(key: key);
@@ -36,9 +37,9 @@ class _StartPageState extends State<StartPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    User? user = context.read<ProfileState>().user;
-    print(user.id);
-    if (user.id != '') {
+    fbAuth.User? user = fbAuth.FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
       _loggedIn = true;
     }
 
@@ -56,7 +57,8 @@ class _StartPageState extends State<StartPage> {
 
     Future.delayed(const Duration(milliseconds: 2000), () {
       if (_loggedIn) {
-        Navigator.pushNamed(context, BasicScreenPage.routeName);
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => SplashPage()));
       }
     });
 
@@ -104,7 +106,7 @@ class _StartPageState extends State<StartPage> {
               child: Column(children: [
                 Image.asset(
                   "images/main_icon.png",
-                  width: 118,
+                  width: 160,
                 ),
               ]),
             ),
@@ -194,7 +196,8 @@ class LoginButtons extends StatelessWidget {
         status == SignupStatus.success || status == SignupStatus.submitting;
     if (status == SignupStatus.success) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushNamed(context, SplashPage.routeName);
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => SplashPage()));
       });
       loading = false;
     }

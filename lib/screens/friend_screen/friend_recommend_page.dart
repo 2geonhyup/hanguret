@@ -8,7 +8,10 @@ import 'package:hangeureut/widgets/profile_icon_box.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/custom_error.dart';
+import '../../providers/friend/recommend_friend_provider.dart';
 import '../../providers/profile/profile_state.dart';
+import '../../widgets/error_dialog.dart';
 
 class FriendRecommendPage extends StatefulWidget {
   const FriendRecommendPage({Key? key}) : super(key: key);
@@ -19,16 +22,29 @@ class FriendRecommendPage extends StatefulWidget {
 }
 
 class _FriendRecommendPageState extends State<FriendRecommendPage> {
+  Future<void> _getRecommends() async {
+    //동의 한 경우만 하도록 수정
+    try {
+      await context.read<RecommendFriendProvider>().getRecommendFriends();
+    } on CustomError catch (e) {
+      errorDialog(context, e);
+      return;
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _getRecommends();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     List<MealFriend> recommendFriends =
-        context.read<RecommendFriendState>().recommendFriends;
+        context.watch<RecommendFriendState>().recommendFriends;
     List realFriends = context.watch<ProfileState>().user.followings;
     List realFriendsId = [];
     for (var friend in realFriends) {
@@ -134,11 +150,8 @@ class _FriendRecommendPageState extends State<FriendRecommendPage> {
                   child: IconButton(
                     icon: Icon(Icons.arrow_back_ios),
                     onPressed: () async {
-                      await context.read<ProfileProvider>().setLogin();
-                      pushNewScreen(context,
-                          screen: BasicScreenPage(
-                            initialIndex: 2,
-                          ));
+                      // await context.read<ProfileProvider>().setLogin();
+                      Navigator.pop(context);
                     },
                   ),
                 ),

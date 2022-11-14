@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hangeureut/constants.dart';
+import 'package:hangeureut/providers/auth/auth_state.dart';
 import 'package:hangeureut/providers/navbar/navbar_state.dart';
 import 'package:hangeureut/providers/news/news_provider.dart';
 import 'package:hangeureut/providers/news/news_state.dart';
@@ -9,7 +11,11 @@ import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/repositories/news_repository.dart';
 import 'package:hangeureut/screens/friend_screen/friend_recommend_page.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
+import 'package:hangeureut/screens/on_boarding_screen/on_boarding1_page.dart';
+import 'package:hangeureut/screens/on_boarding_screen/on_boarding2_page.dart';
+import 'package:hangeureut/screens/on_boarding_screen/on_boarding3_page.dart';
 import 'package:hangeureut/screens/profile_screen/profile_page.dart';
+import 'package:hangeureut/screens/splash_screen/splash_page.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
@@ -18,14 +24,16 @@ import '../../models/search_model.dart';
 import '../../providers/filter/filter_provider.dart';
 import '../../widgets/floating_button.dart';
 import '../main_screen/main_screen_view.dart';
+import '../start_screen/start_page.dart';
 import 'basic_screen_view.dart';
 
 class BasicScreenPage extends StatefulWidget {
   static const String routeName = '/basic';
-  BasicScreenPage({Key? key, this.initialIndex = 0, this.reviewing})
+  BasicScreenPage({Key? key, this.initialIndex = 0, this.reviewing, this.resId})
       : super(key: key);
   final initialIndex;
   bool? reviewing;
+  String? resId;
 
   @override
   State<BasicScreenPage> createState() => _BasicScreenPageState();
@@ -42,30 +50,18 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
     _controller = PersistentTabController(initialIndex: widget.initialIndex);
     widget.reviewing != null ? reviewing = true : null;
-    if (context.read<ProfileState>().user.first) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showDialog(
-            context: context,
-            builder: (context) {
-              return WelcomeDialog(
-                onMoreTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              Scaffold(body: FriendRecommendPage())));
-                },
-              );
-            });
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    //bool navBarShow = context.watch<NavBarState>().show;
-    //print(navBarShow);
+    ProfileStatus status = context.watch<ProfileState>().profileStatus;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (status == ProfileStatus.initial) {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => StartPage()));
+      }
+    });
 
     return Scaffold(
       extendBody: true,
@@ -90,10 +86,20 @@ class _BasicScreenPageState extends State<BasicScreenPage> {
         padding: EdgeInsets.only(bottom: 30.0),
         child: PersistentTabView.custom(
           context,
+          routeAndNavigatorSettings: CutsomWidgetRouteAndNavigatorSettings(
+            routes: <String, WidgetBuilder>{
+              BasicScreenPage.routeName: (context) => BasicScreenPage(),
+              StartPage.routeName: (context) => StartPage(),
+              SplashPage.routeName: (context) => SplashPage(),
+              OnBoarding1Page.routeName: (context) => OnBoarding1Page(),
+              OnBoarding2Page.routeName: (context) => OnBoarding2Page(),
+              OnBoarding3Page.routeName: (context) => OnBoarding3Page()
+            },
+          ),
           controller: _controller,
           itemCount: 4,
           bottomScreenMargin: 0,
-          screens: buildScreens(reviewing),
+          screens: buildScreens(reviewing, widget.resId),
           confineInSafeArea: false,
           resizeToAvoidBottomInset: false,
           handleAndroidBackButtonPress: true,

@@ -28,13 +28,7 @@ class _SplashPageState extends State<SplashPage> {
   bool alReady = false;
   Future<String> _login() async {
     final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
-    //동의 한 경우만 하도록 수정
-    // try {
-    //   await context.read<RecommendFriendProvider>().getRecommendFriends();
-    // } on CustomError catch (e) {
-    //   errorDialog(context, e);
-    //   return;
-    // }
+
     try {
       await context.read<RestaurantsProvider>().getRes(sortType: false);
     } on CustomError catch (e) {
@@ -50,11 +44,14 @@ class _SplashPageState extends State<SplashPage> {
     final onBoardingState = profileState.user.onboarding;
 
     if (onBoardingState["level"] == 3) {
-      Navigator.pushReplacementNamed(context, BasicScreenPage.routeName);
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => BasicScreenPage()));
     } else if (onBoardingState["level"] == 2) {
-      Navigator.pushReplacementNamed(context, OnBoarding1Page.routeName);
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => OnBoarding1Page()));
     } else {
-      Navigator.pushReplacementNamed(context, OnBoarding1Page.routeName);
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => OnBoarding1Page()));
     }
 
     return "login";
@@ -66,7 +63,7 @@ class _SplashPageState extends State<SplashPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _login();
     });
-    _login();
+    //_login();
     super.initState();
   }
 

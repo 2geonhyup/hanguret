@@ -9,6 +9,7 @@ import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/repositories/news_repository.dart';
 import 'package:hangeureut/repositories/restaurant_repository.dart';
 import 'package:hangeureut/screens/profile_screen/others_profile_page.dart';
+import 'package:hangeureut/widgets/click_dialog.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
@@ -253,12 +254,18 @@ class _NoticePageState extends State<NoticePage> {
                     ),
                   )),
                   GestureDetector(
-                    onTap: () {
+                    onTap: () async {
                       if (sendingController.text != "") {
-                        context.read<RestaurantRepository>().sendNewRes(
+                        await context.read<RestaurantRepository>().sendNewRes(
                             content: sendingController.text,
                             userId: context.read<ProfileState>().user.id);
                         sendingController.clear();
+
+                        clickDialog(
+                            context: context,
+                            title: "",
+                            content: "전송완료!\n한그릇 팀이 곧 확인하러 갑니다 :)",
+                            clicked: () {});
                       }
                     },
                     child: Padding(
@@ -334,9 +341,13 @@ class _NoticePageState extends State<NoticePage> {
     ];
     for (var i in news) {
       if (i == null) break;
-      if (i.type == 0) {
+      if (i.type == 1) {
+        if (i.watched == false) {
+          context.read<ProfileProvider>().getFollower();
+        }
+
         result.add(type1News(i));
-      } else if (i.type == 1) {
+      } else if (i.type == 2) {
         result.add(type2News(i));
       } else {
         result.add(type3News(i));
@@ -348,6 +359,9 @@ class _NoticePageState extends State<NoticePage> {
   @override
   Widget build(BuildContext context) {
     List<News> news = context.watch<NewsState>().newsList;
+    // if (news[0].type == -1) {
+    //   return CircularProgressIndicator();
+    // }
 
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),

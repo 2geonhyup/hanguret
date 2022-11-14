@@ -19,57 +19,64 @@ class NewsRepository {
 
   Stream<List<News>> get news async* {
     DateTime newsWatchedTime;
-    final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
-    final userDoc = await usersRef.doc(uid).get();
-    if (userDoc.data()!.containsKey("newsWatchedTime")) {
-      newsWatchedTime = userDoc.data()!["newsWatchedTime"].toDate();
-    } else {
-      newsWatchedTime = DateTime.now().subtract(Duration(days: 30));
-      await usersRef.doc(uid).update({"newsWatchedTime": DateTime.now()});
-    }
-    Stream<QuerySnapshot> newsStream = usersRef
-        .doc(uid)
-        .collection('news')
-        .orderBy('date', descending: true)
-        .snapshots();
-
-    await for (QuerySnapshot q in newsStream) {
-      List<News> newsToReturn = [];
-
-      for (var doc in q.docs) {
-        final newsDoc = doc.data() as Map<String, dynamic>;
-        Map content = newsDoc["content"];
-        if (newsDoc["type"] == 0) {
-          newsToReturn.add(News(
-              type: newsDoc["type"],
-              watched: newsWatchedTime.compareTo(newsDoc["date"].toDate()) > 0,
-              content: FriendsNews(
-                userId: content["id"],
-                userName: content["name"] ?? "",
-                userIcon: content["icon"] ?? 0,
-                cId: content["cId"] ?? "",
-              )));
-        } else if (newsDoc["type"] == 1) {
-          newsToReturn.add(News(
-              type: newsDoc["type"],
-              watched: newsWatchedTime.compareTo(newsDoc["date"].toDate()) > 0,
-              content: ReviewNews(
-                  userId: content["id"],
-                  userIcon: content["icon"] ?? 0,
-                  userName: content["name"] ?? "",
-                  resName: content["resName"] ?? "",
-                  cId: content["cId"] ?? "")));
-        } else if (newsDoc["type"] == 2) {
-          newsToReturn.add(News(
-              type: newsDoc["type"],
-              watched: newsWatchedTime.compareTo(newsDoc["date"].toDate()) > 0,
-              content: HangerutNews(
-                  title: content["title"],
-                  content: content["content"],
-                  navigate: content["navigate"])));
-        }
+    try {
+      final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
+      final userDoc = await usersRef.doc(uid).get();
+      if (userDoc.data()!.containsKey("newsWatchedTime")) {
+        newsWatchedTime = userDoc.data()!["newsWatchedTime"].toDate();
+      } else {
+        newsWatchedTime = DateTime.now().subtract(Duration(days: 30));
+        await usersRef.doc(uid).update({"newsWatchedTime": DateTime.now()});
       }
-      yield newsToReturn;
+      Stream<QuerySnapshot> newsStream = usersRef
+          .doc(uid)
+          .collection('news')
+          .orderBy('date', descending: true)
+          .snapshots();
+
+      await for (QuerySnapshot q in newsStream) {
+        List<News> newsToReturn = [];
+
+        for (var doc in q.docs) {
+          final newsDoc = doc.data() as Map<String, dynamic>;
+          Map content = newsDoc["content"];
+          if (newsDoc["type"] == 1) {
+            newsToReturn.add(News(
+                type: newsDoc["type"],
+                watched:
+                    newsWatchedTime.compareTo(newsDoc["date"].toDate()) > 0,
+                content: FriendsNews(
+                  userId: content["id"],
+                  userName: content["name"] ?? "",
+                  userIcon: content["icon"] ?? 0,
+                  cId: content["cId"] ?? "",
+                )));
+          } else if (newsDoc["type"] == 2) {
+            newsToReturn.add(News(
+                type: newsDoc["type"],
+                watched:
+                    newsWatchedTime.compareTo(newsDoc["date"].toDate()) > 0,
+                content: ReviewNews(
+                    userId: content["id"],
+                    userIcon: content["icon"] ?? 0,
+                    userName: content["name"] ?? "",
+                    resName: content["resName"] ?? "",
+                    cId: content["cId"] ?? "")));
+          } else if (newsDoc["type"] == 3) {
+            newsToReturn.add(News(
+                type: newsDoc["type"],
+                watched:
+                    newsWatchedTime.compareTo(newsDoc["date"].toDate()) > 0,
+                content: HangerutNews(
+                    title: content["title"],
+                    content: content["content"],
+                    navigate: content["navigate"])));
+          }
+        }
+        yield newsToReturn;
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 

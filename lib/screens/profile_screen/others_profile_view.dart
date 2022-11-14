@@ -366,8 +366,18 @@ class ProfileReviewsView extends StatelessWidget {
       }
     });
 
-    return Column(
-      children: reviewsRows,
+    return GestureDetector(
+      onTap: () {
+        pushNewScreen(context,
+            screen: ReviewDetailPage(
+              reviews: reviews,
+              others: true,
+            ),
+            withNavBar: false);
+      },
+      child: Column(
+        children: reviewsRows,
+      ),
     );
   }
 
@@ -474,7 +484,7 @@ class SavedTile extends StatelessWidget {
             Container(
               width: width,
               height: height,
-              child: Image.asset(
+              child: Image.network(
                 imgUrl,
                 fit: BoxFit.fill,
               ),

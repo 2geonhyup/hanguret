@@ -88,21 +88,30 @@ class _ProfilePageState extends State<ProfilePage> {
                       height: 320,
                     ),
                     Positioned(
-                        top: 80,
+                        top: 70,
                         left: 0,
                         right: 0,
-                        child: GestureDetector(
-                          onTap: () {
+                        child: ScoreBar(
+                          onTap: (val) {
                             setState(() {
+                              if (modifyClicked) {
+                                modifyClicked = false;
+                                modifyingField = ModifyingField.none;
+                                idModify = false;
+                                nameModify = false;
+                              }
+
                               watchFollow = !watchFollow;
-                              option = false;
+                              if (val != null && watchFollow == true) {
+                                option = val;
+                              } else {
+                                option = false;
+                              }
                             });
                           },
-                          child: ScoreBar(
-                            tapped: watchFollow,
-                            followingCnt: following.length,
-                            followerCnt: follower.length,
-                          ),
+                          tapped: watchFollow,
+                          followingCnt: following.length,
+                          followerCnt: follower.length,
                         )),
                     Positioned(
                       top: 111,
@@ -209,7 +218,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       GestureDetector(
-                        behavior: HitTestBehavior.translucent,
                         onTap: () {
                           FocusManager.instance.primaryFocus?.unfocus();
                           setState(() {

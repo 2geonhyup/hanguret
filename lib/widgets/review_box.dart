@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hangeureut/models/custom_error.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
+import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:validators/validators.dart';
 
@@ -47,11 +49,16 @@ class _ReviewBoxState extends State<ReviewBox> {
   Future<void> _like() async {
     widget.onLike();
     if (widget.userId == null) return;
-    await context.read<ProfileProvider>().reviewLike(
-        resName: widget.resName,
-        targetId: widget.userId!,
-        reviewId: widget.reviewId,
-        isAdd: !widget.liked);
+    try {
+      await context.read<ProfileProvider>().reviewLike(
+          resName: widget.resName,
+          targetId: widget.userId!,
+          reviewId: widget.reviewId,
+          isAdd: !widget.liked);
+    } on CustomError catch (e) {
+      print(e);
+      errorDialog(context, e);
+    }
   }
 
   @override
@@ -119,6 +126,17 @@ class _ReviewBoxState extends State<ReviewBox> {
                                   width: 324,
                                   height: 324,
                                   fit: BoxFit.fill,
+                                  loadingBuilder: (context, widget, _) {
+                                    return Container(
+                                      color: Colors.black.withOpacity(0.1),
+                                      child: widget,
+                                    );
+                                  },
+                                  errorBuilder: (context, widget, _) {
+                                    return Container(
+                                      color: Colors.black.withOpacity(0.1),
+                                    );
+                                  },
                                 ),
                         ),
                       ),

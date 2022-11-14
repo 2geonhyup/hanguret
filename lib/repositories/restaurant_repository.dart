@@ -64,6 +64,7 @@ class RestaurantRepository {
       Uri _uri = Uri.http(_url, '/restaurants/id/$resId');
 
       var response = await http.get(_uri);
+
       Map body = jsonDecode(response.body) as Map;
 
       return body;
@@ -77,9 +78,10 @@ class RestaurantRepository {
   }) async {
     //input 보내기 -> 백엔드 연동시 추가(userId, location, resId 보냄
     try {
-      Uri _uri = Uri.http(_url, '/reviews/restaurant/$resId');
+      Uri _uri = Uri.http(_url, '/reviews/restaurant/id/$resId');
 
       var response = await http.get(_uri);
+      print("reviewrepo${response.body}");
       List body = (jsonDecode(response.body) as List).map((e) {
         final eMap = e as Map;
         var date = eMap["date"];
@@ -87,6 +89,7 @@ class RestaurantRepository {
         eMap["date"] = "${val.year}년 ${val.month}월 ${val.day}일";
         return eMap;
       }).toList();
+      print("body$body");
       return body.reversed.toList();
     } catch (e) {
       throw CustomError(
@@ -104,7 +107,8 @@ class RestaurantRepository {
       required bool isAdd}) async {
     try {
       Uri _uri = Uri.http(_url, '/reviews/$reviewId/user/$userId');
-      await http.put(_uri);
+      var response = await http.put(_uri);
+      print(response.body);
 
       if (isAdd) {
         await usersRef
@@ -112,7 +116,7 @@ class RestaurantRepository {
             .collection('news')
             .doc("$userId$reviewId")
             .set({
-          "type": 1,
+          "type": 2,
           "date": DateTime.now(),
           "content": {
             "id": userId,
@@ -141,6 +145,7 @@ class RestaurantRepository {
         eMap["date"] = "${val.year}년 ${val.month}월 ${val.day}일";
         return eMap;
       }).toList();
+
       return body.reversed.toList();
     } catch (e) {
       throw CustomError(
@@ -188,10 +193,10 @@ class RestaurantRepository {
     };
   }
 
-  Future<List> getSearchedRestaurants({required String searchTerm}) async {
+  Future<List?> getSearchedRestaurants({required String searchTerm}) async {
     List searchedList = [];
     try {
-      Uri _uri = Uri.http(_url, '/search/$searchTerm');
+      Uri _uri = Uri.http(_url, '/restaurants/search/$searchTerm');
 
       var response = await http.get(_uri);
 
@@ -199,6 +204,29 @@ class RestaurantRepository {
           (jsonDecode(response.body) as List).map((e) => e as Map).toList();
 
       return searchedList;
+    } catch (e) {
+      throw CustomError(
+          code: "알림", message: "식당 정보 받기 오류", plugin: e.toString());
+    }
+  }
+
+  Future<int> getDistance(
+      {required String address,
+      required double userLat,
+      required double userLong}) async {
+    try {
+      Uri _uri = Uri(
+        scheme: 'https',
+        host: 'maps.googleapis.com',
+        path: '/maps/api/distancematrix/json',
+        query:
+            'units=metric&mode=transit&origins=$userLat,$userLong&destinations=$address&region=KR&key=AIzaSyA_0_VpLRcvV6qXc9kzap_fmwYK7chkdvc',
+      );
+
+      var response = await http.get(_uri);
+      var body = jsonDecode(response.body) as Map;
+
+      return body["rows"][0]["elements"][0]["distance"]["value"] ?? -1;
     } catch (e) {
       throw const CustomError(code: "알림", message: "식당 정보 받기 오류");
     }

@@ -48,6 +48,7 @@ class BasicBottomNavigationBar extends StatelessWidget {
                 Navigator.pushNamedAndRemoveUntil(
                     context, nav2, (Route<dynamic> route) => false);
               } else {
+                if (nav2 == "") return;
                 Navigator.pushNamed(context, nav2);
               }
             },

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
+import 'package:location/location.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -7,9 +8,11 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../models/custom_error.dart';
 import '../../providers/restaurants/restaurants_state.dart';
 import '../../providers/result/result_state.dart';
+import '../../repositories/location_repository.dart';
 import '../../repositories/restaurant_repository.dart';
 import '../../restaurants.dart';
 import '../../widgets/error_dialog.dart';
+import '../../widgets/res_tile.dart';
 import '../restaurant_detail_screen/restaurant_detail_page.dart';
 
 class SearchResult extends StatefulWidget {
@@ -24,11 +27,9 @@ class SearchResult extends StatefulWidget {
 
 class _SearchResultState extends State<SearchResult> {
   List? resList;
-  Future<void> _launchUrl(url) async {
-    if (!await launchUrl(url)) {
-      throw 'Could not launch $url';
-    }
-  }
+  TextEditingController textEditingController = TextEditingController();
+  late Stream<LocationData?> locationDataStream;
+  LocationData? locationData;
 
   Future<void> _getSearchedRes() async {
     try {
@@ -45,166 +46,83 @@ class _SearchResultState extends State<SearchResult> {
 
   @override
   void initState() {
+    locationDataStream = context.read<LocationRepository>().getLocation;
+    locationDataStream.listen((event) {
+      locationData = event;
+    });
     // TODO: implement initState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getSearchedRes();
     });
+    textEditingController.text = widget.searchTerm;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: searchPageItem());
+    return Scaffold(
+        body: ListView(
+      padding: EdgeInsets.zero,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 25.0, top: 54),
+              child: IconButton(
+                icon: Icon(Icons.arrow_back_ios),
+                onPressed: () async {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
+        ),
+        searchPageItem(),
+      ],
+    ));
   }
 
   Widget searchPageItem() {
     List resTileList = [];
     if (resList == null) {
-      return const Center(
-        child: CircularProgressIndicator(
-          color: kBasicColor,
-          strokeWidth: 2,
+      resTileList.add(const Center(
+        child: Text(
+          "검색결과가 없습니다!",
+          style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: kSecondaryTextColor,
+              fontSize: 20,
+              fontFamily: 'Suit'),
         ),
-      );
+      ));
     } else {
-      resTileList = resList!.map((e) => resTile(e)).toList();
+      for (var res in resList!) {
+        resTileList.add(ResTile(
+          mainFilterIndex: res["category1"],
+          res: res,
+          locationData: locationData,
+        ));
+      }
     }
 
     return Stack(
       children: [
-        GridView.count(
-            physics: ClampingScrollPhysics(),
-            padding: EdgeInsets.only(top: 29.5, bottom: 60),
-            crossAxisCount: 2,
-            childAspectRatio: 0.709,
-            crossAxisSpacing: 10,
-            children: List.generate(
-                resTileList.length, (index) => resTileList[index])),
+        Column(
+          children: [
+            SearchBox(controller: textEditingController),
+            GridView.count(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.only(top: 29.5, bottom: 60),
+                crossAxisCount: 2,
+                childAspectRatio: 0.709,
+                crossAxisSpacing: 10,
+                children: List.generate(
+                    resTileList.length, (index) => resTileList[index])),
+          ],
+        ),
       ],
-    );
-  }
-
-  Widget resTile(Map res) {
-    List<Widget> resInfoTiles = [];
-    resInfoTiles = makeTiles(res);
-    return GestureDetector(
-      onTap: () {
-        pushNewScreen(context,
-            //option true일 때 error
-            screen: RestaurantDetailPage(
-              resId: res["resId"].toString(),
-              option: true,
-            ),
-            withNavBar: false);
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: Container(
-                  width: double.infinity,
-                  child: Image.network(
-                    res["imgUrl"],
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, widget, _) {
-                      return Container(
-                        color: Colors.black.withOpacity(0.1),
-                        child: widget,
-                      );
-                    },
-                    errorBuilder: (context, widget, _) {
-                      return Container(
-                        color: Colors.black.withOpacity(0.1),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 12,
-                top: 12,
-                child: Row(
-                  children: resInfoTiles,
-                ),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 15.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height: 13,
-                    ),
-                    Text(
-                      res["name"],
-                      style: const TextStyle(
-                          height: 1.357,
-                          fontWeight: FontWeight.w900,
-                          color: kSecondaryTextColor,
-                          fontFamily: 'Suit',
-                          fontSize: 14),
-                    ),
-                    const SizedBox(
-                      height: 3,
-                    ),
-                    Row(
-                      children: [
-                        const Text(
-                          "지금 내 위치에서 ",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              color: kSecondaryTextColor,
-                              fontFamily: 'Suit',
-                              fontSize: 11),
-                        ),
-                        Text(
-                          "${res["distance"] ?? "?"}m",
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: kBasicColor,
-                              fontFamily: 'Suit',
-                              fontSize: 11),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 10.0),
-                child: GestureDetector(
-                  onTap: () async {
-                    final Uri _url = Uri.parse(
-                        'https://map.kakao.com/link/to/${res["kakaoId"]}');
-                    try {
-                      await _launchUrl(_url);
-                    } catch (e) {
-                      print(e);
-                      final ec =
-                          CustomError(code: '', message: '카카오맵을 열 수 없습니다');
-                      errorDialog(context, ec);
-                    }
-                  },
-                  child: Image.asset(
-                    "images/location-marker.png",
-                    width: 25,
-                    height: 25,
-                    color: kBasicColor,
-                  ),
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
     );
   }
 
@@ -284,5 +202,69 @@ class _SearchResultState extends State<SearchResult> {
       );
     }
     return resInfoList;
+  }
+}
+
+class SearchBox extends StatelessWidget {
+  SearchBox({Key? key, required this.controller}) : super(key: key);
+  TextEditingController controller;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 25, right: 23, top: 40),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Container(
+              height: 28,
+              decoration: const BoxDecoration(
+                border: Border(
+                    bottom: BorderSide(width: 1, color: kSecondaryTextColor)),
+              ),
+              child: TextFormField(
+                controller: controller,
+                style: const TextStyle(
+                    fontFamily: 'Suit',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 15,
+                    color: kSecondaryTextColor),
+                decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "음식 또는 식당으로 검색해보세요.",
+                    hintStyle: TextStyle(
+                        fontFamily: 'Suit',
+                        fontWeight: FontWeight.w400,
+                        fontSize: 15,
+                        color: kSecondaryTextColor)),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 21.0),
+            child: GestureDetector(
+              onTap: () {
+                print(controller.text);
+                if (controller.text == "") {
+                  errorDialog(context,
+                      CustomError(code: "알림", message: "검색어는 하나 이상 입력해주세요"));
+                  return;
+                }
+                pushNewScreen(context,
+                    screen: SearchResult(
+                      searchTerm: controller.text,
+                    ));
+              },
+              child: Image.asset(
+                "images/icons/searchbig.png",
+                color: kSecondaryTextColor,
+                width: 33,
+                height: 33,
+              ),
+            ),
+          )
+        ],
+      ),
+    );
   }
 }

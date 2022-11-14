@@ -13,9 +13,17 @@ import 'package:provider/provider.dart';
 
 import '../../widgets/nav_custom_painter.dart';
 
-List<Widget> buildScreens(reviewing) {
+List<Widget> buildScreens(reviewing, String? resId) {
   return [
-    reviewing ? SearchForReviewPage() : MainScreenPage(),
+    reviewing
+        ? SearchForReviewPage()
+        : resId == null
+            ? MainScreenPage()
+            : RestaurantDetailPage(
+                resId: resId,
+                option: false,
+                cantPop: true,
+              ),
     NewsPage(),
     ProfilePage(),
     NoticePage(),

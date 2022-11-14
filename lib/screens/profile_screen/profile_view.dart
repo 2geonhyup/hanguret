@@ -1,8 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
+import 'package:hangeureut/providers/signup/signup_provider.dart';
+import 'package:hangeureut/providers/signup/signup_state.dart';
 import 'package:hangeureut/screens/profile_screen/modify_taste.dart';
 import 'package:hangeureut/screens/profile_screen/review_detail_page.dart';
+import 'package:hangeureut/screens/start_screen/start_page.dart';
 import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +17,7 @@ import '../../widgets/profile_icon_box.dart';
 import '../friend_screen/friend_recommend_page.dart';
 import '../restaurant_detail_screen/restaurant_detail_page.dart';
 import 'others_profile_page.dart';
+import 'package:restart_app/restart_app.dart';
 
 enum ModifyingField { none, favorite, hate, alcohol, spicy }
 
@@ -59,7 +64,58 @@ class ProfileCard extends StatelessWidget {
           const SizedBox(
             height: 24,
           ),
-          ProfileIconBox(content: profileIcons[profile.icon]),
+          GestureDetector(
+              onTap: () {
+                showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    barrierColor: Colors.black.withOpacity(0.3),
+                    shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20),
+                            topRight: Radius.circular(20))),
+                    builder: (BuildContext context) {
+                      return SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.6,
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Expanded(
+                              child: GridView.count(
+                                crossAxisCount: 4,
+                                children: List.generate(
+                                    78,
+                                    (index) => TextButton(
+                                          style: ButtonStyle(
+                                            overlayColor:
+                                                MaterialStateColor.resolveWith(
+                                                    (states) => Colors.black
+                                                        .withOpacity(0.05)),
+                                          ),
+                                          onPressed: () {
+                                            context
+                                                .read<ProfileProvider>()
+                                                .setIcon(icon: index);
+                                          },
+                                          child: Center(
+                                              child: Text(
+                                            profileIcons[index],
+                                            style: TextStyle(fontSize: 40),
+                                          )),
+                                        )),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 50,
+                            )
+                          ],
+                        ),
+                      );
+                    });
+              },
+              child: ProfileIconBox(content: profileIcons[profile.icon])),
           const SizedBox(
             height: 12,
           ),
@@ -147,29 +203,66 @@ class ProfileCard extends StatelessWidget {
             height: 20,
           ),
           modifyClicked
-              ? Center(
-                  child: GestureDetector(
-                    onTap: () {
-                      onModifyClicked();
-                    },
-                    child: Container(
-                      width: 220,
-                      height: 28,
-                      decoration: BoxDecoration(
-                          color: const Color(0xffE5E5E5),
-                          borderRadius: BorderRadius.circular(6)),
-                      child: const Center(
-                        child: Text(
-                          "수정 완료",
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontFamily: 'Suit',
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400),
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        onModifyClicked();
+                      },
+                      child: Container(
+                        width: 154,
+                        height: 28,
+                        decoration: BoxDecoration(
+                            color: const Color(0xffE5E5E5),
+                            borderRadius: BorderRadius.circular(6)),
+                        child: const Center(
+                          child: Text(
+                            "수정 완료",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Suit',
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        try {
+                          await context.read<ProfileProvider>().delUser();
+                          context.read<SignupProvider>().signOutComp();
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => StartPage()));
+                        } on CustomError catch (e) {
+                          errorDialog(context, e);
+                        }
+                      },
+                      child: Container(
+                        width: 55,
+                        height: 28,
+                        decoration: BoxDecoration(
+                            color: const Color(0xff929292),
+                            borderRadius: BorderRadius.circular(6)),
+                        child: const Center(
+                          child: Text(
+                            "탈퇴",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Suit',
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 )
               : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -260,10 +353,12 @@ class ProfileCard extends StatelessWidget {
 class ScoreBar extends StatelessWidget {
   const ScoreBar(
       {Key? key,
+      required this.onTap,
       required this.tapped,
       required this.followerCnt,
       required this.followingCnt})
       : super(key: key);
+  final onTap;
   final bool tapped;
   final int followerCnt;
   final int followingCnt;
@@ -271,34 +366,55 @@ class ScoreBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return tapped
-        ? const Center(
-            child: Text(
-              "돌아가기",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Suit',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500),
+        ? Center(
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () => onTap(null),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: Text(
+                  "돌아가기",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Suit',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500),
+                ),
+              ),
             ),
           )
         : Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                "나를 찜한 $followerCnt   |",
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Suit',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500),
+              GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () => onTap(false),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: Text(
+                    "나를 찜한 $followerCnt   |",
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Suit',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ),
               ),
-              Text(
-                "   내가 찜한 $followingCnt",
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Suit',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500),
+              GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () => onTap(true),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: Text(
+                    "   내가 찜한 $followingCnt",
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Suit',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ),
               )
             ],
           );
@@ -832,9 +948,15 @@ class ProfileReviewsView extends StatelessWidget {
     return SizedBox(
       width: width,
       height: height,
-      child: Image.network(
-        imgUrl,
+      child: CachedNetworkImage(
+        imageUrl: imgUrl,
         fit: BoxFit.fill,
+        progressIndicatorBuilder: (context, url, downloadProgress) => Container(
+          width: width,
+          height: height,
+          color: Colors.black.withOpacity(0.1),
+        ),
+        errorWidget: (context, url, error) => Icon(Icons.error),
       ),
     );
   }
@@ -860,9 +982,16 @@ class SavedTile extends StatelessWidget {
             SizedBox(
               width: width,
               height: height,
-              child: Image.network(
-                imgUrl,
+              child: CachedNetworkImage(
+                imageUrl: imgUrl,
                 fit: BoxFit.fill,
+                progressIndicatorBuilder: (context, url, downloadProgress) =>
+                    Container(
+                  width: width,
+                  height: height,
+                  color: Colors.black.withOpacity(0.1),
+                ),
+                errorWidget: (context, url, error) => Icon(Icons.error),
               ),
             ),
             Positioned(

@@ -62,6 +62,23 @@ class ProfileRepository {
     }
   }
 
+  Future<List> getFollower({required String myId}) async {
+    List followerList = [];
+    try {
+      final QuerySnapshot followers =
+          await usersRef.doc(myId).collection('followers').get();
+      if (followers.docs.isNotEmpty) {
+        for (var e in followers.docs) {
+          followerList.add(await getUserViewInfo(id: e.id));
+        }
+      }
+    } catch (e) {
+      throw CustomError(code: "알림", message: "팔로워 목록을 가져오는 중 오류가 발생했습니다");
+    }
+
+    return followerList;
+  }
+
   Future<void> setLogin() async {
     final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
     try {
@@ -86,6 +103,25 @@ class ProfileRepository {
     final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
     try {
       await usersRef.doc(uid).update({'name': name});
+    } on FirebaseException catch (e) {
+      throw CustomError(
+        code: e.code,
+        message: e.message!,
+        plugin: e.plugin,
+      );
+    } catch (e) {
+      throw CustomError(
+        code: 'Exception',
+        message: e.toString(),
+        plugin: 'flutter_error/server_error',
+      );
+    }
+  }
+
+  Future<void> setIcon({required int icon}) async {
+    final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
+    try {
+      await usersRef.doc(uid).update({'icon': icon});
     } on FirebaseException catch (e) {
       throw CustomError(
         code: e.code,

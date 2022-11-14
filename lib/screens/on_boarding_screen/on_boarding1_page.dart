@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/widgets/bottom_navigation_bar.dart';
+import 'package:hangeureut/widgets/click_dialog.dart';
 import 'package:hangeureut/widgets/progress_bar.dart';
 import 'package:provider/provider.dart';
 
@@ -38,15 +39,23 @@ class _OnBoarding1PageState extends State<OnBoarding1Page> {
           option1: "취소",
           option2: "다음",
           nav1: OnBoarding1Page.routeName,
-          nav2: OnBoarding2Page.routeName,
+          nav2: "",
           withNav2: () async {
-            try {
-              await context.read<ProfileProvider>().setName(name: name);
-              return true;
-            } on CustomError catch (e) {
-              errorDialog(context, e);
-              return false;
-            }
+            clickCancelDialog(
+                context: context,
+                title: "알림",
+                content: "닉네임은 이후에 수정이 불가능합니다!",
+                clicked: () async {
+                  try {
+                    await context.read<ProfileProvider>().setName(name: name);
+
+                    return true;
+                  } on CustomError catch (e) {
+                    errorDialog(context, e);
+                    return false;
+                  }
+                });
+            return true;
           },
         ),
         body: Column(

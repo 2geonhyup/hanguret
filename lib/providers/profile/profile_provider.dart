@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:hangeureut/repositories/auth_repository.dart';
 import 'package:hangeureut/repositories/friend_repository.dart';
 import 'package:hangeureut/repositories/restaurant_repository.dart';
 import 'package:state_notifier/state_notifier.dart';
@@ -54,6 +57,18 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
       if (i["id"] == id) return true;
     }
     return false;
+  }
+
+  Future<void> getFollower() async {
+    try {
+      List followers = await read<ProfileRepository>().getFollower(
+        myId: state.user.id,
+      );
+      User newUser = state.user.copyWith(followers: followers);
+      state = state.copyWith(user: newUser);
+    } on CustomError catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> setFriends(String id, String name, int icon, String cId) async {
@@ -116,6 +131,18 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
     }
   }
 
+  Future<void> delUser() async {
+    try {
+      await read<AuthRepository>().delUser(
+          followings: state.user.followings, followers: state.user.followers);
+      state = state.copyWith(
+        profileStatus: ProfileStatus.initial,
+      );
+    } on CustomError catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> setName({required String? name}) async {
     if (name == null || name == "") {
       throw CustomError(
@@ -134,6 +161,21 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
       );
     }
     User newUser = state.user.copyWith(name: name);
+    state = state.copyWith(user: newUser);
+  }
+
+  Future<void> setIcon({required int icon}) async {
+    try {
+      await read<ProfileRepository>().setIcon(icon: icon);
+    } on CustomError catch (e) {
+      state = state.copyWith(profileStatus: ProfileStatus.error, error: e);
+      throw CustomError(
+        code: 'Exception',
+        message: e.toString(),
+        plugin: 'flutter_error/server_error',
+      );
+    }
+    User newUser = state.user.copyWith(icon: icon);
     state = state.copyWith(user: newUser);
   }
 
@@ -234,14 +276,18 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
     int userIcon = state.user.icon;
     String userName = state.user.name;
 
-    await read<RestaurantRepository>().reviewLike(
-        userId: userId,
-        userIcon: userIcon,
-        userName: userName,
-        targetId: targetId,
-        reviewId: reviewId,
-        resName: resName,
-        isAdd: isAdd);
+    try {
+      await read<RestaurantRepository>().reviewLike(
+          userId: userId,
+          userIcon: userIcon,
+          userName: userName,
+          targetId: targetId,
+          reviewId: reviewId,
+          resName: resName,
+          isAdd: isAdd);
+    } on CustomError catch (e) {
+      rethrow;
+    }
   }
 
   Future<List> searchUser({String? value}) async {
@@ -252,20 +298,28 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
     List followings = state.user.followings;
     //following 돌기
     List followingSearch = followings.where((u) {
-      if (u["cId"] == value || u["name"] == value) {
+      if (u["cId"].contains(value) || u["name"].contains(value)) {
         return true;
       }
       return false;
     }).toList();
     //follower 돌기
     List followerSearch = followers.where((u) {
-      if (u["cId"] == value || u["name"] == value) {
+      if (u["cId"].contains(value) || u["name"].contains(value)) {
         return true;
       }
       return false;
     }).toList();
 
-    semiResult = [...followingSearch, ...followerSearch];
+    List semiResult0 = [...followingSearch, ...followerSearch];
+    semiResult = semiResult0
+        .map((f) => jsonEncode(f))
+        .toSet()
+        .toList()
+        .map((f) => jsonDecode(f) as Map)
+        .toList();
+
+    print(semiResult);
     List preSearchedId = semiResult.map((e) => e["id"]).toList();
 
     try {
