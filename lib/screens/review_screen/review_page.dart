@@ -609,194 +609,29 @@ class _ReviewPageState extends State<ReviewPage> {
                           }
                           _sample != null ? await _cropImage() : null;
                           User user = context.read<ProfileState>().user;
-                          showCupertinoDialog(
-                              context: context,
-                              barrierDismissible: _enabled,
-                              builder: (context) {
-                                return CupertinoAlertDialog(
-                                  title: Text("사용자 선택"),
-                                  actions: [
-                                    CupertinoDialogAction(
-                                      child: Text("돼지토끼"),
-                                      onPressed: () async {
-                                        if (!_enabled) return;
-                                        setState(() => _enabled = false);
-                                        try {
-                                          await context
-                                              .read<ReviewProvider>()
-                                              .reviewComplete(
-                                                userId: "kakao:2363915906",
-                                                userName: "돼지토끼",
-                                                resId: widget.res["resId"]
-                                                    .toString(),
-                                                score: widget.score,
-                                                imgFile:
-                                                    _lastCropped ?? _sample,
-                                                icon: option,
-                                                date: DateTime.now(),
-                                                reviewId: widget.reviewId,
-                                                imgUrl: widget.imgUrl,
-                                                category: widget.res[
-                                                    "category${category + 1}"],
-                                                resName: widget.res["name"],
-                                              );
+                          if (!_enabled) return;
+                          setState(() => _enabled = false);
+                          try {
+                            await context.read<ReviewProvider>().reviewComplete(
+                                userId: "kakao:2204160870",
+                                userName: "건협",
+                                resId: widget.res["resId"].toString(),
+                                score: widget.score,
+                                imgFile: _lastCropped ?? _sample,
+                                icon: option,
+                                date: DateTime.now(),
+                                reviewId: widget.reviewId,
+                                imgUrl: widget.imgUrl,
+                                category: widget.res["category${category + 1}"],
+                                resName: widget.res["name"]);
 
-                                          Navigator.pop(context);
-                                          Navigator.pop(context);
+                            Navigator.pop(context);
 
-                                          setState(() => _enabled = true);
-                                        } on CustomError catch (e) {
-                                          errorDialog(context, e);
-                                          //Navigator.pop(context);
-                                          return;
-                                        }
-                                      },
-                                    ),
-                                    CupertinoDialogAction(
-                                      child: Text("해달"),
-                                      onPressed: () async {
-                                        if (!_enabled) return;
-                                        setState(() => _enabled = false);
-                                        try {
-                                          await context
-                                              .read<ReviewProvider>()
-                                              .reviewComplete(
-                                                  userId: "kakao:2318981232",
-                                                  userName: "해달",
-                                                  resId: widget.res["resId"]
-                                                      .toString(),
-                                                  score: widget.score,
-                                                  imgFile:
-                                                      _lastCropped ?? _sample,
-                                                  icon: option,
-                                                  date: DateTime.now(),
-                                                  reviewId: widget.reviewId,
-                                                  imgUrl: widget.imgUrl,
-                                                  category: widget.res[
-                                                      "category${category + 1}"],
-                                                  resName: widget.res["name"]);
-                                          Navigator.pop(context);
-                                          Navigator.pop(context);
-
-                                          setState(() => _enabled = true);
-                                        } on CustomError catch (e) {
-                                          errorDialog(context, e);
-                                          Navigator.pop(context);
-                                          return;
-                                        }
-                                      },
-                                    ),
-                                    CupertinoDialogAction(
-                                      child: Text("수진"),
-                                      onPressed: () async {
-                                        if (!_enabled) return;
-                                        setState(() => _enabled = false);
-                                        try {
-                                          await context
-                                              .read<ReviewProvider>()
-                                              .reviewComplete(
-                                                userId: "kakao:2350651029",
-                                                userName: "수진",
-                                                resId: widget.res["resId"]
-                                                    .toString(),
-                                                score: widget.score,
-                                                imgFile:
-                                                    _lastCropped ?? _sample,
-                                                icon: option,
-                                                date: DateTime.now(),
-                                                reviewId: widget.reviewId,
-                                                imgUrl: widget.imgUrl,
-                                                category: widget.res[
-                                                    "category${category + 1}"],
-                                                resName: widget.res["name"],
-                                              );
-                                          Navigator.pop(context);
-
-                                          Navigator.pop(context);
-
-                                          setState(() => _enabled = true);
-                                        } on CustomError catch (e) {
-                                          errorDialog(context, e);
-                                          Navigator.pop(context);
-                                          return;
-                                        }
-                                      },
-                                    ),
-                                    CupertinoDialogAction(
-                                      child: Text("건협"),
-                                      onPressed: () async {
-                                        if (!_enabled) return;
-                                        setState(() => _enabled = false);
-                                        try {
-                                          await context
-                                              .read<ReviewProvider>()
-                                              .reviewComplete(
-                                                  userId: "kakao:2204160870",
-                                                  userName: "건협",
-                                                  resId: widget.res["resId"]
-                                                      .toString(),
-                                                  score: widget.score,
-                                                  imgFile:
-                                                      _lastCropped ?? _sample,
-                                                  icon: option,
-                                                  date: DateTime.now(),
-                                                  reviewId: widget.reviewId,
-                                                  imgUrl: widget.imgUrl,
-                                                  category: widget.res[
-                                                      "category${category + 1}"],
-                                                  resName: widget.res["name"]);
-
-                                          Navigator.pop(context);
-                                          Navigator.pop(context);
-
-                                          setState(() => _enabled = true);
-                                        } on CustomError catch (e) {
-                                          print(e.toString());
-                                          errorDialog(context, e);
-                                          //Navigator.pop(context);
-                                          return;
-                                        }
-                                      },
-                                    ),
-                                    CupertinoDialogAction(
-                                      child: Text("정범순"),
-                                      onPressed: () async {
-                                        if (!_enabled) return;
-                                        setState(() => _enabled = false);
-                                        try {
-                                          await context
-                                              .read<ReviewProvider>()
-                                              .reviewComplete(
-                                                userId: "kakao:2473869527",
-                                                userName: "정범순",
-                                                resId: widget.res["resId"]
-                                                    .toString(),
-                                                resName: widget.res["name"],
-                                                score: widget.score,
-                                                imgFile:
-                                                    _lastCropped ?? _sample,
-                                                icon: option,
-                                                date: DateTime.now(),
-                                                reviewId: widget.reviewId,
-                                                imgUrl: widget.imgUrl,
-                                                category: widget.res[
-                                                    "category${category + 1}"],
-                                              );
-                                          Navigator.pop(context);
-
-                                          Navigator.pop(context);
-
-                                          setState(() => _enabled = true);
-                                        } on CustomError catch (e) {
-                                          errorDialog(context, e);
-                                          Navigator.pop(context);
-                                          return;
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                );
-                              });
+                            setState(() => _enabled = true);
+                          } on CustomError catch (e) {
+                            errorDialog(context, e);
+                            return;
+                          }
                         },
                         child: OptionCard(
                           optionText: "완료",
