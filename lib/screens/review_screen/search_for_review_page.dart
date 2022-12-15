@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
+import 'package:hangeureut/providers/restaurants/restaurants_provider.dart';
+import 'package:hangeureut/providers/restaurants/restaurants_state.dart';
 import 'package:hangeureut/repositories/restaurant_repository.dart';
 import 'package:hangeureut/restaurants.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
@@ -21,11 +23,20 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
   Map? selected;
   List? near;
   List? popular;
+  bool stop = false;
+  final FocusNode _focus = FocusNode();
+  int index = 0;
 
   Future<List> getRelated(val) async {
     List results = [];
-    if (val == "") return results;
-    for (var e in restaurantsDB) {
+    List searchedList = [];
+    if (val == "") return [];
+
+    searchedList = await context
+            .read<RestaurantRepository>()
+            .getSearchedRestaurants(searchTerm: val, length: 5) ??
+        [];
+    for (var e in searchedList) {
       final String name = e["name"]!.toString();
 
       if (name.contains(val)) {
@@ -36,6 +47,7 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
           name.substring((searchIndex + val.length).toInt())
         ];
         Map newE = {...e, "nameList": nameList};
+
         results.add(newE);
       }
     }
@@ -57,12 +69,9 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
   }
 
   Future<void> getReco() async {
-    Map<String, List>? recommends =
-        await context.read<RestaurantRepository>().getResForReview();
-    if (recommends != null) {
-      near = recommends["near"];
-      popular = recommends["popular"];
-    }
+    // near =
+    popular = context.read<RestaurantsProvider>().getResByReviewCnt();
+    //print(popular);
   }
 
   @override
@@ -107,10 +116,17 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
                             ),
                             child: TextFormField(
                               onChanged: (val) async {
+                                int here = ++index;
+                                relatedResults = [];
                                 searchTerm = val;
-                                relatedResults = await getRelated(val);
-                                setState(() {});
+                                List thisResults = await getRelated(val);
+                                if (here == index) {
+                                  setState(() {
+                                    relatedResults = thisResults;
+                                  });
+                                }
                               },
+                              focusNode: _focus,
                               style: TextStyle(
                                   fontFamily: 'Suit',
                                   fontWeight: FontWeight.w700,
@@ -157,7 +173,7 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
                                         pushNewScreen(
                                           context,
                                           screen: RestaurantDetailPage(
-                                            resId: e["id"],
+                                            resId: e["resId"].toString(),
                                             option: false,
                                           ),
                                           withNavBar: true,
@@ -231,35 +247,21 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
                         height: 1),
                   ),
                 ),
-                popular == null || near == null
+                popular == null && near == null
                     ? const SizedBox.shrink()
                     : Padding(
                         padding: const EdgeInsets.only(top: 21.0, bottom: 60),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: near!
-                                    .map((e) =>
-                                        ResTile(res: e, type: "지금 나와 가까운"))
-                                    .toList(),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: popular!
-                                    .map((e) =>
-                                        ResTile(res: e, type: "요즘 많이 기록된"))
-                                    .toList(),
-                              ),
-                            )
-                          ],
+                        child: GridView.count(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          childAspectRatio: 1,
+                          crossAxisCount: 2,
+                          children: popular!
+                              .map((e) => ResTile(res: e, type: "요즘 많이 기록된"))
+                              .toList(),
                         ),
                       ),
               ],
@@ -278,48 +280,61 @@ class ResTile extends StatelessWidget {
   String type;
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () {
-          pushNewScreen(context,
-              screen: RestaurantDetailPage(
-                  resId: res["resId"].toString(), option: false));
-        },
-        child: Stack(
-          children: [
-            AspectRatio(
-              aspectRatio: 1,
-              child: Container(
-                width: double.infinity,
-                child: Image.asset(
-                  res["imgUrl"],
-                  fit: BoxFit.cover,
-                ),
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        pushNewScreen(context,
+            screen: RestaurantDetailPage(
+                resId: res["resId"].toString(), option: false));
+      },
+      child: Stack(
+        children: [
+          AspectRatio(
+            aspectRatio: 1,
+            child: Container(
+              width: double.infinity,
+              child: Image.network(
+                res["imgUrl"],
+                fit: BoxFit.cover,
               ),
             ),
-            Positioned(
-                left: 12,
-                bottom: 14,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      type,
-                      style: regularTextStyle.copyWith(fontSize: 10),
-                    ),
-                    SizedBox(
-                      height: 3,
-                    ),
-                    Text(
-                      res["name"],
-                      style: eBoldTextStyle.copyWith(fontSize: 15),
-                    )
+          ),
+          Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 89,
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                  colors: [
+                    Colors.black.withOpacity(0),
+                    Colors.black.withOpacity(0.38)
                   ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 )),
-          ],
-        ),
+              )),
+          Positioned(
+              left: 12,
+              bottom: 14,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    type,
+                    style: regularTextStyle.copyWith(fontSize: 10),
+                  ),
+                  SizedBox(
+                    height: 3,
+                  ),
+                  Text(
+                    res["name"],
+                    style: eBoldTextStyle.copyWith(fontSize: 15),
+                  )
+                ],
+              )),
+        ],
       ),
     );
   }

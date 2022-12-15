@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
+import 'package:hangeureut/providers/reviews/reviews_provider.dart';
+import 'package:hangeureut/providers/reviews/reviews_state.dart';
 import 'package:hangeureut/repositories/restaurant_repository.dart';
+import 'package:hangeureut/screens/profile_screen/profile_reviews_view.dart';
 import 'package:hangeureut/screens/profile_screen/profile_view.dart';
-import 'package:hangeureut/screens/profile_screen/review_detail_page.dart';
-import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_page.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/review_model.dart';
 import '../../providers/profile/profile_state.dart';
 import 'modify_loction.dart';
 
-final countStyle = TextStyle(
+final countStyle = const TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w400,
     fontFamily: 'Suit',
@@ -39,15 +41,29 @@ class _ProfilePageState extends State<ProfilePage> {
   //option이 false면 남긴기록, true 면 저장한 곳
   bool option = false;
   bool watchFollow = false;
-  List? myReviews;
+  // List? myReviews;
   bool friendSearching = false;
   bool keyBoardShowing = false;
+  int reviewNum = 3;
+  int savedNum = 3;
 
   void _getReviews() async {
-    myReviews = await context
-        .read<RestaurantRepository>()
-        .getUsersReviews(userId: context.read<ProfileState>().user.id);
-    setState(() {});
+    if (context.read<ReviewState>().reviewStatus == ReviewStatus.none) {
+      await context.read<ReviewProvider>().getMyReviews();
+    }
+  }
+
+  ScrollController controller = ScrollController();
+  void _scrollListener() {
+    if (controller.position.extentAfter < 500) {
+      setState(() {
+        if (option) {
+          savedNum = savedNum + 3;
+        } else {
+          reviewNum = reviewNum + 3;
+        }
+      });
+    }
   }
 
   @override
@@ -55,8 +71,15 @@ class _ProfilePageState extends State<ProfilePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getReviews();
     });
+    controller = ScrollController()..addListener(_scrollListener);
     // TODO: implement initState
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.removeListener(_scrollListener);
+    super.dispose();
   }
 
   @override
@@ -64,6 +87,12 @@ class _ProfilePageState extends State<ProfilePage> {
     final following = context.watch<ProfileState>().user.followings;
     final follower = context.watch<ProfileState>().user.followers;
     final saved = context.watch<ProfileState>().user.saved;
+    final List<Review> myReviews =
+        context.watch<ReviewState>().reviewList.toList();
+    Map onboarding = context.watch<ProfileState>().user.onboarding;
+    final int reviewLength = myReviews.length;
+    final int savedLength = saved.length;
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -75,78 +104,89 @@ class _ProfilePageState extends State<ProfilePage> {
           backgroundColor: Colors.white,
           resizeToAvoidBottomInset: false,
           body: ListView(
-              physics: ClampingScrollPhysics(),
+              physics: const ClampingScrollPhysics(),
               padding: EdgeInsets.zero,
+              controller: controller,
               children: [
-                Stack(
-                  children: [
-                    Container(
-                      height: 200,
-                      color: watchFollow ? Color(0xff808761) : kBasicColor,
-                    ),
-                    SizedBox(
-                      height: 320,
-                    ),
-                    Positioned(
-                        top: 70,
-                        left: 0,
-                        right: 0,
-                        child: ScoreBar(
-                          onTap: (val) {
-                            setState(() {
-                              if (modifyClicked) {
-                                modifyClicked = false;
-                                modifyingField = ModifyingField.none;
-                                idModify = false;
-                                nameModify = false;
-                              }
-
-                              watchFollow = !watchFollow;
-                              if (val != null && watchFollow == true) {
-                                option = val;
-                              } else {
-                                option = false;
-                              }
-                            });
-                          },
-                          tapped: watchFollow,
-                          followingCnt: following.length,
-                          followerCnt: follower.length,
-                        )),
-                    Positioned(
-                      top: 111,
-                      left: 40,
-                      right: 40,
-                      child: Container(
-                          child: ProfileCard(
-                              onNameClicked: () {
-                                // setState(() {
-                                //   nameModify = !nameModify;
-                                //   idModify = false;
-                                // });
-                              },
-                              onIdClicked: () {
-                                setState(() {
-                                  idModify = !idModify;
-                                  nameModify = false;
-                                });
-                              },
-                              onModifyClicked: () {
-                                setState(() {
-                                  modifyClicked = !modifyClicked;
+                GestureDetector(
+                  onTap: () {
+                    if (watchFollow) {
+                      setState(() {
+                        watchFollow = false;
+                      });
+                    }
+                  },
+                  child: Stack(
+                    children: [
+                      Container(
+                        height: 200,
+                        color:
+                            watchFollow ? const Color(0xff808761) : kBasicColor,
+                      ),
+                      const SizedBox(
+                        height: 320,
+                      ),
+                      Positioned(
+                          top: 70,
+                          left: 0,
+                          right: 0,
+                          child: ScoreBar(
+                            onTap: (val) {
+                              setState(() {
+                                if (modifyClicked) {
+                                  modifyClicked = false;
                                   modifyingField = ModifyingField.none;
                                   idModify = false;
                                   nameModify = false;
-                                });
-                              },
-                              watchFollow: watchFollow,
-                              nameModify: nameModify,
-                              idModify: idModify,
-                              modifyClicked: modifyClicked)),
-                    )
-                  ],
+                                }
+
+                                watchFollow = !watchFollow;
+                                if (val != null && watchFollow == true) {
+                                  option = val;
+                                } else {
+                                  option = false;
+                                }
+                              });
+                            },
+                            tapped: watchFollow,
+                            followingCnt: following.length,
+                            followerCnt: follower.length,
+                          )),
+                      Positioned(
+                        top: 111,
+                        left: 40,
+                        right: 40,
+                        child: Container(
+                            child: ProfileCard(
+                                onNameClicked: () {
+                                  // setState(() {
+                                  //   nameModify = !nameModify;
+                                  //   idModify = false;
+                                  // });
+                                },
+                                onIdClicked: () {
+                                  setState(() {
+                                    idModify = !idModify;
+                                    nameModify = false;
+                                  });
+                                },
+                                onModifyClicked: () {
+                                  setState(() {
+                                    modifyClicked = !modifyClicked;
+                                    modifyingField = ModifyingField.none;
+                                    idModify = false;
+                                    nameModify = false;
+                                  });
+                                },
+                                watchFollow: watchFollow,
+                                nameModify: nameModify,
+                                idModify: idModify,
+                                modifyClicked: modifyClicked)),
+                      )
+                    ],
+                  ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 26,
                 ),
                 modifyClicked
@@ -155,9 +195,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         onTap: () {
                           pushNewScreen(
                             context,
-                            screen: ModifyLocation(),
+                            screen: const ModifyLocation(),
                             withNavBar: false,
-                          );
+                          ).then((value) => setState(() {}));
                         },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -167,7 +207,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               width: 19,
                               height: 19,
                             ),
-                            Text(
+                            const Text(
                               " 관심 지역 ",
                               style: TextStyle(
                                   fontFamily: 'Suit',
@@ -175,7 +215,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   fontWeight: FontWeight.w600,
                                   fontSize: 12),
                             ),
-                            Text(
+                            const Text(
                               "수정하기",
                               style: TextStyle(
                                   fontFamily: 'Suit',
@@ -186,10 +226,12 @@ class _ProfilePageState extends State<ProfilePage> {
                           ],
                         ),
                       ))
-                    : SizedBox.shrink(),
-                modifyClicked ? SizedBox(height: 23) : SizedBox.shrink(),
+                    : const SizedBox.shrink(),
+                modifyClicked
+                    ? const SizedBox(height: 23)
+                    : const SizedBox.shrink(),
                 watchFollow
-                    ? SizedBox.shrink()
+                    ? const SizedBox.shrink()
                     : TasteProfile(
                         modifyClicked: modifyClicked,
                         modifyingField: modifyingField,
@@ -203,6 +245,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             modifyingField = ModifyingField.alcohol;
                           });
                         },
+                        onboarding: onboarding,
                       ),
                 SizedBox(
                   height: watchFollow ? 17 : 49,
@@ -230,7 +273,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           decoration: BoxDecoration(
                               border: Border(
                                   bottom: !option && !friendSearching
-                                      ? BorderSide(
+                                      ? const BorderSide(
                                           color: kSecondaryTextColor, width: 1)
                                       : BorderSide.none)),
                           child: Column(
@@ -278,7 +321,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                                       option ? 0.5 : 1)),
                                         ),
                                         Text(
-                                          '${myReviews == null ? 0 : myReviews!.length}',
+                                          '${myReviews == null ? 0 : reviewLength}',
                                           style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.w400,
@@ -287,14 +330,14 @@ class _ProfilePageState extends State<ProfilePage> {
                                         )
                                       ],
                                     ),
-                              SizedBox(
+                              const SizedBox(
                                 height: 8,
                               )
                             ],
                           ),
                         ),
                       ),
-                      SizedBox(width: 26),
+                      const SizedBox(width: 26),
                       GestureDetector(
                         behavior: HitTestBehavior.translucent,
                         onTap: () {
@@ -309,7 +352,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           decoration: BoxDecoration(
                               border: Border(
                                   bottom: option && !friendSearching
-                                      ? BorderSide(
+                                      ? const BorderSide(
                                           color: kSecondaryTextColor, width: 1)
                                       : BorderSide.none)),
                           child: Column(
@@ -357,7 +400,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                                       option ? 1 : 0.5)),
                                         ),
                                         Text(
-                                          '${saved.length}',
+                                          '${savedLength}',
                                           style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.w400,
@@ -366,7 +409,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                         )
                                       ],
                                     ),
-                              SizedBox(
+                              const SizedBox(
                                 height: 8,
                               ),
                             ],
@@ -377,18 +420,19 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
                 watchFollow
-                    ? SizedBox.shrink()
+                    ? const SizedBox.shrink()
                     : Padding(
                         padding: const EdgeInsets.only(top: 19.5, bottom: 80),
                         child: option
                             ? ProfileReviewsView(
-                                reviews: saved,
-                                count: saved.length,
+                                saved: saved,
+                                count: savedLength,
+                                showingLength: savedNum,
                                 forSaved: true)
                             : ProfileReviewsView(
-                                reviews: myReviews ?? [],
-                                count:
-                                    myReviews == null ? 0 : myReviews!.length,
+                                reviews: myReviews,
+                                count: reviewLength,
+                                showingLength: reviewNum,
                                 forSaved: false,
                               ),
                       ),
@@ -399,12 +443,16 @@ class _ProfilePageState extends State<ProfilePage> {
                         searchedTap: (hasFocus) {
                           if (hasFocus) {
                             setState(() {
+                              controller.animateTo(
+                                  controller.position.maxScrollExtent,
+                                  duration: Duration(milliseconds: 100),
+                                  curve: Curves.linear);
                               keyBoardShowing = true;
                               friendSearching = true;
                             });
                           }
                         })
-                    : SizedBox.shrink()
+                    : const SizedBox.shrink()
               ])),
     );
   }

@@ -2,58 +2,32 @@ import 'dart:convert';
 
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/models/custom_error.dart';
-import 'package:hangeureut/screens/main_screen/main_output.dart';
-import 'package:hangeureut/screens/profile_screen/profile_page_output.dart';
-import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_output.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hangeureut/screens/review_screen/review_output.dart';
+
 import 'package:http/http.dart' as http;
 
 String _url = 'ec2-3-35-52-247.ap-northeast-2.compute.amazonaws.com:3001';
 
 class RestaurantRepository {
-  Future<Map?> getRestaurants({required bool sortType}) async {
+  Future<List<Map>?> getRestaurants({required bool sortType}) async {
     // 사용자 위치 찾기
     // input 보내기
     // output 받기
-    List<Map>? responseR;
-    List<Map>? responseB;
-    List<Map>? responseC;
+    List<Map>? allRes;
 
     try {
-      Uri _uri = Uri.http(_url, '/restaurants/onlyRestaurant');
+      Uri _uri = Uri.http(_url, '/restaurants/popular');
 
       var response = await http.get(_uri);
       //print(response.body);
-      responseR =
-          (jsonDecode(response.body) as List).map((e) => e as Map).toList();
-    } catch (e) {
-      throw const CustomError(code: "알림", message: "식당 정보 받기 오류");
-    }
-    try {
-      Uri _uri = Uri.http(_url, '/restaurants/onlyBar');
-
-      var response = await http.get(_uri);
-      responseB =
-          (jsonDecode(response.body) as List).map((e) => e as Map).toList();
-    } catch (e) {
-      throw const CustomError(code: "알림", message: "식당 정보 받기 오류");
-    }
-    try {
-      Uri _uri = Uri.http(_url, '/restaurants/onlyCafe');
-
-      var response = await http.get(_uri);
-      responseC =
+      allRes =
           (jsonDecode(response.body) as List).map((e) => e as Map).toList();
     } catch (e) {
       throw const CustomError(code: "알림", message: "식당 정보 받기 오류");
     }
 
-    //await Future.delayed(Duration(milliseconds: 1000));
-    var map = {0: responseR, 1: responseB, 2: responseC};
-
-    return map;
+    return allRes;
   }
 
   Future<Map> getRestaurantsDetail({
@@ -81,7 +55,7 @@ class RestaurantRepository {
       Uri _uri = Uri.http(_url, '/reviews/restaurant/id/$resId');
 
       var response = await http.get(_uri);
-      print("reviewrepo${response.body}");
+      //print("reviewrepo${response.body}");
       List body = (jsonDecode(response.body) as List).map((e) {
         final eMap = e as Map;
         var date = eMap["date"];
@@ -89,7 +63,7 @@ class RestaurantRepository {
         eMap["date"] = "${val.year}년 ${val.month}월 ${val.day}일";
         return eMap;
       }).toList();
-      print("body$body");
+      //print("body$body");
       return body.reversed.toList();
     } catch (e) {
       throw CustomError(
@@ -108,7 +82,6 @@ class RestaurantRepository {
     try {
       Uri _uri = Uri.http(_url, '/reviews/$reviewId/user/$userId');
       var response = await http.put(_uri);
-      print(response.body);
 
       if (isAdd) {
         await usersRef
@@ -142,11 +115,12 @@ class RestaurantRepository {
         final eMap = e as Map;
         var date = eMap["date"];
         var val = DateTime.parse(date);
+
         eMap["date"] = "${val.year}년 ${val.month}월 ${val.day}일";
         return eMap;
       }).toList();
 
-      return body.reversed.toList();
+      return body.toList();
     } catch (e) {
       throw CustomError(
           code: "알림", message: "리뷰 정보 받기 오류", plugin: e.toString());
@@ -180,20 +154,8 @@ class RestaurantRepository {
         .set({"content": content, "userId": userId});
   }
 
-  Future<Map<String, List>?> getResForReview() async {
-    List popularResList = [];
-    List nearResList = [];
-
-    //백엔드 연결시 수정
-    popularResList = popularRes;
-    nearResList = nearRes;
-    return {
-      "popular": popularResList,
-      "near": nearResList,
-    };
-  }
-
-  Future<List?> getSearchedRestaurants({required String searchTerm}) async {
+  Future<List?> getSearchedRestaurants(
+      {required String searchTerm, int? length}) async {
     List searchedList = [];
     try {
       Uri _uri = Uri.http(_url, '/restaurants/search/$searchTerm');
@@ -202,6 +164,10 @@ class RestaurantRepository {
 
       searchedList =
           (jsonDecode(response.body) as List).map((e) => e as Map).toList();
+
+      if (length != null && searchedList.length > length) {
+        return searchedList.sublist(0, length);
+      }
 
       return searchedList;
     } catch (e) {

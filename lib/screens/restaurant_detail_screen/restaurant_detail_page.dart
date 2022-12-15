@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:hangeureut/models/custom_error.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
@@ -11,24 +12,26 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../constants.dart';
+import '../../models/review_model.dart';
+import '../../providers/restaurants/restaurants_provider.dart';
+import '../../providers/reviews/reviews_provider.dart';
+import '../../providers/reviews/reviews_state.dart';
+import '../../repositories/location_repository.dart';
 import '../../widgets/custom_round_rect_slider_thumb_shape.dart';
 import '../../widgets/res_title.dart';
 import '../../widgets/review_box.dart';
+import '../profile_screen/others_profile_page.dart';
 import '../review_screen/review_page.dart';
 import 'dart:math' as math;
+import 'package:collection/collection.dart';
 // 레이아웃 잡은 것 참고
 
 class RestaurantDetailPage extends StatefulWidget {
-  RestaurantDetailPage({
-    Key? key,
-    required this.resId,
-    required this.option,
-    this.cantPop = false,
-  }) : super(key: key);
+  RestaurantDetailPage({Key? key, required this.resId, required this.option})
+      : super(key: key);
   final String resId;
   final bool option; // false: 기록, true: 탐색
   static String routeName = "/restaurant_detail_page";
-  bool cantPop;
 
   @override
   State<RestaurantDetailPage> createState() => _RestaurantDetailPageState();
@@ -58,12 +61,37 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
     }
   }
 
+  Future<String> _getDistance(res) async {
+    Position? position;
+    try {
+      position = await determinePosition();
+    } catch (e) {
+      position = null;
+    }
+
+    if (position != null) {
+      int distance = await context.read<RestaurantsProvider>().getDistance(
+          address: res["address"],
+          resId: res["resId"],
+          locationData: position,
+          mainFilterNum: res["category1"]);
+
+      if (distance == -1) return "-";
+      String distanceString = distance < 1000
+          ? '${distance}m'
+          : '${(distance / 1000.0).toStringAsFixed(1)}km';
+
+      return distanceString;
+    } else {
+      return "-";
+    }
+  }
+
   Future<void> _getResDetail() async {
     try {
       res = await context
           .read<RestaurantRepository>()
           .getRestaurantsDetail(resId: widget.resId);
-
       setState(() {});
     } on CustomError catch (e) {
       print(e);
@@ -85,7 +113,6 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
           for (var e in otherReviews!) {
             // 내 아이디가 두번 이상 나오는 경우를 대비해서 comp설정
             if (myId == e["userId"] && !comp) {
-              myReview = e;
               comp = true;
             }
             if (e["likes"].contains(myId)) {
@@ -97,17 +124,15 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
             }
           }
         }
-
-        myReview != null ? preReview = true : null;
-        if (myReview != null) {
-          myOriginLiked = myReview!["likes"].contains(myId);
-          myLike = myOriginLiked;
-        }
       } on CustomError catch (e) {
         errorDialog(context, e);
       }
     }
     setState(() {});
+  }
+
+  void _getMyReviews() async {
+    await context.read<ReviewProvider>().getMyReviews();
   }
 
   @override
@@ -118,6 +143,12 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getReviews();
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.read<ReviewState>().reviewStatus == ReviewStatus.none) {
+        _getMyReviews();
+      }
     });
 
     opt = widget.option;
@@ -131,9 +162,19 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    print(myReview);
+    Review? myReview = context
+        .watch<ReviewState>()
+        .reviewList
+        .firstWhereOrNull((element) => element.resId == widget.resId);
+
+    myReview != null ? preReview = true : null;
+    if (myReview != null) {
+      myOriginLiked =
+          myReview.likes.contains(context.read<ProfileState>().user.id);
+      myLike = myOriginLiked;
+    }
+
     if (res != null && !savedSet) {
-      print(res!["resId"].runtimeType);
       savedSet = true;
       for (var e in savedList) {
         if (widget.resId == e["resId"]) {
@@ -156,13 +197,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                     ? setState(() {
                         detailView = false;
                       })
-                    : widget.cantPop
-                        ? pushNewScreen(context,
-                            screen: BasicScreenPage(),
-                            pageTransitionAnimation:
-                                PageTransitionAnimation.slideRight,
-                            withNavBar: false)
-                        : Navigator.pop(context);
+                    : Navigator.pop(context);
               },
               child: Icon(
                 Icons.arrow_back_ios,
@@ -171,7 +206,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
             ),
           ),
           res == null
-              ? SizedBox.shrink()
+              ? const SizedBox.shrink()
               : Padding(
                   padding: const EdgeInsets.only(right: 28.0, top: 40),
                   child: GestureDetector(
@@ -190,7 +225,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                     },
                     child: Column(
                       children: [
-                        Text(
+                        const Text(
                           "저장",
                           style: TextStyle(
                               fontSize: 10,
@@ -198,7 +233,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                               fontFamily: 'Suit',
                               color: kSecondaryTextColor),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 2,
                         ),
                         Image.asset(
@@ -215,7 +250,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
         ],
       ),
       res == null
-          ? SizedBox.shrink()
+          ? const SizedBox.shrink()
           : Padding(
               padding: const EdgeInsets.only(top: 19.0),
               child: ResTitle(
@@ -252,35 +287,31 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
               },
               child: detailView
                   ? Padding(
-                      padding: EdgeInsets.only(top: 44.5),
+                      padding: const EdgeInsets.only(top: 44.5),
                       child: reviewsDetailView())
                   : reviewsView())
-          : preReview
+          : myReview != null
               ? res == null
-                  ? SizedBox.shrink()
+                  ? const SizedBox.shrink()
                   : Padding(
                       padding: const EdgeInsets.only(top: 30.0),
                       child: ReviewBox(
                         resName: res!["name"],
-                        userId: myReview!["userId"],
-                        reviewId: myReview!["reviewId"],
-                        date: myReview!["date"],
-                        score: myReview!["score"],
-                        imgUrl: myReview!["imgUrl"],
-                        tag: resFilterTextsSh[myReview!["category"]]
-                            [myReview!["icon"] + 1],
-                        icon: resFilterIcons[myReview!["category"]]
-                            [myReview!["icon"]],
+                        userId: myReview.userId,
+                        reviewId: myReview.reviewId,
+                        date: myReview.date,
+                        score: 5 >= int.parse(myReview.score) &&
+                                int.parse(myReview.score) >= 1
+                            ? int.parse(myReview.score)
+                            : 5,
+                        imgUrl: myReview.imgUrl,
+                        tag: resFilterTextsSh[myReview.category]
+                            [myReview.icon + 1],
+                        icon: resFilterIcons[myReview.category][myReview.icon],
                         onLike: () {
-                          setState(() {
-                            myLike = !myLike;
-                          });
+                          setState(() {});
                         },
-                        likes: myLike == myOriginLiked
-                            ? myReview!["likes"].length
-                            : !myLike && myOriginLiked
-                                ? myReview!["likes"].length - 1
-                                : myReview!["likes"].length + 1,
+                        likes: myReview.likes.length,
                         liked: myLike,
                       ),
                     )
@@ -322,8 +353,8 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                 //shrinkWrap: true,
 
                 physics: opt
-                    ? AlwaysScrollableScrollPhysics()
-                    : NeverScrollableScrollPhysics(),
+                    ? const AlwaysScrollableScrollPhysics()
+                    : const NeverScrollableScrollPhysics(),
                 padding: EdgeInsets.zero,
                 itemCount: items.length,
                 itemBuilder: (context, int index) {
@@ -335,12 +366,12 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                   height: 83,
                   decoration: BoxDecoration(color: Colors.white, boxShadow: [
                     BoxShadow(
-                        offset: Offset(0, -4),
+                        offset: const Offset(0, -4),
                         blurRadius: 17,
                         color: Colors.black.withOpacity(0.15))
                   ]),
                   child: res == null
-                      ? SizedBox.shrink()
+                      ? const SizedBox.shrink()
                       : Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -353,34 +384,49 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                                 children: [
                                   Row(
                                     children: [
-                                      Text(
+                                      const Text(
                                         "지금 내 위치에서 ",
                                         style: TextStyle(
                                             height: 1.25,
-                                            fontSize: 12,
-                                            fontFamily: 'Suit',
+                                            fontWeight: FontWeight.w700,
                                             color: kSecondaryTextColor,
-                                            fontWeight: FontWeight.w700),
-                                      ),
-                                      Text(
-                                        res!["distance"] == null
-                                            ? "거리 확인 불가"
-                                            : "${res!["distance"]}m",
-                                        style: TextStyle(
-                                            height: 1.25,
-                                            fontSize: 12,
                                             fontFamily: 'Suit',
-                                            color: kBasicColor,
-                                            fontWeight: FontWeight.w700),
+                                            fontSize: 12),
                                       ),
+                                      FutureBuilder(
+                                          future: _getDistance(res),
+                                          builder: (BuildContext context,
+                                              AsyncSnapshot<String> snapshot) {
+                                            if (!snapshot.hasData) {
+                                              return const Text(
+                                                "-",
+                                                style: TextStyle(
+                                                    height: 1.25,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: kBasicColor,
+                                                    fontFamily: 'Suit',
+                                                    fontSize: 12),
+                                              );
+                                            } else {
+                                              return Text(
+                                                snapshot.data!,
+                                                style: const TextStyle(
+                                                    height: 1.25,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: kBasicColor,
+                                                    fontFamily: 'Suit',
+                                                    fontSize: 12),
+                                              );
+                                            }
+                                          }),
                                     ],
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 4,
                                   ),
                                   Text(
                                     res!["address"],
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         height: 1,
                                         fontSize: 11,
                                         fontFamily: 'Suit',
@@ -397,7 +443,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                                 try {
                                   await _launchUrl(_url);
                                 } catch (e) {
-                                  final ec = CustomError(
+                                  final ec = const CustomError(
                                       code: '', message: '카카오맵을 열 수 없습니다');
                                   errorDialog(context, ec);
                                 }
@@ -412,7 +458,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                                         color: kBasicColor,
                                         borderRadius:
                                             BorderRadius.circular(19)),
-                                    child: Center(
+                                    child: const Center(
                                       child: Text(
                                         "길찾기",
                                         style: TextStyle(
@@ -427,7 +473,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                           ],
                         ),
                 )
-              : SizedBox.shrink(),
+              : const SizedBox.shrink(),
         ],
       ),
     );
@@ -479,7 +525,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
           setState(() {
             likes[key] = !likes[key];
           });
-          await context.read<ProfileProvider>().reviewLike(
+          await context.read<ReviewProvider>().reviewLike(
               resName: res!["name"],
               targetId: e["userId"],
               reviewId: e["reviewId"],
@@ -521,7 +567,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
               child: Center(
                 child: Text(
                   review["userName"],
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontWeight: FontWeight.w900,
                       color: kSecondaryTextColor,
                       fontSize: 12,
@@ -531,10 +577,10 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
               width: 55,
               height: 29,
               decoration: BoxDecoration(
-                  color: Color(0xfff3f3f2),
+                  color: const Color(0xfff3f3f2),
                   borderRadius: BorderRadius.circular(11)),
             ),
-            SizedBox(
+            const SizedBox(
               height: 14,
             ),
             ReviewBox(
@@ -542,9 +588,14 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
               userId: review["userId"],
               reviewId: review["reviewId"],
               date: review["date"],
-              score: review["score"],
+              score: 5 >= int.parse(review!['score']) &&
+                      int.parse(review!["score"]) >= 1
+                  ? int.parse(review!["score"])
+                  : 5,
               imgUrl: review["imgUrl"],
-              icon: resFilterIcons[review["category"]][review["icon"]],
+              icon: review["icon"] == -1
+                  ? ""
+                  : resFilterIcons[review["category"]][review["icon"]],
               tag: resFilterTextsSh[review["category"]][review["icon"] + 1],
               onLike: () {
                 setState(() {
@@ -558,7 +609,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                       : review["likes"].length + 1,
               liked: likes[index],
             ),
-            SizedBox(
+            const SizedBox(
               height: 65,
             )
           ],
@@ -602,7 +653,8 @@ class OptionRow extends StatelessWidget {
                   border: Border(
                       bottom: option
                           ? BorderSide.none
-                          : BorderSide(color: kSecondaryTextColor, width: 1))),
+                          : const BorderSide(
+                              color: kSecondaryTextColor, width: 1))),
               child: Column(
                 children: [
                   Text(
@@ -613,14 +665,14 @@ class OptionRow extends StatelessWidget {
                         color:
                             kSecondaryTextColor.withOpacity(option ? 0.5 : 1)),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 8,
                   )
                 ],
               ),
             ),
           ),
-          SizedBox(width: 26),
+          const SizedBox(width: 26),
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: onTap,
@@ -629,7 +681,8 @@ class OptionRow extends StatelessWidget {
               decoration: BoxDecoration(
                   border: Border(
                       bottom: option
-                          ? BorderSide(color: kSecondaryTextColor, width: 1)
+                          ? const BorderSide(
+                              color: kSecondaryTextColor, width: 1)
                           : BorderSide.none)),
               child: Column(
                 children: [
@@ -641,7 +694,7 @@ class OptionRow extends StatelessWidget {
                         color:
                             kSecondaryTextColor.withOpacity(option ? 1 : 0.5)),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 8,
                   ),
                 ],
@@ -678,32 +731,32 @@ class ScoringBox extends StatelessWidget {
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-                offset: Offset(0, 4),
+                offset: const Offset(0, 4),
                 blurRadius: 17,
                 color: Colors.black.withOpacity(0.08))
           ]),
       child: Column(
         children: [
-          SizedBox(
+          const SizedBox(
             height: 48,
           ),
           Text(
             resScoreIcons[score - 1][0],
-            style: TextStyle(
+            style: const TextStyle(
                 fontFamily: 'Suit', fontWeight: FontWeight.w800, fontSize: 55),
           ),
-          SizedBox(
+          const SizedBox(
             height: 1,
           ),
           Text(
             resScoreIcons[score - 1][1],
-            style: TextStyle(
+            style: const TextStyle(
                 fontFamily: 'Suit',
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
                 color: kSecondaryTextColor),
           ),
-          SizedBox(
+          const SizedBox(
             height: 30,
           ),
           GestureDetector(
@@ -714,7 +767,7 @@ class ScoringBox extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(30),
-                      color: Color(0xffd9d9d9).withOpacity(0.5),
+                      color: const Color(0xffd9d9d9).withOpacity(0.5),
                     ),
                     height: 6,
                   ),
@@ -724,7 +777,7 @@ class ScoringBox extends StatelessWidget {
                       overlayShape: SliderComponentShape.noOverlay,
                       trackHeight: 0,
                       thumbColor: kBasicColor,
-                      thumbShape: CustomRoundSliderThumbShape(
+                      thumbShape: const CustomRoundSliderThumbShape(
                         enabledThumbRadius: 8,
                         elevation: 0,
                       )),
@@ -745,11 +798,11 @@ class ScoringBox extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 6,
           ),
           Padding(
-              padding: EdgeInsets.symmetric(horizontal: 48),
+              padding: const EdgeInsets.symmetric(horizontal: 48),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -760,7 +813,7 @@ class ScoringBox extends StatelessWidget {
                   Text("1", style: ScoreTextStyle(1, score))
                 ],
               )),
-          SizedBox(
+          const SizedBox(
             height: 38,
           ),
           GestureDetector(
@@ -768,7 +821,7 @@ class ScoringBox extends StatelessWidget {
             child: Container(
               width: 92,
               height: 44,
-              child: Center(
+              child: const Center(
                   child: Text(
                 "완료",
                 style: TextStyle(
@@ -778,7 +831,7 @@ class ScoringBox extends StatelessWidget {
                     fontSize: 15),
               )),
               decoration: BoxDecoration(
-                  color: Color(0xffececec),
+                  color: const Color(0xffececec),
                   borderRadius: BorderRadius.circular(15)),
             ),
           ),
@@ -790,7 +843,7 @@ class ScoringBox extends StatelessWidget {
 
 TextStyle ScoreTextStyle(num, score) {
   return num == score
-      ? TextStyle(
+      ? const TextStyle(
           fontWeight: FontWeight.w900,
           fontFamily: 'Suit',
           color: kBasicColor,

@@ -1,13 +1,11 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_page.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/contents/content_state.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import '../../repositories/restaurant_repository.dart';
+import '../../widgets/loading_widget.dart';
 
 class CustomContentsPage extends StatefulWidget {
   const CustomContentsPage(
@@ -18,7 +16,8 @@ class CustomContentsPage extends StatefulWidget {
       this.tag = "",
       this.icon = "",
       required this.titleImage,
-      required this.allContents})
+      required this.allContents,
+      this.resIds = const []})
       : super(key: key);
   final List images;
   final String title;
@@ -27,118 +26,143 @@ class CustomContentsPage extends StatefulWidget {
   final String tag;
   final String titleImage;
   final List allContents;
+  final List resIds;
 
   @override
   State<CustomContentsPage> createState() => _CustomContentsPageState();
 }
 
 class _CustomContentsPageState extends State<CustomContentsPage> {
+  Future<Map> getRes(String resId) async {
+    Map res = await context
+        .read<RestaurantRepository>()
+        .getRestaurantsDetail(resId: resId);
+    return res;
+  }
+
+  List imgList = [];
+
+  Future getImages() async {
+    for (var e in widget.images) {
+      imgList.add(NetworkImage(e));
+    }
+    for (var img in imgList) {
+      await precacheImage(img, context);
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<Widget> items = [];
-    items.add(topWidget(context));
-    int length = widget.images.length;
-
-    widget.images.asMap().forEach((index, element) {
-      index == 0 || index == length - 1
-          ? items.add(CachedNetworkImage(
-              imageUrl: element,
-              progressIndicatorBuilder: (context, url, downloadProgress) =>
-                  Container(
-                color: Colors.black.withOpacity(0.1),
-              ),
-              errorWidget: (context, url, error) => Icon(Icons.error),
-            ))
-          : items.add(Column(
-              children: [
-                ResCard(),
-                Container(
-                    color: Colors.white,
-                    child: CachedNetworkImage(
-                      imageUrl: element,
-                      progressIndicatorBuilder:
-                          (context, url, downloadProgress) => Container(
-                        width: double.infinity,
-                        height: 400,
-                        padding: EdgeInsets.symmetric(horizontal: 30),
-                        color: Colors.grey.withOpacity(0.2),
-                      ),
-                      errorWidget: (context, url, error) => Icon(Icons.error),
-                    )),
-              ],
-            ));
-    });
-
-    items.add(SizedBox(
-      height: 50,
-    ));
-
-    items.add(Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            child: Divider(
-              thickness: 1,
-              color: kSecondaryTextColor,
-            ),
-            width: 350,
-          ),
-          SizedBox(
-            height: 38,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 33,
-              ),
-              Text(
-                "다른",
-                style: TextStyle(
-                    fontFamily: 'Suit',
-                    fontSize: 18,
-                    color: kBasicColor,
-                    fontWeight: FontWeight.w900,
-                    height: 1),
-              ),
-              Text(" 콘텐츠도 보기",
-                  style: TextStyle(
-                      fontFamily: 'Suit',
-                      fontSize: 18,
-                      color: kSecondaryTextColor,
-                      fontWeight: FontWeight.w900,
-                      height: 1)),
-            ],
-          ),
-          SizedBox(
-            height: 20,
-          ),
-        ],
-      ),
-    ));
-
-    var list = List<int>.generate(widget.allContents.length, (i) => i)
-      ..shuffle();
-    list = list.take(3).toList();
-    for (var i in list) {
-      items.add(Padding(
-        padding: const EdgeInsets.only(bottom: 15.0),
-        child: nextWidget(widget.allContents[i], widget.allContents),
-      ));
-    }
-
-    items.add(SizedBox(
-      height: 70,
-    ));
-
-    //items.add();
-    //List.generate(images.length, (index) => Image.network(images[index]));
     return Scaffold(
-      body: ListView(
-        padding: EdgeInsets.zero,
-        children: items,
-      ),
+      body: FutureBuilder(
+          future: getImages(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData)
+              return LoadingWidget();
+            else {
+              List<Widget> items = [];
+              items.add(topWidget(context));
+              int length = widget.images.length;
+
+              widget.images.asMap().forEach((index, element) {
+                index == 0 || index == length - 1
+                    ? items.add(Image(image: imgList[index]))
+                    : items.add(Column(
+                        children: [
+                          !widget.resIds.asMap().containsKey(index - 1)
+                              ? const SizedBox.shrink()
+                              : FutureBuilder(
+                                  future: getRes(widget.resIds[index - 1]),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData) {
+                                      Map dataMap = snapshot.data as Map;
+                                      return ResCard(
+                                        title: dataMap["name"],
+                                        detail: dataMap["detail"],
+                                        score: dataMap["score"],
+                                        resId: dataMap["resId"].toString(),
+                                      );
+                                    } else {
+                                      return ResCard();
+                                    }
+                                  },
+                                ),
+                          Container(
+                              color: Colors.white,
+                              child: Image(image: imgList[index])),
+                        ],
+                      ));
+              });
+
+              items.add(const SizedBox(
+                height: 50,
+              ));
+
+              items.add(Container(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(
+                      child: Divider(
+                        thickness: 1,
+                        color: kSecondaryTextColor,
+                      ),
+                      width: 350,
+                    ),
+                    const SizedBox(
+                      height: 38,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const SizedBox(
+                          width: 33,
+                        ),
+                        const Text(
+                          "다른",
+                          style: TextStyle(
+                              fontFamily: 'Suit',
+                              fontSize: 18,
+                              color: kBasicColor,
+                              fontWeight: FontWeight.w900,
+                              height: 1),
+                        ),
+                        const Text(" 콘텐츠도 보기",
+                            style: TextStyle(
+                                fontFamily: 'Suit',
+                                fontSize: 18,
+                                color: kSecondaryTextColor,
+                                fontWeight: FontWeight.w900,
+                                height: 1)),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                  ],
+                ),
+              ));
+
+              var list = List<int>.generate(widget.allContents.length, (i) => i)
+                ..shuffle();
+              list = list.take(3).toList();
+              for (var i in list) {
+                items.add(Padding(
+                  padding: const EdgeInsets.only(bottom: 15.0),
+                  child: nextWidget(widget.allContents[i], widget.allContents),
+                ));
+              }
+
+              items.add(const SizedBox(
+                height: 70,
+              ));
+              return ListView(
+                padding: EdgeInsets.zero,
+                children: items,
+              );
+            }
+          }),
     );
   }
 
@@ -159,6 +183,9 @@ class _CustomContentsPageState extends State<CustomContentsPage> {
                   icon: targetContents["icon"],
                   tag: targetContents["tag"],
                   allContents: allContents,
+                  resIds: targetContents.containsKey("resIds")
+                      ? targetContents["resIds"]
+                      : [],
                 ),
               ));
         },
@@ -169,14 +196,21 @@ class _CustomContentsPageState extends State<CustomContentsPage> {
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 324),
                 child: ClipRRect(
-                  child: CachedNetworkImage(
-                    imageUrl: targetContents["titleImage"],
+                  child: Image.network(
+                    targetContents["titleImage"],
                     fit: BoxFit.cover,
-                    progressIndicatorBuilder:
-                        (context, url, downloadProgress) => Container(
-                      color: Colors.black.withOpacity(0.1),
-                    ),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    loadingBuilder: (context, widget, _) {
+                      return Container(
+                        color: Colors.black.withOpacity(0.1),
+                        child: widget,
+                      );
+                    },
+                    errorBuilder: (context, widget, _) {
+                      return Image.asset(
+                        "images/error_tile.png",
+                        fit: BoxFit.cover,
+                      );
+                    },
                   ),
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -190,7 +224,7 @@ class _CustomContentsPageState extends State<CustomContentsPage> {
                 children: [
                   Text(
                     targetContents["subTitle"],
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontWeight: FontWeight.w400,
                         //height: 1,
                         fontSize: 14,
@@ -199,7 +233,7 @@ class _CustomContentsPageState extends State<CustomContentsPage> {
                   ),
                   Text(
                     targetContents["title"],
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontWeight: FontWeight.w900,
                         //height: 1,
                         fontSize: 30,
@@ -221,7 +255,7 @@ class _CustomContentsPageState extends State<CustomContentsPage> {
                 child: Center(
                     child: Text(
                   "${targetContents["icon"]} ${targetContents["tag"]}",
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontFamily: 'Suit',
                       color: kSecondaryTextColor,
                       fontSize: 13,
@@ -236,28 +270,50 @@ class _CustomContentsPageState extends State<CustomContentsPage> {
   }
 
   Widget topWidget(context) {
-    return Container(
+    return SizedBox(
       height: 338,
       child: Stack(
         children: [
-          Container(
+          SizedBox(
             height: 303,
             child: Stack(
               children: [
-                Container(
+                SizedBox(
                   height: 303,
                   width: double.infinity,
-                  child: CachedNetworkImage(
-                    imageUrl: widget.titleImage,
+                  child: Image.network(
+                    widget.titleImage,
                     fit: BoxFit.cover,
-                    progressIndicatorBuilder:
-                        (context, url, downloadProgress) => Container(
-                      width: double.infinity,
-                      color: Colors.black.withOpacity(0.1),
-                    ),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    loadingBuilder: (context, widget, _) {
+                      return Container(
+                        color: Colors.black.withOpacity(0.1),
+                        child: widget,
+                      );
+                    },
+                    errorBuilder: (context, widget, _) {
+                      return Image.asset(
+                        "images/error_tile.png",
+                        fit: BoxFit.cover,
+                      );
+                    },
                   ),
                 ),
+                Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      height: 216,
+                      decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                        colors: [
+                          Colors.black.withOpacity(0),
+                          Colors.black.withOpacity(0.23)
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      )),
+                    )),
                 Positioned(
                   bottom: 30,
                   left: 31,
@@ -266,7 +322,7 @@ class _CustomContentsPageState extends State<CustomContentsPage> {
                     children: [
                       Text(
                         widget.subTitle,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontWeight: FontWeight.w400,
                             //height: 1,
                             fontSize: 18,
@@ -275,7 +331,7 @@ class _CustomContentsPageState extends State<CustomContentsPage> {
                       ),
                       Text(
                         widget.title,
-                        style: TextStyle(
+                        style: const TextStyle(
                             fontWeight: FontWeight.w900,
                             //height: 1,
                             fontSize: 35,
@@ -299,14 +355,14 @@ class _CustomContentsPageState extends State<CustomContentsPage> {
                   borderRadius: BorderRadius.circular(19.5),
                   boxShadow: [
                     BoxShadow(
-                        offset: Offset(0, 1),
+                        offset: const Offset(0, 1),
                         blurRadius: 5,
                         color: kSecondaryTextColor.withOpacity(0.4))
                   ]),
               child: Center(
                 child: Text(
                   "${widget.icon} ${widget.tag}",
-                  style: TextStyle(
+                  style: const TextStyle(
                       height: 1,
                       fontSize: 14,
                       fontFamily: 'Suit',
@@ -320,7 +376,7 @@ class _CustomContentsPageState extends State<CustomContentsPage> {
               top: 54,
               left: 34,
               child: IconButton(
-                icon: Icon(
+                icon: const Icon(
                   Icons.arrow_back_ios,
                   color: Colors.white,
                 ),
@@ -336,11 +392,15 @@ class _CustomContentsPageState extends State<CustomContentsPage> {
 
 class ResCard extends StatelessWidget {
   ResCard(
-      {Key? key, this.title = "", this.detail = "", this.score = 0, this.resId})
+      {Key? key,
+      this.title = "",
+      this.detail = "",
+      this.score = "?",
+      this.resId})
       : super(key: key);
   final String title;
   final String detail;
-  final int score;
+  final String score;
   final String? resId;
   BorderSide _borderSide =
       BorderSide(color: kSecondaryTextColor.withOpacity(0.2), width: 1);
@@ -359,26 +419,26 @@ class ResCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   Text(
-                    "dhfkfkf",
-                    style: TextStyle(
+                    title,
+                    style: const TextStyle(
                         fontWeight: FontWeight.w800,
                         fontFamily: 'Suit',
                         fontSize: 18,
                         color: kSecondaryTextColor),
                   ),
                   Text(
-                    "gddfdafdafdagd",
-                    style: TextStyle(
+                    detail,
+                    style: const TextStyle(
                         fontWeight: FontWeight.w400,
                         fontFamily: 'Suit',
                         fontSize: 12,
                         color: kSecondaryTextColor),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 15,
                   ),
                   Row(
@@ -388,12 +448,12 @@ class ResCard extends StatelessWidget {
                         width: 70,
                         height: 29,
                         decoration: BoxDecoration(
-                            color: Color(0xfff3f3f2),
+                            color: const Color(0xfff3f3f2),
                             borderRadius: BorderRadius.circular(11)),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
+                            const Text(
                               "평점 ",
                               style: TextStyle(
                                   fontWeight: FontWeight.w500,
@@ -402,8 +462,8 @@ class ResCard extends StatelessWidget {
                                   color: kSecondaryTextColor),
                             ),
                             Text(
-                              "4.3",
-                              style: TextStyle(
+                              score,
+                              style: const TextStyle(
                                   fontWeight: FontWeight.w900,
                                   fontFamily: 'Suit',
                                   fontSize: 12,
@@ -412,7 +472,7 @@ class ResCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 8,
                       ),
                       GestureDetector(
@@ -421,16 +481,17 @@ class ResCard extends StatelessWidget {
                           if (resId != null) {
                             pushNewScreen(context,
                                 screen: RestaurantDetailPage(
-                                    resId: resId!, option: true));
+                                    resId: resId!, option: true),
+                                withNavBar: false);
                           }
                         },
                         child: Container(
                           width: 70,
                           height: 29,
                           decoration: BoxDecoration(
-                              color: Color(0xfff3f3f2),
+                              color: const Color(0xfff3f3f2),
                               borderRadius: BorderRadius.circular(11)),
-                          child: Center(
+                          child: const Center(
                             child: Text(
                               "자세히",
                               style: TextStyle(
@@ -449,7 +510,7 @@ class ResCard extends StatelessWidget {
             ),
             decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(19),
                     bottomRight: Radius.circular(19)),
                 border: Border(
@@ -464,7 +525,7 @@ class ResCard extends StatelessWidget {
             height: 126,
             decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(19),
                     bottomLeft: Radius.circular(19)),
                 border: Border(

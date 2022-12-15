@@ -35,7 +35,7 @@ class SignupProvider extends StateNotifier<SignupState> with LocatorMixin {
     }
   }
 
-  Future<void> signOutComp() async {
+  void signOutComp() {
     state = state.copyWith(signupStatus: SignupStatus.initial);
   }
 }

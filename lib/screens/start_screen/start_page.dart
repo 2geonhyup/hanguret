@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:flutter/material.dart';
 import 'package:hangeureut/providers/auth/auth_provider.dart';
+import 'package:hangeureut/providers/auth/auth_state.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/providers/signup/signup_state.dart';
 import 'package:hangeureut/repositories/auth_repository.dart';
@@ -8,6 +9,7 @@ import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
 import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/splash_screen/splash_page.dart';
 import 'package:hangeureut/screens/start_screen/start_view_model.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:provider/provider.dart';
 
 import '../../constants.dart';
@@ -40,7 +42,7 @@ class _StartPageState extends State<StartPage> {
     fbAuth.User? user = fbAuth.FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      _loggedIn = true;
+      _loggedIn = false;
     }
 
     Future.delayed(const Duration(milliseconds: 600), () {
@@ -82,8 +84,7 @@ class _StartPageState extends State<StartPage> {
     //     //TODO: 이부분 전환 부자연스러운 것 고치기
     //     Navigator.popAndPushNamed(context, SplashPage.routeName);
     //   });
-    // }
-    print(11);
+    //
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -190,7 +191,6 @@ class LoginButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(12);
     SignupStatus status = context.watch<SignupState>().signupStatus;
     bool loading =
         status == SignupStatus.success || status == SignupStatus.submitting;

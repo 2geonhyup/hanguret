@@ -145,7 +145,7 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
 
   Future<void> setName({required String? name}) async {
     if (name == null || name == "") {
-      throw CustomError(
+      throw const CustomError(
         code: 'Exception',
         message: "이름은 한글자 이상이어야 합니다",
       );
@@ -181,7 +181,7 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
 
   Future<void> setCId({required String? cID}) async {
     if (cID == null || cID == "") {
-      throw CustomError(
+      throw const CustomError(
         code: 'Exception',
         message: "아이디는 한글자 이상이어야 합니다",
       );
@@ -212,9 +212,9 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
         .toList()
         .length;
     if (tasteCnt < 2) {
-      throw CustomError(message: "입맛 키워드는 2개 이상 선택해주세요");
+      throw const CustomError(message: "입맛 키워드는 2개 이상 선택해주세요");
     } else if (alcoholCnt == 0) {
-      throw CustomError(message: "주종은 1개 이상 선택해주세요");
+      throw const CustomError(message: "주종은 1개 이상 선택해주세요");
     }
     try {
       await read<ProfileRepository>().setOnboarding(onboarding: onboarding);
@@ -267,29 +267,6 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
     return 21;
   }
 
-  Future<void> reviewLike(
-      {required String targetId,
-      required int reviewId,
-      required String resName,
-      required bool isAdd}) async {
-    String userId = state.user.id;
-    int userIcon = state.user.icon;
-    String userName = state.user.name;
-
-    try {
-      await read<RestaurantRepository>().reviewLike(
-          userId: userId,
-          userIcon: userIcon,
-          userName: userName,
-          targetId: targetId,
-          reviewId: reviewId,
-          resName: resName,
-          isAdd: isAdd);
-    } on CustomError catch (e) {
-      rethrow;
-    }
-  }
-
   Future<List> searchUser({String? value}) async {
     if (value == null || value == "") return [];
     List semiResult = [];
@@ -319,7 +296,7 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
         .map((f) => jsonDecode(f) as Map)
         .toList();
 
-    print(semiResult);
+    //print(semiResult);
     List preSearchedId = semiResult.map((e) => e["id"]).toList();
 
     try {

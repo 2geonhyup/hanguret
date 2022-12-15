@@ -54,12 +54,12 @@ class User extends Equatable {
       id: '',
       name: '',
       email: '',
-      onboarding: {},
-      followings: [],
-      followers: [],
+      onboarding: const {},
+      followings: const [],
+      followers: const [],
       icon: 0,
       first: false,
-      saved: [],
+      saved: const [],
       cId: '',
     );
   }

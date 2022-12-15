@@ -7,16 +7,37 @@ enum ResStatus {
 }
 
 class RestaurantsState extends Equatable {
+  final List allRes;
   final Map allResult;
+  final Map allResultByDistance;
   final ResStatus resStatus;
-  RestaurantsState({
-    required this.resStatus,
-    required this.allResult,
-  });
+  final Map<String, Map> ranking;
+  RestaurantsState(
+      {required this.allRes,
+      required this.resStatus,
+      required this.allResult,
+      required this.ranking,
+      required this.allResultByDistance});
 
   factory RestaurantsState.initial() {
     return RestaurantsState(
-        resStatus: ResStatus.initial, allResult: {0: [], 1: [], 2: []});
+        resStatus: ResStatus.initial,
+        allRes: const [],
+        allResult: const {
+          0: [],
+          1: [],
+          2: []
+        },
+        allResultByDistance: const {
+          0: [],
+          1: [],
+          2: []
+        },
+        ranking: const {
+          "Yonsei": {},
+          "Sogang": {},
+          "Ewha": {},
+        });
   }
 
   @override
@@ -27,11 +48,16 @@ class RestaurantsState extends Equatable {
 
   RestaurantsState copyWith({
     ResStatus? resStatus,
+    List? allRes,
     Map? allResult,
+    Map<String, Map>? ranking,
+    Map? allResultByDistance,
   }) {
     return RestaurantsState(
-      resStatus: resStatus ?? this.resStatus,
-      allResult: allResult ?? this.allResult,
-    );
+        allRes: allRes ?? this.allRes,
+        resStatus: resStatus ?? this.resStatus,
+        allResult: allResult ?? this.allResult,
+        ranking: ranking ?? this.ranking,
+        allResultByDistance: allResultByDistance ?? this.allResultByDistance);
   }
 }

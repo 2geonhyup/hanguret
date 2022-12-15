@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
@@ -8,6 +10,7 @@ import '../profile_screen/profile_page.dart';
 class MyProfileCard extends StatelessWidget {
   MyProfileCard({required this.icon, required this.name, required this.id});
   final icon;
+  // ignore: prefer_typing_uninitialized_variables
   final name;
   final id;
   @override
@@ -18,10 +21,10 @@ class MyProfileCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-                color: Color(0xff000000).withOpacity(0.08),
+                color: const Color(0xff000000).withOpacity(0.08),
                 blurRadius: 6,
                 spreadRadius: 0,
-                offset: Offset(
+                offset: const Offset(
                   0,
                   4,
                 )),
@@ -30,31 +33,31 @@ class MyProfileCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(
+          const SizedBox(
             height: 24,
           ),
           ProfileIconBox(content: profileIcons[icon]),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
           Text(
             name,
-            style: TextStyle(
+            style: const TextStyle(
                 color: Colors.white,
                 fontFamily: 'Suit',
                 fontSize: 20,
                 fontWeight: FontWeight.w700),
           ),
-          SizedBox(
+          const SizedBox(
             height: 3,
           ),
           Text("@$id",
-              style: TextStyle(
+              style: const TextStyle(
                   color: Colors.white,
                   fontSize: 11,
                   fontWeight: FontWeight.w400,
                   fontFamily: 'Suit')),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           Center(
@@ -62,8 +65,8 @@ class MyProfileCard extends StatelessWidget {
               onTap: () {
                 pushNewScreenWithRouteSettings(
                   context,
-                  screen: ProfilePage(),
-                  settings: RouteSettings(name: ProfilePage.routeName),
+                  screen: const ProfilePage(),
+                  settings: const RouteSettings(name: ProfilePage.routeName),
                   withNavBar: true,
                 );
               },
@@ -73,7 +76,7 @@ class MyProfileCard extends StatelessWidget {
                 decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(6)),
-                child: Center(
+                child: const Center(
                   child: Text(
                     "내 프로필 보기",
                     style: TextStyle(
@@ -86,7 +89,7 @@ class MyProfileCard extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 24,
           ),
         ],

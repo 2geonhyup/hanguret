@@ -2,7 +2,9 @@
 
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:hangeureut/constants.dart';
@@ -20,6 +22,7 @@ import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/user_model.dart';
+import '../../providers/reviews/reviews_provider.dart';
 import '../../repositories/review_repository.dart';
 import '../../widgets/bottom_navigation_bar.dart';
 import '../../widgets/custom_round_rect_slider_thumb_shape.dart';
@@ -45,6 +48,21 @@ class ReviewPage extends StatefulWidget {
   State<ReviewPage> createState() => _ReviewPageState();
 }
 
+class MyHorizontalDragGestureRecognizer
+    extends HorizontalDragGestureRecognizer {
+  @override
+  void rejectGesture(int pointer) {
+    acceptGesture(pointer);
+  }
+}
+
+class MyVerticalDragGestureRecognizer extends VerticalDragGestureRecognizer {
+  @override
+  void rejectGesture(int pointer) {
+    acceptGesture(pointer);
+  }
+}
+
 class _ReviewPageState extends State<ReviewPage> {
   bool scoring = false;
   late int score;
@@ -52,6 +70,8 @@ class _ReviewPageState extends State<ReviewPage> {
   int category = 0;
   int option = -1;
   bool scrollable = true;
+  bool control = false;
+  ScrollPhysics physics = AlwaysScrollableScrollPhysics();
 
   final cropKey = GlobalKey<CropState>();
 
@@ -59,6 +79,18 @@ class _ReviewPageState extends State<ReviewPage> {
   File? _sample;
   File? _lastCropped;
   bool _enabled = true;
+
+  disableScroll() {
+    setState(() {
+      physics = NeverScrollableScrollPhysics();
+    });
+  }
+
+  enableScroll() {
+    setState(() {
+      physics = AlwaysScrollableScrollPhysics();
+    });
+  }
 
   @override
   void initState() {
@@ -76,38 +108,59 @@ class _ReviewPageState extends State<ReviewPage> {
     _lastCropped?.delete();
   }
 
-  Widget ImageBox({required onDrag, required onDragEnd}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 33.0),
-      child: widget.imgUrl != null && _sample == null
-          ? GestureDetector(
-              onTap: () async {
-                try {
-                  await _openImage();
-                } catch (e) {
-                  errorDialog(context,
-                      CustomError(code: "알림", plugin: "해당 사진을 가져올 수 없습니다"));
-                }
-              },
+  Widget ImageBox() {
+    return _sample == null
+        ? Padding(
+            padding: EdgeInsets.symmetric(horizontal: 33.0, vertical: 10),
+            child: AspectRatio(
+              aspectRatio: widget.imgUrl == null ? 1.65 : 1,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(19),
-                child: Image.network(
-                  widget.imgUrl!,
-                  width: 324,
-                  height: 324,
-                  fit: BoxFit.fill,
-                ),
+                child: widget.imgUrl != null
+                    ? GestureDetector(
+                        onTap: () async {
+                          try {
+                            await _openImage();
+                          } catch (e) {
+                            print(e.toString());
+                            errorDialog(
+                                context,
+                                CustomError(
+                                    code: "알림", plugin: "해당 사진을 가져올 수 없습니다"));
+                          }
+                        },
+                        child: Image.network(
+                          widget.imgUrl!,
+                          fit: BoxFit.fill,
+                          loadingBuilder: (context, widget, _) {
+                            return Container(
+                              color: Colors.black.withOpacity(0.1),
+                              child: widget,
+                            );
+                          },
+                          errorBuilder: (context, widget, _) {
+                            return Image.asset(
+                              "images/error_tile.png",
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ))
+                    : Container(
+                        clipBehavior: Clip.hardEdge,
+                        decoration: BoxDecoration(
+                          color: Color(0xffececec),
+                        ),
+                        child: _buildOpenImage()),
               ),
-            )
-          : Container(
-              clipBehavior: Clip.hardEdge,
-              width: 324,
-              height: _sample == null ? 196 : 324,
-              decoration: BoxDecoration(
-                  color: Color(0xffececec),
-                  borderRadius: BorderRadius.circular(19)),
-              child: _sample == null ? _buildOpenImage() : _buildCropImage()),
-    );
+            ),
+          )
+        : Padding(
+            padding: EdgeInsets.symmetric(horizontal: 13),
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: _buildCropImage(),
+            ),
+          );
   }
 
   Widget _buildOpenImage() {
@@ -145,38 +198,81 @@ class _ReviewPageState extends State<ReviewPage> {
   }
 
   Future<void> _openImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    final file = File(pickedFile!.path);
+    final pickedFile = await ImagePicker()
+        .pickImage(source: ImageSource.gallery, imageQuality: 100);
+    if (pickedFile == null) return;
+    final file = File(pickedFile.path);
     final sample = await ImageCrop.sampleImage(
-        file: file, preferredWidth: 324, preferredHeight: 324);
+        file: file, preferredWidth: 400, preferredHeight: 400);
 
     _sample?.delete();
-
     _file?.delete();
     setState(() {
       _sample = sample;
       _file = file;
     });
-    print("sam${_sample!.path}");
-    print("file${_file!.path}");
   }
 
   Widget _buildCropImage() {
     return GestureDetector(
-      onTap: () => _openImage(),
-      child: Transform.scale(
-        scale: 1.03,
-        child: Crop.file(
-          _sample!,
-          key: cropKey,
-        ),
-      ),
-    );
+        onTap: () {
+          if (control == true) {
+            setState(() {
+              control = false;
+            });
+            return;
+          }
+          showModalBottomSheet(
+              context: context,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20))),
+              builder: (context) {
+                return showImageModal(context);
+              });
+          return;
+        },
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Crop.file(
+              _sample!,
+              key: cropKey,
+              alwaysShowGrid: control ? true : false,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: 10,
+                  color: Colors.white,
+                ),
+                Container(
+                  width: 10,
+                  color: Colors.white,
+                )
+              ],
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  height: 10,
+                  color: Colors.white,
+                ),
+                Container(
+                  height: 10,
+                  color: Colors.white,
+                )
+              ],
+            )
+          ],
+        ));
   }
 
   Future<void> _cropImage() async {
-    final scale = cropKey.currentState!.scale;
+    final scale = cropKey.currentState?.scale ?? 1;
     final area = cropKey.currentState?.area;
 
     if (area == null) {
@@ -191,17 +287,80 @@ class _ReviewPageState extends State<ReviewPage> {
       preferredSize: (2000 / scale).round(),
     );
 
-    final file = await ImageCrop.cropImage(
-      file: sample,
-      area: area,
-    );
+    final file = await ImageCrop.cropImage(file: sample, area: area);
 
     sample.delete();
-
     _lastCropped?.delete();
     _lastCropped = file;
+  }
 
-    debugPrint('$file');
+  Widget showImageModal(context) {
+    return Container(
+      height: 255,
+      child: Column(
+        children: [
+          SizedBox(
+            height: 15,
+          ),
+          Container(
+            width: 60,
+            height: 7,
+            decoration: BoxDecoration(
+                color: Color(0xffd9d9d9),
+                borderRadius: BorderRadius.circular(30)),
+          ),
+          SizedBox(
+            height: 34,
+          ),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                control = true;
+              });
+              Navigator.pop(context);
+            },
+            child: Container(
+              height: 60,
+              child: Center(
+                  child: Text(
+                "다시 조정하기",
+                style: TextStyle(
+                    fontSize: 14,
+                    height: 1,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Suit',
+                    color: kSecondaryTextColor),
+              )),
+            ),
+          ),
+          Divider(
+            indent: 15,
+            endIndent: 15,
+            thickness: 0.5,
+            color: kBorderGreenColor.withOpacity(0.5),
+          ),
+          GestureDetector(
+            onTap: () {
+              _openImage();
+              Navigator.pop(context);
+            },
+            child: Container(
+              height: 60,
+              child: Center(
+                  child: Text(
+                "새로 선택하기",
+                style: TextStyle(
+                    fontSize: 14,
+                    height: 1,
+                    fontWeight: FontWeight.w800,
+                    fontFamily: 'Suit',
+                    color: kSecondaryTextColor),
+              )),
+            ),
+          )
+        ],
+      ),
+    );
   }
 
   @override
@@ -209,191 +368,198 @@ class _ReviewPageState extends State<ReviewPage> {
     List optionIconList = resFilterIcons[widget.res["category${category + 1}"]];
     List optionTextList = resFilterTexts[widget.res["category${category + 1}"]];
     List _items = [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 34.0, top: 54),
-            child: IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: SizedBox(
-                  height: 18,
-                  child: Icon(
-                    Icons.arrow_back_ios,
-                    color: kBasicTextColor.withOpacity(0.8),
-                  ),
-                )),
-          ),
-        ],
-      ),
-      GestureDetector(
-        onTap: () {
-          setState(() {
-            scoring = true;
-          });
-        },
-        child: Padding(
-          padding: EdgeInsets.only(top: 19),
-          child: ResTitle(
-              category: widget.res["category1"],
-              icon: widget.res["tag1"],
-              name: widget.res["name"],
-              detail: scoring
-                  ? null
-                  : "${resScoreIcons[score - 1][0]} ${resScoreIcons[score - 1][1]} (다시 선택)"),
+      Opacity(
+        opacity: control ? 0.8 : 1,
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 34.0, top: 54),
+                  child: IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: SizedBox(
+                        height: 18,
+                        child: Icon(
+                          Icons.arrow_back_ios,
+                          color: kBasicTextColor.withOpacity(0.8),
+                        ),
+                      )),
+                ),
+              ],
+            ),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  scoring = true;
+                });
+              },
+              child: Padding(
+                padding: EdgeInsets.only(top: 19),
+                child: ResTitle(
+                    category: widget.res["category1"],
+                    icon: widget.res["tag1"],
+                    name: widget.res["name"],
+                    detail: scoring
+                        ? null
+                        : "${resScoreIcons[score - 1][0]} ${resScoreIcons[score - 1][1]} (다시 선택)"),
+              ),
+            ),
+            SizedBox(
+              height: 18,
+            ),
+            scoring
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 39.0),
+                    child: _ScoringBox(
+                        onCompleted: () {
+                          setState(() {
+                            scoring = false;
+                          });
+                        },
+                        score: score,
+                        scrollScore: scrollScore,
+                        onScrollEnd: (val) {
+                          setState(() {
+                            scrollScore = val.round().toDouble();
+                            score = (5 - val.round()).toInt();
+                          });
+                        },
+                        onScroll: (val) {
+                          setState(() {
+                            scrollScore = val;
+                          });
+                        }),
+                  )
+                : SizedBox.shrink(),
+            !scoring
+                ? widget.res["category2"] == null ||
+                        widget.res["category2"] == -1
+                    ? Center(
+                        child: CategoryTile(
+                          title: categoryTexts[widget.res["category1"]],
+                          selected: true,
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CategoryTile(
+                            title: categoryTexts[widget.res["category1"]],
+                            selected: category == 0,
+                            onTap: () {
+                              setState(() {
+                                category = 0;
+                              });
+                            },
+                          ),
+                          SizedBox(
+                            width: 22,
+                          ),
+                          CategoryTile(
+                            title: categoryTexts[widget.res["category2"]],
+                            selected: category == 1,
+                            onTap: () {
+                              setState(() {
+                                category = 1;
+                              });
+                            },
+                          )
+                        ],
+                      )
+                : SizedBox.shrink(),
+            SizedBox(
+              height: 34,
+            ),
+          ],
         ),
       ),
-      SizedBox(
-        height: 18,
-      ),
-      scoring
-          ? Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 39.0),
-              child: _ScoringBox(
-                  onCompleted: () {
+      ImageBox(),
+      Opacity(
+        opacity: control ? 0.8 : 1,
+        child: Column(
+          children: [
+            SizedBox(
+              height: 15,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FilterTile(
+                  icon: optionIconList[0],
+                  text: optionTextList[0],
+                  selected: option == 0,
+                  onTap: () {
                     setState(() {
-                      scoring = false;
+                      option = 0;
                     });
                   },
-                  score: score,
-                  scrollScore: scrollScore,
-                  onScrollEnd: (val) {
+                ),
+                FilterTile(
+                  icon: optionIconList[1],
+                  text: optionTextList[1],
+                  selected: option == 1,
+                  onTap: () {
                     setState(() {
-                      scrollScore = val.round().toDouble();
-                      score = (5 - val.round()).toInt();
+                      option = 1;
                     });
                   },
-                  onScroll: (val) {
+                ),
+                FilterTile(
+                  icon: optionIconList[2],
+                  text: optionTextList[2],
+                  selected: option == 2,
+                  onTap: () {
                     setState(() {
-                      scrollScore = val;
+                      option = 2;
                     });
-                  }),
-            )
-          : SizedBox.shrink(),
-      !scoring
-          ? widget.res["category2"] == null
-              ? Center(
-                  child: CategoryTile(
-                    title: categoryTexts[widget.res["category1"]],
-                    selected: true,
-                  ),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CategoryTile(
-                      title: categoryTexts[widget.res["category1"]],
-                      selected: category == 0,
-                      onTap: () {
-                        setState(() {
-                          category = 0;
-                        });
-                      },
-                    ),
-                    SizedBox(
-                      width: 22,
-                    ),
-                    CategoryTile(
-                      title: categoryTexts[widget.res["category2"]],
-                      selected: category == 1,
-                      onTap: () {
-                        setState(() {
-                          category = 1;
-                        });
-                      },
-                    )
-                  ],
-                )
-          : SizedBox.shrink(),
-      SizedBox(
-        height: 34,
-      ),
-      ImageBox(onDrag: (val) {
-        setState(() {
-          scrollable = false;
-        });
-      }, onDragEnd: (val) {
-        setState(() {
-          scrollable = true;
-        });
-      }),
-      SizedBox(
-        height: 15,
-      ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          FilterTile(
-            icon: optionIconList[0],
-            text: optionTextList[0],
-            selected: option == 0,
-            onTap: () {
-              setState(() {
-                option = 0;
-              });
-            },
-          ),
-          FilterTile(
-            icon: optionIconList[1],
-            text: optionTextList[1],
-            selected: option == 1,
-            onTap: () {
-              setState(() {
-                option = 1;
-              });
-            },
-          ),
-          FilterTile(
-            icon: optionIconList[2],
-            text: optionTextList[2],
-            selected: option == 2,
-            onTap: () {
-              setState(() {
-                option = 2;
-              });
-            },
-          ),
-        ],
-      ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          FilterTile(
-            icon: optionIconList[3],
-            text: optionTextList[3],
-            selected: option == 3,
-            onTap: () {
-              setState(() {
-                option = 3;
-              });
-            },
-          ),
-          FilterTile(
-            icon: optionIconList[4],
-            text: optionTextList[4],
-            selected: option == 4,
-            onTap: () {
-              setState(() {
-                option = 4;
-              });
-            },
-          ),
-          FilterTile(
-            icon: optionIconList[5],
-            text: optionTextList[5],
-            selected: option == 5,
-            onTap: () {
-              setState(() {
-                option = 5;
-              });
-            },
-          ),
-        ],
-      ),
-      SizedBox(
-        height: 50,
+                  },
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FilterTile(
+                  icon: optionIconList[3],
+                  text: optionTextList[3],
+                  selected: option == 3,
+                  onTap: () {
+                    setState(() {
+                      option = 3;
+                    });
+                  },
+                ),
+                FilterTile(
+                  icon: optionIconList[4],
+                  text: optionTextList[4],
+                  selected: option == 4,
+                  onTap: () {
+                    setState(() {
+                      option = 4;
+                    });
+                  },
+                ),
+                FilterTile(
+                  icon: optionIconList[5],
+                  text: optionTextList[5],
+                  selected: option == 5,
+                  onTap: () {
+                    setState(() {
+                      option = 5;
+                    });
+                  },
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 50,
+            ),
+          ],
+        ),
       ),
     ];
 
@@ -403,9 +569,9 @@ class _ReviewPageState extends State<ReviewPage> {
         children: [
           Expanded(
             child: ListView.separated(
-                physics: scrollable
-                    ? ScrollPhysics()
-                    : NeverScrollableScrollPhysics(),
+                physics: control
+                    ? NeverScrollableScrollPhysics()
+                    : AlwaysScrollableScrollPhysics(),
                 separatorBuilder: (_, __) => SizedBox.shrink(),
                 shrinkWrap: true,
                 padding: EdgeInsets.zero,
@@ -414,67 +580,258 @@ class _ReviewPageState extends State<ReviewPage> {
                   return _items[index];
                 }),
           ),
-          Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
+          !control
+              ? Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: OptionCard(
+                          optionText: "취소",
+                          optionColor: kThirdColor,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          if (option == -1) {
+                            errorDialog(context,
+                                CustomError(message: "식당 스탭프를 선택해주세요"));
+                            return;
+                          }
+                          if (_sample == null && widget.imgUrl == null) {
+                            errorDialog(
+                                context, CustomError(message: "사진을 선택해주세요!"));
+                            return;
+                          }
+                          _sample != null ? await _cropImage() : null;
+                          User user = context.read<ProfileState>().user;
+                          showCupertinoDialog(
+                              context: context,
+                              barrierDismissible: _enabled,
+                              builder: (context) {
+                                return CupertinoAlertDialog(
+                                  title: Text("사용자 선택"),
+                                  actions: [
+                                    CupertinoDialogAction(
+                                      child: Text("돼지토끼"),
+                                      onPressed: () async {
+                                        if (!_enabled) return;
+                                        setState(() => _enabled = false);
+                                        try {
+                                          await context
+                                              .read<ReviewProvider>()
+                                              .reviewComplete(
+                                                userId: "kakao:2363915906",
+                                                userName: "돼지토끼",
+                                                resId: widget.res["resId"]
+                                                    .toString(),
+                                                score: widget.score,
+                                                imgFile:
+                                                    _lastCropped ?? _sample,
+                                                icon: option,
+                                                date: DateTime.now(),
+                                                reviewId: widget.reviewId,
+                                                imgUrl: widget.imgUrl,
+                                                category: widget.res[
+                                                    "category${category + 1}"],
+                                                resName: widget.res["name"],
+                                              );
+
+                                          Navigator.pop(context);
+                                          Navigator.pop(context);
+
+                                          setState(() => _enabled = true);
+                                        } on CustomError catch (e) {
+                                          errorDialog(context, e);
+                                          //Navigator.pop(context);
+                                          return;
+                                        }
+                                      },
+                                    ),
+                                    CupertinoDialogAction(
+                                      child: Text("해달"),
+                                      onPressed: () async {
+                                        if (!_enabled) return;
+                                        setState(() => _enabled = false);
+                                        try {
+                                          await context
+                                              .read<ReviewProvider>()
+                                              .reviewComplete(
+                                                  userId: "kakao:2318981232",
+                                                  userName: "해달",
+                                                  resId: widget.res["resId"]
+                                                      .toString(),
+                                                  score: widget.score,
+                                                  imgFile:
+                                                      _lastCropped ?? _sample,
+                                                  icon: option,
+                                                  date: DateTime.now(),
+                                                  reviewId: widget.reviewId,
+                                                  imgUrl: widget.imgUrl,
+                                                  category: widget.res[
+                                                      "category${category + 1}"],
+                                                  resName: widget.res["name"]);
+                                          Navigator.pop(context);
+                                          Navigator.pop(context);
+
+                                          setState(() => _enabled = true);
+                                        } on CustomError catch (e) {
+                                          errorDialog(context, e);
+                                          Navigator.pop(context);
+                                          return;
+                                        }
+                                      },
+                                    ),
+                                    CupertinoDialogAction(
+                                      child: Text("수진"),
+                                      onPressed: () async {
+                                        if (!_enabled) return;
+                                        setState(() => _enabled = false);
+                                        try {
+                                          await context
+                                              .read<ReviewProvider>()
+                                              .reviewComplete(
+                                                userId: "kakao:2350651029",
+                                                userName: "수진",
+                                                resId: widget.res["resId"]
+                                                    .toString(),
+                                                score: widget.score,
+                                                imgFile:
+                                                    _lastCropped ?? _sample,
+                                                icon: option,
+                                                date: DateTime.now(),
+                                                reviewId: widget.reviewId,
+                                                imgUrl: widget.imgUrl,
+                                                category: widget.res[
+                                                    "category${category + 1}"],
+                                                resName: widget.res["name"],
+                                              );
+                                          Navigator.pop(context);
+
+                                          Navigator.pop(context);
+
+                                          setState(() => _enabled = true);
+                                        } on CustomError catch (e) {
+                                          errorDialog(context, e);
+                                          Navigator.pop(context);
+                                          return;
+                                        }
+                                      },
+                                    ),
+                                    CupertinoDialogAction(
+                                      child: Text("건협"),
+                                      onPressed: () async {
+                                        if (!_enabled) return;
+                                        setState(() => _enabled = false);
+                                        try {
+                                          await context
+                                              .read<ReviewProvider>()
+                                              .reviewComplete(
+                                                  userId: "kakao:2204160870",
+                                                  userName: "건협",
+                                                  resId: widget.res["resId"]
+                                                      .toString(),
+                                                  score: widget.score,
+                                                  imgFile:
+                                                      _lastCropped ?? _sample,
+                                                  icon: option,
+                                                  date: DateTime.now(),
+                                                  reviewId: widget.reviewId,
+                                                  imgUrl: widget.imgUrl,
+                                                  category: widget.res[
+                                                      "category${category + 1}"],
+                                                  resName: widget.res["name"]);
+
+                                          Navigator.pop(context);
+                                          Navigator.pop(context);
+
+                                          setState(() => _enabled = true);
+                                        } on CustomError catch (e) {
+                                          print(e.toString());
+                                          errorDialog(context, e);
+                                          //Navigator.pop(context);
+                                          return;
+                                        }
+                                      },
+                                    ),
+                                    CupertinoDialogAction(
+                                      child: Text("정범순"),
+                                      onPressed: () async {
+                                        if (!_enabled) return;
+                                        setState(() => _enabled = false);
+                                        try {
+                                          await context
+                                              .read<ReviewProvider>()
+                                              .reviewComplete(
+                                                userId: "kakao:2473869527",
+                                                userName: "정범순",
+                                                resId: widget.res["resId"]
+                                                    .toString(),
+                                                resName: widget.res["name"],
+                                                score: widget.score,
+                                                imgFile:
+                                                    _lastCropped ?? _sample,
+                                                icon: option,
+                                                date: DateTime.now(),
+                                                reviewId: widget.reviewId,
+                                                imgUrl: widget.imgUrl,
+                                                category: widget.res[
+                                                    "category${category + 1}"],
+                                              );
+                                          Navigator.pop(context);
+
+                                          Navigator.pop(context);
+
+                                          setState(() => _enabled = true);
+                                        } on CustomError catch (e) {
+                                          errorDialog(context, e);
+                                          Navigator.pop(context);
+                                          return;
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                );
+                              });
+                        },
+                        child: OptionCard(
+                          optionText: "완료",
+                          optionColor: Color(0xffc7c7c0),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : GestureDetector(
                   onTap: () {
-                    Navigator.pop(context);
+                    setState(() {
+                      control = false;
+                    });
                   },
-                  child: OptionCard(
-                    optionText: "취소",
-                    optionColor: kThirdColor,
+                  child: Container(
+                    height: 83,
+                    width: double.infinity,
+                    color: Color(0xffc7c7c0),
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 10.0),
+                      child: Center(
+                        child: Text(
+                          "조정완료",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Suit',
+                            fontSize: 18,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () async {
-                    if (!_enabled) return;
-                    setState(() => _enabled = false);
-                    if (_sample == null && widget.imgUrl == null) {
-                      errorDialog(context, CustomError(message: "사진을 선택해주세요!"));
-                      return;
-                    }
-                    _sample != null ? await _cropImage() : null;
-                    User user = context.read<ProfileState>().user;
-                    try {
-                      await context.read<ReviewRepository>().reviewComplete(
-                            userId: user.id,
-                            userName: user.name,
-                            resId: widget.res["resId"].toString(),
-                            score: widget.score,
-                            imgFile: _lastCropped,
-                            icon: option,
-                            date: DateTime.now(),
-                            reviewId: widget.reviewId,
-                            imgUrl: widget.imgUrl,
-                            category: widget.res["category${category + 1}"],
-                          );
-                    } on CustomError catch (e) {
-                      errorDialog(context, e);
-                      return;
-                    }
-                    //수정화면의 경우에는 완료 시 pop
-                    if (widget.reviewId == null) {
-                      pushNewScreen(context,
-                          screen: BasicScreenPage(
-                            initialIndex: 0,
-                            resId: widget.res["resId"].toString(),
-                          ));
-                    } else {
-                      Navigator.pop(context);
-                    }
-                    setState(() => _enabled = true);
-                  },
-                  child: OptionCard(
-                    optionText: "완료",
-                    optionColor: Color(0xffc7c7c0),
-                  ),
-                ),
-              ),
-            ],
-          )
+                )
         ],
       ),
     );

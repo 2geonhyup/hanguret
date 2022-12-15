@@ -15,20 +15,17 @@ class ReviewFloatingButton extends StatelessWidget {
   Widget build(context) {
     return GestureDetector(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.only(right: 8.0, bottom: 8),
-        child: Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(56),
-              color: kSecondaryTextColor),
-          child: Center(
-            child: Image.asset(
-              "images/pencil.png",
-              width: 28,
-              height: 28,
-            ),
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(56),
+            color: kSecondaryTextColor),
+        child: Center(
+          child: Image.asset(
+            "images/pencil.png",
+            width: 28,
+            height: 28,
           ),
         ),
       ),

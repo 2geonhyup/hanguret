@@ -5,8 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/models/custom_error.dart';
 import 'package:hangeureut/models/news_model.dart';
-import 'package:hangeureut/providers/profile/profile_state.dart';
-import 'package:hangeureut/screens/news_screen/news_output.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
@@ -92,12 +90,13 @@ class NewsRepository {
       try {
         Uri _uri = Uri.http(_url, '/reviews/user/$userId');
         var response = await http.get(_uri);
-        print(response.body);
+
         List reviewList = jsonDecode(response.body) as List;
+
         for (Map review in reviewList) {
-          var date = review["date"];
-          DateTime val = DateTime.parse(date);
+          DateTime val = DateTime.parse(review["date"]);
           if (val.difference(DateTime.now()).inDays > 10) continue;
+          review["dateOrigin"] = review["date"];
           review["date"] = "${val.year}년 ${val.month}월 ${val.day}일";
           responseList.add(review);
         }
@@ -106,13 +105,12 @@ class NewsRepository {
             code: "알림", message: "소식을 받아오는 과정에서 문제가 발생했습니다");
       }
     }
-    print("hi$responseList");
+    responseList.sort((a, b) => DateTime.parse(b["dateOrigin"])
+        .compareTo(DateTime.parse(a["dateOrigin"])));
     return responseList;
   }
 
   Future<List<Map>> getRecoNews() async {
-    // await Future.delayed(Duration(milliseconds: 500));
-
-    return newsOutputReco;
+    return [];
   }
 }

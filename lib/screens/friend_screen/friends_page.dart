@@ -23,7 +23,7 @@ class _FriendsPageState extends State<FriendsPage> {
       color: Colors.white,
       child: Column(
         children: [
-          SizedBox(
+          const SizedBox(
             height: 71,
           ),
           Padding(
@@ -31,7 +31,7 @@ class _FriendsPageState extends State<FriendsPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   "밥친구들",
                   style: TextStyle(
                       fontFamily: 'Cafe24',
@@ -42,7 +42,7 @@ class _FriendsPageState extends State<FriendsPage> {
                 GestureDetector(
                   onTap: () {
                     pushNewScreen(context,
-                        screen: FriendRecommendPage(), withNavBar: true);
+                        screen: const FriendRecommendPage(), withNavBar: true);
                   },
                   child: Image.asset(
                     "images/user_fill_add.png",
@@ -53,7 +53,7 @@ class _FriendsPageState extends State<FriendsPage> {
               ],
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 32,
           ),
           Expanded(
@@ -66,7 +66,7 @@ class _FriendsPageState extends State<FriendsPage> {
                       name: myProfile.name,
                       id: myProfile.id),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 33,
                 ),
                 SizedBox.expand(
@@ -79,7 +79,7 @@ class _FriendsPageState extends State<FriendsPage> {
                       return Container(
                         decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.only(
+                            borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(48),
                                 topRight: Radius.circular(48)),
                             boxShadow: [
@@ -87,7 +87,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                   color: Colors.black.withOpacity(0.08),
                                   blurRadius: 17,
                                   spreadRadius: 0,
-                                  offset: Offset(0, -4))
+                                  offset: const Offset(0, -4))
                             ]),
                         child: MediaQuery.removePadding(
                           context: context,
@@ -124,7 +124,7 @@ class _FriendsPageState extends State<FriendsPage> {
                                                 border: InputBorder.none),
                                           ),
                                         ),
-                                        Icon(
+                                        const Icon(
                                           Icons.search,
                                           color: kBasicColor,
                                           size: 20,
@@ -146,18 +146,18 @@ class _FriendsPageState extends State<FriendsPage> {
                                       fontFamily: 'Suit'),
                                 ),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 height: 18,
                               ),
                               Row(
                                 children: [
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 33,
                                   ),
                                   FriendIconBox(
                                       content: profileIcons[
                                           myProfile.followings[0]["icon"]]),
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 12,
                                   ),
                                   Column(
@@ -167,18 +167,18 @@ class _FriendsPageState extends State<FriendsPage> {
                                     children: [
                                       Text(
                                         myProfile.followings[0]["name"],
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             color: kSecondaryTextColor,
                                             fontSize: 18,
                                             fontWeight: FontWeight.w600,
                                             fontFamily: 'Suit'),
                                       ),
-                                      SizedBox(
+                                      const SizedBox(
                                         height: 3,
                                       ),
                                       Text(
                                         "@${myProfile.followings[0]["id"]}",
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             color: kSecondaryTextColor,
                                             fontFamily: 'Suit',
                                             fontWeight: FontWeight.w400,
@@ -214,12 +214,12 @@ class FriendIconBox extends StatelessWidget {
       child: Center(
           child: Text(
         content,
-        style: TextStyle(fontSize: 27),
+        style: const TextStyle(fontSize: 27),
       )),
       width: 50,
       height: 50,
       decoration: BoxDecoration(
-        color: Color(0xffe5e5e5).withOpacity(0.5),
+        color: const Color(0xffe5e5e5).withOpacity(0.5),
         borderRadius: BorderRadius.circular(50),
       ),
     );

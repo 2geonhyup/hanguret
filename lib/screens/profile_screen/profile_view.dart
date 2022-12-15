@@ -1,23 +1,22 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/providers/signup/signup_provider.dart';
-import 'package:hangeureut/providers/signup/signup_state.dart';
 import 'package:hangeureut/screens/profile_screen/modify_taste.dart';
 import 'package:hangeureut/screens/profile_screen/review_detail_page.dart';
 import 'package:hangeureut/screens/start_screen/start_page.dart';
+import 'package:hangeureut/widgets/click_dialog.dart';
 import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/custom_error.dart';
+import '../../models/review_model.dart';
 import '../../providers/profile/profile_state.dart';
 import '../../widgets/profile_icon_box.dart';
 import '../friend_screen/friend_recommend_page.dart';
 import '../restaurant_detail_screen/restaurant_detail_page.dart';
 import 'others_profile_page.dart';
-import 'package:restart_app/restart_app.dart';
 
 enum ModifyingField { none, favorite, hate, alcohol, spicy }
 
@@ -79,7 +78,7 @@ class ProfileCard extends StatelessWidget {
                         height: MediaQuery.of(context).size.height * 0.6,
                         child: Column(
                           children: [
-                            SizedBox(
+                            const SizedBox(
                               height: 20,
                             ),
                             Expanded(
@@ -102,12 +101,13 @@ class ProfileCard extends StatelessWidget {
                                           child: Center(
                                               child: Text(
                                             profileIcons[index],
-                                            style: TextStyle(fontSize: 40),
+                                            style:
+                                                const TextStyle(fontSize: 40),
                                           )),
                                         )),
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 50,
                             )
                           ],
@@ -228,21 +228,25 @@ class ProfileCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 10,
                     ),
                     GestureDetector(
                       onTap: () async {
-                        try {
-                          await context.read<ProfileProvider>().delUser();
-                          context.read<SignupProvider>().signOutComp();
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => StartPage()));
-                        } on CustomError catch (e) {
-                          errorDialog(context, e);
-                        }
+                        clickCancelDialog(
+                            context: context,
+                            title: "경고",
+                            content: "정말로 탈퇴하시겠어요?",
+                            clicked: () async {
+                              try {
+                                await context.read<ProfileProvider>().delUser();
+                                context.read<SignupProvider>().signOutComp();
+                                return false;
+                              } on CustomError catch (e) {
+                                errorDialog(context, e);
+                                return false;
+                              }
+                            });
                       },
                       child: Container(
                         width: 55,
@@ -370,8 +374,8 @@ class ScoreBar extends StatelessWidget {
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: () => onTap(null),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 10.0),
                 child: Text(
                   "돌아가기",
                   style: TextStyle(
@@ -421,25 +425,31 @@ class ScoreBar extends StatelessWidget {
   }
 }
 
-class TasteProfile extends StatelessWidget {
-  const TasteProfile({
+class TasteProfile extends StatefulWidget {
+  TasteProfile({
     Key? key,
     required this.modifyClicked,
     required this.modifyingField,
     required this.onModifyingFieldChange,
     required this.alcoholAdd,
+    required this.onboarding,
   }) : super(key: key);
 
   final bool modifyClicked;
   final ModifyingField modifyingField;
   final Function onModifyingFieldChange;
   final Function alcoholAdd;
+  Map onboarding;
 
   @override
+  State<TasteProfile> createState() => _TasteProfileState();
+}
+
+class _TasteProfileState extends State<TasteProfile> {
+  @override
   Widget build(BuildContext context) {
-    final onboarding = context.watch<ProfileState>().user.onboarding;
-    final tasteKeyword = onboarding["tasteKeyword"];
-    final alcoholType = onboarding["alcoholType"];
+    Map tasteKeyword = widget.onboarding["tasteKeyword"];
+    Map alcoholType = widget.onboarding["alcoholType"];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -449,14 +459,14 @@ class TasteProfile extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.only(left: 30.0),
             child: ListView(scrollDirection: Axis.horizontal, children: [
-              modifyClicked
+              widget.modifyClicked
                   ? GestureDetector(
                       onTap: () {
                         pushNewScreen(
                           context,
                           screen: const ModifyTaste(),
                           withNavBar: false,
-                        );
+                        ).then((value) => setState(() {}));
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(4),
@@ -497,13 +507,13 @@ class TasteProfile extends StatelessWidget {
                     iconPath: "$tasteProfileIconPath/${keyword[0]}.png",
                     text: keyword[1],
                     selected: tasteKeyword[keyword[0]],
-                    modifying: modifyClicked),
+                    modifying: widget.modifyClicked),
               for (var alcohol in alcoholTypeList2)
                 RoundedButton(
                     iconPath: "$tasteProfileIconPath/${alcohol[0]}.png",
                     text: alcohol[1],
                     selected: alcoholType[alcohol[0]],
-                    modifying: modifyClicked)
+                    modifying: widget.modifyClicked)
             ]),
           ),
         ),
@@ -625,8 +635,6 @@ class _FriendModalState extends State<FriendModal> {
     final following = context.watch<ProfileState>().user.followings;
     final follower = context.watch<ProfileState>().user.followers;
 
-    print(following);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -649,7 +657,6 @@ class _FriendModalState extends State<FriendModal> {
                       controller: _textEditingController,
                       focusNode: _focus,
                       onChanged: (val) async {
-                        print("user");
                         try {
                           searchUserList = await context
                               .read<ProfileProvider>()
@@ -710,6 +717,9 @@ class _FriendModalState extends State<FriendModal> {
               cId: user["cId"],
             ),
           ),
+        SizedBox(
+          height: 600,
+        )
       ],
     );
   }
@@ -798,218 +808,5 @@ class FriendIconBox extends StatelessWidget {
         borderRadius: BorderRadius.circular(50),
       ),
     );
-  }
-}
-
-class ProfileReviewsView extends StatelessWidget {
-  const ProfileReviewsView(
-      {Key? key,
-      required this.reviews,
-      required this.count,
-      required this.forSaved})
-      : super(key: key);
-
-  final List reviews;
-  final int count;
-  final bool forSaved;
-
-  // 1. 기록을 세개씩 묶어서 리스트로 저장, 나머지는 처음에 넣어야 함
-  // 2. 각 리스트를 돌면서 한개, 두개, 세개에 따라 다른 레이아웃을 적용시킴
-
-  @override
-  Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double sideLength2 = screenWidth / 2 - 4;
-    double sideLength31 = (screenWidth - 16) / 3;
-    double sideLength32 = 2 * sideLength31 + 8;
-    int changePoint = count % 3;
-    List reviewsCollection = [];
-    List imsiList = [];
-    List<Widget> reviewsRows = [];
-
-    reviews.asMap().forEach((index, review) {
-      imsiList.add([review["imgUrl"], review["resId"]]);
-      if ((index % 3 + 1) % 3 == changePoint) {
-        if (imsiList.isNotEmpty) reviewsCollection.add(imsiList);
-        imsiList = [];
-      }
-    });
-
-    bool direction = true;
-
-    reviewsCollection.asMap().forEach((index, _reviews) {
-      if (_reviews.length == 3) {
-        reviewsRows.add(Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child:
-              row3(sideLength31, sideLength32, direction, _reviews, forSaved),
-        ));
-        direction = !direction;
-      } else if (_reviews.length == 1) {
-        reviewsRows.add(Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: row1(screenWidth, _reviews, forSaved)));
-      } else if (_reviews.length == 2) {
-        reviewsRows.add(Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: row2(sideLength2, _reviews, forSaved),
-        ));
-      }
-    });
-
-    return GestureDetector(
-      onTap: () {
-        if (!forSaved) {
-          pushNewScreen(context,
-              screen: ReviewDetailPage(
-                reviews: reviews,
-              ),
-              withNavBar: false);
-        }
-      },
-      child: Column(
-        children: reviewsRows,
-      ),
-    );
-  }
-
-  Widget row3(sideLength31, sideLength32, direction, reviews, forSaved) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: direction
-          ? [
-              forSaved
-                  ? SavedTile(
-                      sideLength32, sideLength32, reviews[0][1], reviews[0][0])
-                  : reviewTile(sideLength32, sideLength32, reviews[0][0]),
-              SizedBox(
-                height: sideLength32,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    forSaved
-                        ? SavedTile(sideLength31, sideLength31, reviews[1][1],
-                            reviews[1][0])
-                        : reviewTile(sideLength31, sideLength31, reviews[1][0]),
-                    forSaved
-                        ? SavedTile(sideLength31, sideLength31, reviews[2][1],
-                            reviews[2][0])
-                        : reviewTile(sideLength31, sideLength31, reviews[2][0])
-                  ],
-                ),
-              )
-            ]
-          : [
-              SizedBox(
-                height: sideLength32,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    forSaved
-                        ? SavedTile(sideLength31, sideLength31, reviews[0][1],
-                            reviews[0][0])
-                        : reviewTile(sideLength31, sideLength31, reviews[0][0]),
-                    forSaved
-                        ? SavedTile(sideLength31, sideLength31, reviews[1][1],
-                            reviews[1][0])
-                        : reviewTile(sideLength31, sideLength31, reviews[1][0])
-                  ],
-                ),
-              ),
-              forSaved
-                  ? SavedTile(
-                      sideLength32, sideLength32, reviews[2][1], reviews[2][0])
-                  : reviewTile(sideLength32, sideLength32, reviews[2][0])
-            ],
-    );
-  }
-
-  Widget row1(screenWidth, reviews, forSaved) {
-    return forSaved
-        ? SavedTile(screenWidth, screenWidth, reviews[0][1], reviews[0][0])
-        : reviewTile(screenWidth, screenWidth, reviews[0][0]);
-  }
-
-  Widget row2(sideLength2, reviews, forSaved) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        forSaved
-            ? SavedTile(sideLength2, sideLength2, reviews[0][1], reviews[0][0])
-            : reviewTile(sideLength2, sideLength2, reviews[0][0]),
-        forSaved
-            ? SavedTile(sideLength2, sideLength2, reviews[1][1], reviews[1][0])
-            : reviewTile(sideLength2, sideLength2, reviews[1][0]),
-      ],
-    );
-  }
-
-  Widget reviewTile(width, height, imgUrl) {
-    return SizedBox(
-      width: width,
-      height: height,
-      child: CachedNetworkImage(
-        imageUrl: imgUrl,
-        fit: BoxFit.fill,
-        progressIndicatorBuilder: (context, url, downloadProgress) => Container(
-          width: width,
-          height: height,
-          color: Colors.black.withOpacity(0.1),
-        ),
-        errorWidget: (context, url, error) => Icon(Icons.error),
-      ),
-    );
-  }
-}
-
-class SavedTile extends StatelessWidget {
-  const SavedTile(this.width, this.height, this.resId, this.imgUrl);
-
-  final double width;
-  final double height;
-  final String resId;
-  final String imgUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-        onTap: () async {
-          pushNewScreen(context,
-              screen: RestaurantDetailPage(resId: resId, option: false));
-        },
-        child: Stack(
-          children: [
-            SizedBox(
-              width: width,
-              height: height,
-              child: CachedNetworkImage(
-                imageUrl: imgUrl,
-                fit: BoxFit.fill,
-                progressIndicatorBuilder: (context, url, downloadProgress) =>
-                    Container(
-                  width: width,
-                  height: height,
-                  color: Colors.black.withOpacity(0.1),
-                ),
-                errorWidget: (context, url, error) => Icon(Icons.error),
-              ),
-            ),
-            Positioned(
-              top: 13,
-              right: 13,
-              child: GestureDetector(
-                onTap: () async {
-                  await context.read<ProfileProvider>().saveRemoveRes(
-                      resId: resId, imgUrl: imgUrl, isSave: false);
-                },
-                child: Image.asset(
-                  "images/icons/bookmark_fill.png",
-                  color: Colors.white,
-                  width: 17,
-                ),
-              ),
-            )
-          ],
-        ));
   }
 }

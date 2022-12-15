@@ -23,29 +23,29 @@ class ResTitle extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          resFilterIcons[category][icon],
-          style: TextStyle(fontSize: 35, fontFamily: 'Suit', height: 1),
+          icon == -1 ? "" : resFilterIcons[category][icon],
+          style: const TextStyle(fontSize: 35, fontFamily: 'Suit', height: 1),
         ),
-        SizedBox(
+        const SizedBox(
           height: 15,
         ),
         Text(
           name,
-          style: TextStyle(
+          style: const TextStyle(
               height: 1,
               fontFamily: 'Cafe24',
               fontWeight: FontWeight.bold,
               color: kSecondaryTextColor,
               fontSize: 25),
         ),
-        SizedBox(
+        const SizedBox(
           height: 14,
         ),
         detail == null
-            ? SizedBox.shrink()
+            ? const SizedBox.shrink()
             : Text(
                 detail ?? "",
-                style: TextStyle(
+                style: const TextStyle(
                     fontSize: 12,
                     height: 1,
                     fontWeight: FontWeight.w400,
@@ -60,12 +60,12 @@ class ResTitle extends StatelessWidget {
                 width: 70,
                 height: 29,
                 decoration: BoxDecoration(
-                    color: Color(0xfff3f3f2),
+                    color: const Color(0xfff3f3f2),
                     borderRadius: BorderRadius.circular(11)),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       "평점 ",
                       style: TextStyle(
                           fontFamily: 'Suit',
@@ -75,7 +75,7 @@ class ResTitle extends StatelessWidget {
                     ),
                     Text(
                       score!,
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontFamily: 'Suit',
                           fontWeight: FontWeight.w900,
                           color: kBasicColor,
@@ -84,7 +84,7 @@ class ResTitle extends StatelessWidget {
                   ],
                 ),
               )
-            : SizedBox.shrink(),
+            : const SizedBox.shrink(),
       ],
     );
   }

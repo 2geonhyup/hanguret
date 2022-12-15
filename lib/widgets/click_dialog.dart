@@ -71,7 +71,6 @@ void clickCancelDialog(
                 child: Text('확인'),
                 onPressed: () async {
                   bool success = await clicked();
-
                   Navigator.pop(context);
                   if (success)
                     Navigator.pushNamed(context, OnBoarding2Page.routeName);

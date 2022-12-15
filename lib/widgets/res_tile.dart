@@ -1,50 +1,40 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:location/location.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../constants.dart';
 import '../models/custom_error.dart';
-import '../providers/distance/distance_provider.dart';
 import '../restaurants.dart';
 import '../screens/restaurant_detail_screen/restaurant_detail_page.dart';
 import 'error_dialog.dart';
 
 class ResTile extends StatefulWidget {
-  ResTile(
-      {Key? key,
-      required this.res,
-      required this.mainFilterIndex,
-      this.locationData})
-      : super(key: key);
+  ResTile({
+    Key? key,
+    required this.res,
+    required this.mainFilterIndex,
+  }) : super(key: key);
   Map res;
   int mainFilterIndex;
-  LocationData? locationData;
 
   @override
   State<ResTile> createState() => _ResTileState();
 }
 
 class _ResTileState extends State<ResTile> {
-  Future<String> _getDistance() async {
-    if (widget.locationData != null) {
-      String distance = await context.read<DistanceProvider>().getDistance(
-          address: widget.res["address"],
-          resId: widget.res["resId"].toString(),
-          locationData: widget.locationData!);
-      print(distance);
-      return distance;
-    } else {
-      return "-";
-    }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     List<Widget> resInfoTiles = [];
     resInfoTiles = makeTiles(widget.res);
+
     return GestureDetector(
       onTap: () {
         pushNewScreen(context,
@@ -67,11 +57,17 @@ class _ResTileState extends State<ResTile> {
                   child: CachedNetworkImage(
                     imageUrl: widget.res["imgUrl"],
                     fit: BoxFit.cover,
-                    progressIndicatorBuilder:
-                        (context, url, downloadProgress) => Container(
-                      color: Colors.black.withOpacity(0.1),
-                    ),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    progressIndicatorBuilder: (context, _, __) {
+                      return Container(
+                        color: Colors.black.withOpacity(0.1),
+                      );
+                    },
+                    errorWidget: (_, __, ___) {
+                      return Image.asset(
+                        "images/error_tile.png",
+                        fit: BoxFit.cover,
+                      );
+                    },
                   ),
                 ),
               ),
@@ -87,63 +83,39 @@ class _ResTileState extends State<ResTile> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 15.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height: 13,
-                    ),
-                    Text(
-                      widget.res["name"],
-                      style: const TextStyle(
-                          height: 1.357,
-                          fontWeight: FontWeight.w900,
-                          color: kSecondaryTextColor,
-                          fontFamily: 'Suit',
-                          fontSize: 14),
-                    ),
-                    const SizedBox(
-                      height: 3,
-                    ),
-                    Row(
-                      children: [
-                        const Text(
-                          "지금 내 위치에서 ",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              color: kSecondaryTextColor,
-                              fontFamily: 'Suit',
-                              fontSize: 11),
-                        ),
-                        FutureBuilder(
-                            future: _getDistance(),
-                            builder: (BuildContext context,
-                                AsyncSnapshot<String> snapshot) {
-                              if (!snapshot.hasData) {
-                                return const Text(
-                                  "-",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: kBasicColor,
-                                      fontFamily: 'Suit',
-                                      fontSize: 11),
-                                );
-                              } else {
-                                return Text(
-                                  snapshot.data!,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: kBasicColor,
-                                      fontFamily: 'Suit',
-                                      fontSize: 11),
-                                );
-                              }
-                            }),
-                      ],
-                    )
-                  ],
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 15.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(
+                        height: 13,
+                      ),
+                      Text(
+                        widget.res["name"],
+                        style: const TextStyle(
+                            height: 1.357,
+                            fontWeight: FontWeight.w900,
+                            color: kSecondaryTextColor,
+                            fontFamily: 'Suit',
+                            fontSize: 14),
+                      ),
+                      const SizedBox(
+                        height: 3,
+                      ),
+                      Text(
+                        widget.res["detail"],
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: 0.143,
+                            color: kSecondaryTextColor.withOpacity(0.6),
+                            fontFamily: 'Suit',
+                            fontSize: 11),
+                      )
+                    ],
+                  ),
                 ),
               ),
               Padding(
@@ -156,8 +128,8 @@ class _ResTileState extends State<ResTile> {
                       await _launchUrl(_url);
                     } catch (e) {
                       print(e);
-                      final ec =
-                          CustomError(code: '', message: '카카오맵을 열 수 없습니다');
+                      final ec = const CustomError(
+                          code: '', message: '카카오맵을 열 수 없습니다');
                       errorDialog(context, ec);
                     }
                   },
@@ -185,7 +157,7 @@ class _ResTileState extends State<ResTile> {
           child: Container(
             child: Center(
               child: Text(res["score"],
-                  style: TextStyle(
+                  style: const TextStyle(
                       color: Colors.white,
                       fontSize: 10,
                       fontWeight: FontWeight.w900,
@@ -205,11 +177,11 @@ class _ResTileState extends State<ResTile> {
         Padding(
           padding: const EdgeInsets.only(right: 4.0),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Center(
               child: Text(
                   resFilterTextsSh[widget.mainFilterIndex][res["tag1"] + 1],
-                  style: TextStyle(
+                  style: const TextStyle(
                       color: Colors.white,
                       fontSize: 10,
                       fontWeight: FontWeight.w400,
@@ -223,12 +195,12 @@ class _ResTileState extends State<ResTile> {
           ),
         ),
       );
-    if (res["tag2"] != null) {
+    if (res["tag2"] != null && res["tag2"] != -1) {
       resInfoList.add(
         Padding(
           padding: const EdgeInsets.only(right: 4.0),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Center(
               child: Text(
                   resFilterTextsSh[widget.mainFilterIndex][res["tag2"] + 1],

@@ -44,7 +44,7 @@ class _OnBoarding1PageState extends State<OnBoarding1Page> {
             clickCancelDialog(
                 context: context,
                 title: "알림",
-                content: "닉네임은 이후에 수정이 불가능합니다!",
+                content: "닉네임은 이후에 수정이 어려워요!",
                 clicked: () async {
                   try {
                     await context.read<ProfileProvider>().setName(name: name);

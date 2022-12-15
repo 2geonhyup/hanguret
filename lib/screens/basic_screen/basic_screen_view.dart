@@ -11,30 +11,25 @@ import 'package:hangeureut/screens/review_screen/search_for_review_page.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
+import '../../widgets/floating_button.dart';
 import '../../widgets/nav_custom_painter.dart';
+import 'basic_screen_page.dart';
 
-List<Widget> buildScreens(reviewing, String? resId) {
+List<Widget> buildScreens() {
   return [
-    reviewing
-        ? SearchForReviewPage()
-        : resId == null
-            ? MainScreenPage()
-            : RestaurantDetailPage(
-                resId: resId,
-                option: false,
-                cantPop: true,
-              ),
-    NewsPage(),
-    ProfilePage(),
-    NoticePage(),
+    const MainScreenPage(),
+    const NewsPage(),
+    const ProfilePage(),
+    const NoticePage(),
+    const SearchForReviewPage()
   ];
 }
 
 List<Widget> initialScreens = [
-  MainScreenPage(),
-  Center(child: Text("2")),
-  ProfilePage(),
-  Center(child: Text("4")),
+  const MainScreenPage(),
+  const Center(child: Text("2")),
+  const ProfilePage(),
+  const Center(child: Text("4")),
 ];
 
 List<Color> navBackgroundColor = [
@@ -47,7 +42,7 @@ List<Color> navBackgroundColor = [
 List<PersistentBottomNavBarItem> navBarsItems() {
   return [
     PersistentBottomNavBarItem(
-      icon: ImageIcon(
+      icon: const ImageIcon(
         AssetImage(
           "images/icons/home.png",
         ),
@@ -58,7 +53,7 @@ List<PersistentBottomNavBarItem> navBarsItems() {
       inactiveColorPrimary: kBasicTextColor.withOpacity(0.3),
     ),
     PersistentBottomNavBarItem(
-      icon: ImageIcon(
+      icon: const ImageIcon(
         AssetImage(
           "images/icons/chat.png",
         ),
@@ -69,7 +64,7 @@ List<PersistentBottomNavBarItem> navBarsItems() {
       inactiveColorPrimary: kBasicTextColor.withOpacity(0.3),
     ),
     PersistentBottomNavBarItem(
-      icon: ImageIcon(
+      icon: const ImageIcon(
         AssetImage(
           "images/icons/user.png",
         ),
@@ -80,7 +75,7 @@ List<PersistentBottomNavBarItem> navBarsItems() {
       inactiveColorPrimary: kBasicTextColor.withOpacity(0.3),
     ),
     PersistentBottomNavBarItem(
-      icon: ImageIcon(
+      icon: const ImageIcon(
         AssetImage(
           "images/icons/bell.png",
         ),
@@ -132,33 +127,37 @@ class CustomNavBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool watched = context.watch<NewsState>().watched;
-    return CustomPaint(
-      painter: NavCustomPainter(
-          0.74, 4, Colors.white, Directionality.of(context), false),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 15,
-          ),
-          Container(
-            width: 280,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: items.map((item) {
-                int index = items.indexOf(item);
-                return Flexible(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      this.onItemSelected(index);
-                    },
-                    child: _buildItem(item, selectedIndex == index, watched),
-                  ),
-                );
-              }).toList(),
+    return SizedBox(
+      width: double.infinity,
+      child: CustomPaint(
+        painter: NavCustomPainter(
+            0.74, 4, Colors.white, Directionality.of(context), false),
+        child: Row(
+          children: [
+            const SizedBox(
+              width: 15,
             ),
-          ),
-        ],
+            Container(
+              width: 280,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: items.map((item) {
+                  int index = items.indexOf(item);
+                  return Flexible(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        this.onItemSelected(index);
+                      },
+                      child:
+                          _buildItem(item, selectedIndex % 4 == index, watched),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

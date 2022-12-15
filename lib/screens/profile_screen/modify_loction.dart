@@ -77,11 +77,11 @@ class _ModifyLocationState extends State<ModifyLocation> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 84,
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 33.0),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 33.0),
                 child: Text(
                   "관심 지역",
                   style: TextStyle(
@@ -96,15 +96,15 @@ class _ModifyLocationState extends State<ModifyLocation> {
                   color: kBorderGreenColor.withOpacity(0.5),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 9.7,
               ),
               Row(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 36,
                   ),
-                  Text(
+                  const Text(
                     "여기에 ",
                     style: TextStyle(
                         fontFamily: 'Suit',
@@ -112,7 +112,7 @@ class _ModifyLocationState extends State<ModifyLocation> {
                         color: kSecondaryTextColor,
                         fontSize: 14),
                   ),
-                  Text(
+                  const Text(
                     "특히 관심 있어요!",
                     style: TextStyle(
                         fontFamily: 'Suit',
@@ -134,7 +134,7 @@ class _ModifyLocationState extends State<ModifyLocation> {
                           "images/map.png",
                         )),
                     mainLocation != MainLocation.yonsei
-                        ? SizedBox.shrink()
+                        ? const SizedBox.shrink()
                         : Positioned(
                             top: 42,
                             left: -30,
@@ -142,13 +142,13 @@ class _ModifyLocationState extends State<ModifyLocation> {
                               width: 200,
                               height: 200,
                               decoration: BoxDecoration(
-                                color: Color(0xffd9d9d9).withOpacity(0.2),
+                                color: const Color(0xffd9d9d9).withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(100),
                                 boxShadow: [
                                   BoxShadow(
                                       blurRadius: 16,
                                       color: Colors.black.withOpacity(0.1),
-                                      offset: Offset(0, 1),
+                                      offset: const Offset(0, 1),
                                       blurStyle: BlurStyle.outer)
                                 ],
                               ),
@@ -183,7 +183,7 @@ class _ModifyLocationState extends State<ModifyLocation> {
                           ),
                         )),
                     mainLocation != MainLocation.ewha
-                        ? SizedBox.shrink()
+                        ? const SizedBox.shrink()
                         : Positioned(
                             top: 42,
                             left: 208,
@@ -191,13 +191,13 @@ class _ModifyLocationState extends State<ModifyLocation> {
                               width: 200,
                               height: 200,
                               decoration: BoxDecoration(
-                                color: Color(0xffd9d9d9).withOpacity(0.2),
+                                color: const Color(0xffd9d9d9).withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(100),
                                 boxShadow: [
                                   BoxShadow(
                                       blurRadius: 16,
                                       color: Colors.black.withOpacity(0.1),
-                                      offset: Offset(0, 1),
+                                      offset: const Offset(0, 1),
                                       blurStyle: BlurStyle.outer)
                                 ],
                               ),
@@ -232,7 +232,7 @@ class _ModifyLocationState extends State<ModifyLocation> {
                           ),
                         )),
                     mainLocation != MainLocation.sogang
-                        ? SizedBox.shrink()
+                        ? const SizedBox.shrink()
                         : Positioned(
                             top: 200,
                             left: 107,
@@ -240,13 +240,13 @@ class _ModifyLocationState extends State<ModifyLocation> {
                               width: 200,
                               height: 200,
                               decoration: BoxDecoration(
-                                color: Color(0xffd9d9d9).withOpacity(0.2),
+                                color: const Color(0xffd9d9d9).withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(100),
                                 boxShadow: [
                                   BoxShadow(
                                       blurRadius: 16,
                                       color: Colors.black.withOpacity(0.1),
-                                      offset: Offset(0, 1),
+                                      offset: const Offset(0, 1),
                                       blurStyle: BlurStyle.outer)
                                 ],
                               ),

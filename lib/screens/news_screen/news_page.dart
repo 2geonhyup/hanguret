@@ -5,9 +5,11 @@ import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/repositories/news_repository.dart';
 import 'package:hangeureut/restaurants.dart';
 import 'package:hangeureut/widgets/error_dialog.dart';
+import 'package:hangeureut/widgets/loading_widget.dart';
 import 'package:hangeureut/widgets/review_box.dart';
 import 'package:provider/provider.dart';
 import '../../providers/profile/profile_state.dart';
+import '../../repositories/restaurant_repository.dart';
 import 'news_view.dart';
 
 class NewsPage extends StatefulWidget {
@@ -75,17 +77,15 @@ class _NewsPageState extends State<NewsPage> {
         int icon = context
             .read<ProfileProvider>()
             .findFollowingsIcon(id: news["userId"]);
-        print(news);
         newsWidgets.add(Column(
           children: [
-            //수정
             NewsInfoBox(
                 icon: icon,
                 userId: news["userId"],
                 name: news["userName"],
                 date: news["date"],
                 resId: news["resId"],
-                resName: ""),
+                resName: news["resName"] ?? ""),
             SizedBox(
               height: 23,
             ),
@@ -95,8 +95,10 @@ class _NewsPageState extends State<NewsPage> {
               userId: news["userId"],
               reviewId: news["reviewId"],
               imgUrl: news["imgUrl"],
-              icon: resFilterIcons[news!["category"]][news!["icon"]],
-              tag: resFilterTextsSh[news!["category"]][news!["icon"]],
+              icon: news["icon"] == -1
+                  ? ""
+                  : resFilterIcons[news!["category"]][news!["icon"]],
+              tag: resFilterTextsSh[news!["category"]][news!["icon"] + 1],
               onLike: () {
                 setState(() {
                   likes[index] = !likes[index];
@@ -244,12 +246,7 @@ class _NewsPageState extends State<NewsPage> {
     _makeWidgetsList();
     return Scaffold(
         body: loading
-            ? Center(
-                child: CircularProgressIndicator(
-                  color: kBasicColor,
-                  strokeWidth: 2,
-                ),
-              )
+            ? Center(child: LoadingWidget())
             : RefreshIndicator(
                 onRefresh: _getNews,
                 color: kBasicColor,

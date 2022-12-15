@@ -2,7 +2,9 @@ import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/restaurants/restaurants_state.dart';
+import 'package:hangeureut/providers/result/result_state.dart';
 import 'package:hangeureut/repositories/restaurant_repository.dart';
+import 'package:location/location.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -10,6 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../models/custom_error.dart';
 import '../../restaurants.dart';
 import '../../widgets/error_dialog.dart';
+import '../../widgets/res_tile.dart';
 import '../restaurant_detail_screen/restaurant_detail_page.dart';
 
 Future<void> _launchUrl(url) async {
@@ -61,23 +64,15 @@ class _RecommendPlacePageState extends State<RecommendPlacePage> {
   int thisUniv = 0;
   List? allRes;
 
-  Future<void> _getAllRes() async {
-    allRes = await context.read<RestaurantsState>().allResult[0];
-  }
-
-  List _getShowingRes() {
-    List showingRes = [];
-    String _univName = getUnivEng(thisUniv);
-    print("sow$_univName");
-    if (allRes != null) {
-      for (var res in allRes!) {
-        if (_univName == res["univ"]) {
-          print(res["univ"]);
-          showingRes.add(res);
-        }
-      }
+  Map _getShowingRes(thisUniv) {
+    Map rankMap = context.read<RestaurantsState>().ranking;
+    if (thisUniv == 1) {
+      return rankMap["Yonsei"];
+    } else if (thisUniv == 2) {
+      return rankMap["Ewha"];
+    } else {
+      return rankMap["Sogang"];
     }
-    return showingRes;
   }
 
   @override
@@ -86,11 +81,6 @@ class _RecommendPlacePageState extends State<RecommendPlacePage> {
     thisUniv = widget.univIndex;
     if (widget.univIndex == 2) univList = [2, 3, 1];
     if (widget.univIndex == 3) univList = [3, 1, 2];
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _getAllRes();
-      _getShowingRes();
-      setState(() {});
-    });
     super.initState();
   }
 
@@ -205,7 +195,7 @@ class _RecommendPlacePageState extends State<RecommendPlacePage> {
             ],
           ),
           UnivRestaurants(
-            resList: _getShowingRes(),
+            resMap: _getShowingRes(thisUniv),
           )
         ],
       ),
@@ -214,8 +204,8 @@ class _RecommendPlacePageState extends State<RecommendPlacePage> {
 }
 
 class UnivRestaurants extends StatelessWidget {
-  UnivRestaurants({Key? key, required this.resList}) : super(key: key);
-  List resList;
+  UnivRestaurants({Key? key, required this.resMap}) : super(key: key);
+  Map resMap;
 
   @override
   Widget build(BuildContext context) {
@@ -226,198 +216,11 @@ class UnivRestaurants extends StatelessWidget {
         crossAxisCount: 2,
         childAspectRatio: 0.709,
         crossAxisSpacing: 10,
-        children: resList.map((e) => _ResTile(res: e)).toList());
+        children: List.generate(
+            resMap.length,
+            (index) => ResTile(
+                  res: resMap[index + 1]!,
+                  mainFilterIndex: resMap[index + 1]!["category1"],
+                )));
   }
-}
-
-class _ResTile extends StatelessWidget {
-  _ResTile({Key? key, required this.res}) : super(key: key);
-  Map res;
-
-  @override
-  Widget build(BuildContext context) {
-    List<Widget> resInfoTiles = [];
-    resInfoTiles = makeTiles(res);
-    return GestureDetector(
-      onTap: () {
-        pushNewScreen(context,
-            //option true일 때 error
-
-            screen: RestaurantDetailPage(
-              resId: res["resId"].toString(),
-              option: true,
-            ),
-            withNavBar: false);
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: Container(
-                  width: double.infinity,
-                  child: Image.asset(
-                    res["imgUrl"],
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 12,
-                top: 12,
-                child: Row(
-                  children: resInfoTiles,
-                ),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 15.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height: 13,
-                    ),
-                    Text(
-                      res["name"],
-                      style: TextStyle(
-                          height: 1.357,
-                          fontWeight: FontWeight.w900,
-                          color: kSecondaryTextColor,
-                          fontFamily: 'Suit',
-                          fontSize: 14),
-                    ),
-                    SizedBox(
-                      height: 3,
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          "지금 내 위치에서 ",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              color: kSecondaryTextColor,
-                              fontFamily: 'Suit',
-                              fontSize: 11),
-                        ),
-                        Text(
-                          "${res["distance"]}m",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: kBasicColor,
-                              fontFamily: 'Suit',
-                              fontSize: 11),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 10.0),
-                child: GestureDetector(
-                  onTap: () async {
-                    final Uri _url = Uri.parse(
-                        'https://map.kakao.com/link/to/${res["kakaoId"]}');
-                    try {
-                      await _launchUrl(_url);
-                    } catch (e) {
-                      print(e);
-                      final ec =
-                          CustomError(code: '', message: '카카오맵을 열 수 없습니다');
-                      errorDialog(context, ec);
-                    }
-                  },
-                  child: Image.asset(
-                    "images/location-marker.png",
-                    width: 25,
-                    height: 25,
-                    color: kBasicColor,
-                  ),
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
-    );
-  }
-}
-
-List<Widget> makeTiles(res) {
-  List<Widget> resInfoList = [];
-  if (res["score"] != null)
-    resInfoList.add(
-      Padding(
-        padding: const EdgeInsets.only(right: 4.0),
-        child: Container(
-          child: Center(
-            child: Text(res["score"].toString(),
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    fontFamily: 'Suit')),
-          ),
-          width: 36,
-          height: 22,
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(15),
-          ),
-        ),
-      ),
-    );
-  if (res["tag1"] != null)
-    resInfoList.add(
-      Padding(
-        padding: const EdgeInsets.only(right: 4.0),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          child: Center(
-            child: Text(resFilterTextsSh[res["category1"]][res["tag1"] + 1],
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: 'Suit')),
-          ),
-          height: 22,
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(15),
-          ),
-        ),
-      ),
-    );
-  if (res["tag2"] != null) {
-    resInfoList.add(
-      Padding(
-        padding: const EdgeInsets.only(right: 4.0),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          child: Center(
-            child: Text(resFilterTextsSh[res["category1"]][res["tag2"] + 1],
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: 'Suit')),
-          ),
-          height: 22,
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(15),
-          ),
-        ),
-      ),
-    );
-  }
-  return resInfoList;
 }

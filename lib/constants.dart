@@ -68,13 +68,13 @@ Map onboarding_initial = {
 };
 
 Map stationColor = {
-  "안암역": Color(0xffcd7c2f),
-  "회기역": Color(0xff0033a0),
-  "외대앞역": Color(0xff0033a0),
-  "신촌역": Color(0xff009d3e),
-  "성신여대입구역": Color(0xff00a5de),
-  "광흥창역": Color(0xffcd7c2f),
-  "서울대입구역": Color(0xff009d3e),
+  "안암역": const Color(0xffcd7c2f),
+  "회기역": const Color(0xff0033a0),
+  "외대앞역": const Color(0xff0033a0),
+  "신촌역": const Color(0xff009d3e),
+  "성신여대입구역": const Color(0xff00a5de),
+  "광흥창역": const Color(0xffcd7c2f),
+  "서울대입구역": const Color(0xff009d3e),
 };
 
 const keyWordList = [

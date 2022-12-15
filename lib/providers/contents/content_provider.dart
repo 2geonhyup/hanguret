@@ -10,12 +10,13 @@ import 'content_state.dart';
 class ContentProvider extends StateNotifier<ContentState> with LocatorMixin {
   ContentProvider() : super(ContentState.unknown());
 
-  Future<void> getContents() async {
+  Future<Map> getContents() async {
     try {
       state = state.copyWith(contentStatus: ContentStatus.loading);
       Map _contents = await read<ContentsRepository>().getContents();
       state = state.copyWith(
           contents: _contents, contentStatus: ContentStatus.loaded);
+      return _contents;
     } catch (e) {
       rethrow;
     }

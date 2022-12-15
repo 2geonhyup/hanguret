@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
-import 'package:location/location.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/custom_error.dart';
-import '../../providers/restaurants/restaurants_state.dart';
-import '../../providers/result/result_state.dart';
-import '../../repositories/location_repository.dart';
 import '../../repositories/restaurant_repository.dart';
 import '../../restaurants.dart';
 import '../../widgets/error_dialog.dart';
 import '../../widgets/res_tile.dart';
-import '../restaurant_detail_screen/restaurant_detail_page.dart';
 
 class SearchResult extends StatefulWidget {
   SearchResult({Key? key, required this.searchTerm}) : super(key: key);
@@ -28,8 +22,9 @@ class SearchResult extends StatefulWidget {
 class _SearchResultState extends State<SearchResult> {
   List? resList;
   TextEditingController textEditingController = TextEditingController();
-  late Stream<LocationData?> locationDataStream;
-  LocationData? locationData;
+  //late Stream<LocationData?> locationDataStream;
+  //LocationData? locationData;
+  bool completed = false;
 
   Future<void> _getSearchedRes() async {
     try {
@@ -37,7 +32,9 @@ class _SearchResultState extends State<SearchResult> {
           .read<RestaurantRepository>()
           .getSearchedRestaurants(searchTerm: widget.searchTerm);
 
-      setState(() {});
+      setState(() {
+        completed = true;
+      });
     } on CustomError catch (e) {
       Navigator.pop(context);
       errorDialog(context, e);
@@ -46,10 +43,10 @@ class _SearchResultState extends State<SearchResult> {
 
   @override
   void initState() {
-    locationDataStream = context.read<LocationRepository>().getLocation;
-    locationDataStream.listen((event) {
-      locationData = event;
-    });
+    // locationDataStream = context.read<LocationRepository>().getLocation;
+    // locationDataStream.listen((event) {
+    //   locationData = event;
+    // });
     // TODO: implement initState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getSearchedRes();
@@ -85,7 +82,8 @@ class _SearchResultState extends State<SearchResult> {
 
   Widget searchPageItem() {
     List resTileList = [];
-    if (resList == null) {
+    if (!completed) {
+    } else if (resList == null && completed) {
       resTileList.add(const Center(
         child: Text(
           "검색결과가 없습니다!",
@@ -101,7 +99,7 @@ class _SearchResultState extends State<SearchResult> {
         resTileList.add(ResTile(
           mainFilterIndex: res["category1"],
           res: res,
-          locationData: locationData,
+          //locationData: locationData,
         ));
       }
     }
@@ -237,6 +235,17 @@ class SearchBox extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                         fontSize: 15,
                         color: kSecondaryTextColor)),
+                onEditingComplete: () {
+                  if (controller.text == "") {
+                    errorDialog(context,
+                        CustomError(code: "알림", message: "검색어는 하나 이상 입력해주세요"));
+                    return;
+                  }
+                  pushNewScreen(context,
+                      screen: SearchResult(
+                        searchTerm: controller.text,
+                      ));
+                },
               ),
             ),
           ),
@@ -244,7 +253,6 @@ class SearchBox extends StatelessWidget {
             padding: const EdgeInsets.only(left: 21.0),
             child: GestureDetector(
               onTap: () {
-                print(controller.text);
                 if (controller.text == "") {
                   errorDialog(context,
                       CustomError(code: "알림", message: "검색어는 하나 이상 입력해주세요"));

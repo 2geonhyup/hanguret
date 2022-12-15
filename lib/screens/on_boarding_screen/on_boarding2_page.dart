@@ -97,11 +97,11 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 84,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 33.0),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 33.0),
                   child: Text(
                     "입맛 프로필",
                     style: TextStyle(
@@ -116,17 +116,17 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                     color: kBorderGreenColor.withOpacity(0.5),
                   ),
                 ),
-                SizedBox(height: 10.5),
+                const SizedBox(height: 10.5),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 33.0),
                   child: subTitleRow(
                       "images/icons/favorite.png", "입맛 키워드", "*2개 이상"),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 14,
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 29),
+                  padding: const EdgeInsets.symmetric(horizontal: 29),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -136,7 +136,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[0]}.png",
+                                  "$tasteProfileIconPath/${keyWordList[0]}.png",
                               text: "애기입맛",
                               onTap: () {
                                 setState(() {
@@ -148,7 +148,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[1]}.png",
+                                  "$tasteProfileIconPath/${keyWordList[1]}.png",
                               text: "할매입맛",
                               onTap: () {
                                 setState(() {
@@ -160,7 +160,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[2]}.png",
+                                  "$tasteProfileIconPath/${keyWordList[2]}.png",
                               text: "아재입맛",
                               onTap: () {
                                 setState(() {
@@ -177,7 +177,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[3]}.png",
+                                  "$tasteProfileIconPath/${keyWordList[3]}.png",
                               text: "빵순이",
                               onTap: () {
                                 setState(() {
@@ -189,7 +189,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[4]}.png",
+                                  "$tasteProfileIconPath/${keyWordList[4]}.png",
                               text: "밥순이",
                               onTap: () {
                                 setState(() {
@@ -201,7 +201,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[5]}.png",
+                                  "$tasteProfileIconPath/${keyWordList[5]}.png",
                               text: "눈으로 먹어요",
                               onTap: () {
                                 setState(() {
@@ -218,7 +218,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[6]}.png",
+                                  "$tasteProfileIconPath/${keyWordList[6]}.png",
                               text: "날 것 좋아",
                               onTap: () {
                                 setState(() {
@@ -230,7 +230,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[7]}.png",
+                                  "$tasteProfileIconPath/${keyWordList[7]}.png",
                               text: "고기 좋아",
                               onTap: () {
                                 setState(() {
@@ -242,7 +242,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[8]}.png",
+                                  "$tasteProfileIconPath/${keyWordList[8]}.png",
                               text: "건강 챙겨",
                               onTap: () {
                                 setState(() {
@@ -259,7 +259,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[9]}.png",
+                                  "$tasteProfileIconPath/${keyWordList[9]}.png",
                               text: "맵찔이",
                               onTap: () {
                                 setState(() {
@@ -271,7 +271,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[10]}.png",
+                                  "$tasteProfileIconPath/${keyWordList[10]}.png",
                               text: "맵고수",
                               onTap: () {
                                 setState(() {
@@ -283,7 +283,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${keyWordList[11]}.png",
+                                  "$tasteProfileIconPath/${keyWordList[11]}.png",
                               text: "달달구리 좋아",
                               onTap: () {
                                 setState(() {
@@ -297,7 +297,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                     ],
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 56,
                 ),
                 Padding(
@@ -305,11 +305,11 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                   child: subTitleRow(
                       "images/icons/favorite.png", "좋아하는 주종", "*1개 이상"),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 14,
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 29),
+                  padding: const EdgeInsets.symmetric(horizontal: 29),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -318,7 +318,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedAlcoholButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${alcoholTypeList[0]}.png",
+                                  "$tasteProfileIconPath/${alcoholTypeList[0]}.png",
                               text: "소주",
                               onTap: () {
                                 setState(() {
@@ -330,7 +330,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedAlcoholButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${alcoholTypeList[1]}.png",
+                                  "$tasteProfileIconPath/${alcoholTypeList[1]}.png",
                               text: "맥주",
                               onTap: () {
                                 setState(() {
@@ -342,7 +342,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedAlcoholButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${alcoholTypeList[2]}.png",
+                                  "$tasteProfileIconPath/${alcoholTypeList[2]}.png",
                               text: "양주",
                               onTap: () {
                                 setState(() {
@@ -358,7 +358,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedAlcoholButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${alcoholTypeList[3]}.png",
+                                  "$tasteProfileIconPath/${alcoholTypeList[3]}.png",
                               text: "전통주",
                               onTap: () {
                                 setState(() {
@@ -370,7 +370,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedAlcoholButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${alcoholTypeList[4]}.png",
+                                  "$tasteProfileIconPath/${alcoholTypeList[4]}.png",
                               text: "와인",
                               onTap: () {
                                 setState(() {
@@ -382,7 +382,7 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                           RoundedAlcoholButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${alcoholTypeList[5]}.png",
+                                  "$tasteProfileIconPath/${alcoholTypeList[5]}.png",
                               text: "칵테일",
                               onTap: () {
                                 setState(() {
@@ -398,8 +398,8 @@ class OnBoarding2PageState extends State<OnBoarding2Page> {
                 )
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 24.0),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 24.0),
               child: ProgressBar(level: 2),
             ),
           ],

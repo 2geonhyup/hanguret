@@ -76,7 +76,7 @@ class _NoticePageState extends State<NoticePage> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 33,
                   ),
                   Text(
@@ -111,7 +111,7 @@ class _NoticePageState extends State<NoticePage> {
                     height: 28,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
-                      color: isFriends ? Color(0xffe5e5e5) : kBasicColor,
+                      color: isFriends ? const Color(0xffe5e5e5) : kBasicColor,
                     ),
                     child: Center(
                       child: Text(
@@ -173,7 +173,7 @@ class _NoticePageState extends State<NoticePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
+          const SizedBox(
             width: 33,
           ),
           Text(
@@ -192,27 +192,27 @@ class _NoticePageState extends State<NoticePage> {
   Widget recommendWidget() {
     return Container(
       height: 160,
-      decoration: BoxDecoration(color: Color(0xffE8EBDB)),
+      decoration: const BoxDecoration(color: Color(0xffE8EBDB)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 33.0),
         child: Column(
           children: [
-            SizedBox(
+            const SizedBox(
               height: 60,
             ),
             Row(
               children: [
-                Text(
+                const Text(
                   "💬 아니, ",
                   style: regularStyle,
                 ),
-                Text(
+                const Text(
                   "여기가 없다고?!",
                   style: boldStyle,
                 ),
               ],
             ),
-            SizedBox(
+            const SizedBox(
               height: 15,
             ),
             Container(
@@ -264,7 +264,7 @@ class _NoticePageState extends State<NoticePage> {
                         clickDialog(
                             context: context,
                             title: "",
-                            content: "전송완료!\n한그릇 팀이 곧 확인하러 갑니다 :)",
+                            content: "전송완료!\n한그릇 팀이 곧 확인할게요 :)",
                             clicked: () {});
                       }
                     },
@@ -303,41 +303,21 @@ class _NoticePageState extends State<NoticePage> {
 
   List<Widget> newsWidget(news) {
     List<Widget> result = [
-      recommendWidget(),
-      SizedBox(
+      const SizedBox(
         height: 53,
       ),
-      Padding(
-        padding: const EdgeInsets.only(left: 30.0, bottom: 27),
-        child: GestureDetector(
-          onTap: () async {
-            String _url =
-                'ec2-3-35-52-247.ap-northeast-2.compute.amazonaws.com:3001';
-            try {
-              Uri _uri = Uri.http(_url, '/restaurants');
-
-              var response = await http.post(
-                _uri,
-                //headers: {"Content-Type": "application/json"},
-                body: jsonEncode(newRes),
-              );
-
-              print(response.body);
-            } catch (e) {
-              print(e);
-            }
-          },
-          child: Text(
-            "알림",
-            style: TextStyle(
-                fontSize: 27,
-                fontWeight: FontWeight.w900,
-                color: kBasicColor,
-                fontFamily: 'Suit',
-                height: 1),
-          ),
+      const Padding(
+        padding: EdgeInsets.only(left: 30.0, bottom: 27),
+        child: Text(
+          "알림",
+          style: TextStyle(
+              fontSize: 27,
+              fontWeight: FontWeight.w900,
+              color: kBasicColor,
+              fontFamily: 'Suit',
+              height: 1),
         ),
-      )
+      ),
     ];
     for (var i in news) {
       if (i == null) break;
@@ -353,22 +333,29 @@ class _NoticePageState extends State<NoticePage> {
         result.add(type3News(i));
       }
     }
+    result.add(const SizedBox(
+      height: 60,
+    ));
     return result;
   }
 
   @override
   Widget build(BuildContext context) {
     List<News> news = context.watch<NewsState>().newsList;
-    // if (news[0].type == -1) {
-    //   return CircularProgressIndicator();
-    // }
 
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        body: ListView(
-          padding: EdgeInsets.zero,
-          children: newsWidget(news),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            recommendWidget(),
+            Expanded(
+                child: ListView(
+              padding: EdgeInsets.zero,
+              children: newsWidget(news),
+            )),
+          ],
         ),
       ),
     );

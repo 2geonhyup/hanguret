@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
+import 'package:hangeureut/screens/profile_screen/profile_page.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 class BasicBottomNavigationBar extends StatelessWidget {
@@ -115,13 +116,7 @@ class BasicBottomPopBar extends StatelessWidget {
               if (withNav1 != null) {
                 withNav1!();
               }
-              pushNewScreen(
-                context,
-                screen: BasicScreenPage(
-                  initialIndex: 2,
-                ),
-                withNavBar: true,
-              );
+              Navigator.pop(context);
             },
             child: OptionCard(
               optionText: option1,
@@ -134,13 +129,7 @@ class BasicBottomPopBar extends StatelessWidget {
             onTap: () async {
               bool navigate = await withNav2();
               if (navigate == false) return;
-              pushNewScreen(
-                context,
-                screen: BasicScreenPage(
-                  initialIndex: 2,
-                ),
-                withNavBar: true,
-              );
+              Navigator.pop(context);
             },
             child: OptionCard(
               optionText: option2,

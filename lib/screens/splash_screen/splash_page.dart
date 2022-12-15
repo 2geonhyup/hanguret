@@ -78,16 +78,17 @@ class _SplashPageState extends State<SplashPage> {
               Center(
                   child: Image.asset(
                 "images/fork.png",
-                width: 50,
+                width: 30,
                 color: state == ProfileStatus.loaded
                     ? kBasicColor
                     : kBasicColor.withOpacity(0.6),
               )),
               Center(
                 child: SizedBox(
-                    width: 114,
-                    height: 114,
+                    width: 70,
+                    height: 70,
                     child: CircularProgressIndicator(
+                      strokeWidth: 2,
                       value: state == ProfileStatus.loaded ? 1 : null,
                       color: kBasicColor,
                     )),

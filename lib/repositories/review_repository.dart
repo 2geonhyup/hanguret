@@ -2,13 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
-import 'package:gallery_saver/gallery_saver.dart';
 import 'package:dio/dio.dart';
-import 'package:hangeureut/constants.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'dart:math';
 import 'package:http/http.dart' as http;
 
 import '../models/custom_error.dart';
@@ -28,7 +23,7 @@ class ReviewRepository {
   final FirebaseFirestore firebaseFirestore;
   ReviewRepository({required this.firebaseFirestore});
 
-  Future<void> reviewComplete(
+  Future<Map> reviewComplete(
       {required String userId,
       required String userName,
       required String resId,
@@ -38,8 +33,9 @@ class ReviewRepository {
       required DateTime date,
       int? reviewId,
       String? imgUrl,
-      required int category}) async {
-    print(category);
+      required int category,
+      required String resName}) async {
+    Map responseMap = {};
     if (imgFile != null) {
       //사진 등록
       try {
@@ -64,7 +60,6 @@ class ReviewRepository {
         );
       }
     }
-    print(imgUrl);
 
     if (imgUrl == null) {
       throw const CustomError(code: "알림", message: "리뷰를 기록하는 과정에서 오류가 발생했습니다");
@@ -82,8 +77,13 @@ class ReviewRepository {
           "icon": "$icon",
           "imgUrl": imgUrl,
           "category": category.toString(),
+          "resName": resName,
         });
-        Map responseMap = jsonDecode(response.body) as Map;
+        responseMap = jsonDecode(response.body) as Map;
+        // print(responseMap);
+        responseMap["icon"] = int.parse(responseMap["icon"]);
+        var val = DateTime.parse(responseMap["date"]);
+        responseMap["date"] = "${val.year}년 ${val.month}월 ${val.day}일";
         reviewId = responseMap["reviewId"];
       } catch (e) {
         throw CustomError(
@@ -98,30 +98,32 @@ class ReviewRepository {
           Uri _uri = Uri.http(_url, '/reviews/$reviewId');
           var response = await http.put(_uri,
               body: {"score": "$score", "icon": "$icon", "imgUrl": imgUrl});
-          print(response.body);
+          responseMap = jsonDecode(response.body) as Map;
+          responseMap["icon"] = int.parse(responseMap["icon"]);
+          var val = DateTime.parse(responseMap["date"]);
+          responseMap["date"] = "${val.year}년 ${val.month}월 ${val.day}일";
+          reviewId = responseMap["reviewId"];
+          return responseMap;
         }
       } catch (e) {
-        throw CustomError(
-          code: "알림",
-          message: "리뷰를 수정하는 과정에서 오류가 발생했습니다",
-        );
+        throw CustomError(code: "알림", message: "리뷰를 수정하는 과정에서 오류가 발생했습니다");
       }
     }
 
+    // 새로 등록의 경우에만 아래 코드 실행
     if (reviewId == null) {
       throw const CustomError(code: "알림", message: "리뷰를 기록하는 과정에서 오류가 발생했습니다");
     }
     //리뷰 카운트 업데이트
     try {
-      Uri _uri = Uri.http(_url, '/restaurants/count/:$resId');
-      await http.put(_uri);
+      Uri _uri = Uri.http(_url, '/restaurants/count/$resId');
+
+      var response = await http.put(_uri);
     } catch (e) {
       throw const CustomError(code: "알림", message: "리뷰를 기록하는 과정에서 오류가 발생했습니다");
     }
 
-    //리뷰 아이디를 사용자 collection에 저장
-    final String uid = fbAuth.FirebaseAuth.instance.currentUser!.uid;
-    await usersRef.doc(uid).collection("reviews").add({"id": reviewId});
+    return responseMap;
   }
 
   Future<void> deleteReview(
@@ -142,10 +144,6 @@ class ReviewRepository {
     try {
       Uri _uri = Uri.http(_url, 'reviews/$reviewId');
       var response = await http.delete(_uri);
-      // Map body = jsonDecode(response.body) as Map;
-      // if (body["success"] == false) {
-      //   throw CustomError(code: "알림", message: "리뷰 삭제 중 오류");
-      // }
     } catch (e) {
       throw CustomError(
           code: "알림", message: "리뷰 삭제 중 오류", plugin: e.toString());

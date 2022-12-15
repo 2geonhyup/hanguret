@@ -4,9 +4,12 @@ import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/models/custom_error.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/screens/profile_screen/others_profile_view.dart';
+import 'package:hangeureut/screens/profile_screen/profile_reviews_view.dart';
 import 'package:hangeureut/widgets/error_dialog.dart';
+import 'package:hangeureut/widgets/loading_widget.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/review_model.dart';
 import '../../models/user_model.dart';
 import '../../providers/profile/profile_state.dart';
 import '../../repositories/restaurant_repository.dart';
@@ -26,6 +29,8 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
   bool option = false;
   User? profile;
   List? otherReviews;
+  int reviewNum = 3;
+  int savedNum = 3;
 
   Future<User?> _getProfile(userId) async {
     try {
@@ -40,10 +45,28 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
   }
 
   void _getReviews() async {
-    otherReviews = await context
-        .read<RestaurantRepository>()
-        .getUsersReviews(userId: widget.userId);
-    setState(() {});
+    try {
+      otherReviews = await context
+          .read<RestaurantRepository>()
+          .getUsersReviews(userId: widget.userId);
+      otherReviews = otherReviews!.toList();
+      setState(() {});
+    } on CustomError catch (e) {
+      errorDialog(context, e);
+    }
+  }
+
+  ScrollController controller = ScrollController();
+  void _scrollListener() {
+    if (controller.position.extentAfter < 500) {
+      setState(() {
+        if (option) {
+          savedNum = savedNum + 3;
+        } else {
+          reviewNum = reviewNum + 3;
+        }
+      });
+    }
   }
 
   @override
@@ -55,6 +78,13 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
       _getReviews();
     });
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+    controller = ScrollController()..addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    controller.removeListener(_scrollListener);
+    super.dispose();
   }
 
   @override
@@ -88,6 +118,7 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                 backgroundColor: Colors.white,
                 body: ListView(
                   padding: EdgeInsets.zero,
+                  controller: controller,
                   children: [
                     Stack(
                       children: [
@@ -95,14 +126,14 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                           height: 200,
                           color: kBasicColor,
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 320,
                         ),
                         Positioned(
                             top: 54,
                             left: 34,
                             child: IconButton(
-                              icon: Icon(
+                              icon: const Icon(
                                 Icons.arrow_back_ios,
                                 color: Colors.white,
                               ),
@@ -134,7 +165,7 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                             ))
                       ],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 26,
                     ),
                     TasteProfile(
@@ -145,7 +176,7 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                           ? profile!.onboarding["alcoholType"]
                           : [],
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 49,
                     ),
                     Container(
@@ -169,7 +200,7 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                                   border: Border(
                                       bottom: option
                                           ? BorderSide.none
-                                          : BorderSide(
+                                          : const BorderSide(
                                               color: kSecondaryTextColor,
                                               width: 1))),
                               child: Column(
@@ -197,14 +228,14 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                                       )
                                     ],
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 8,
                                   )
                                 ],
                               ),
                             ),
                           ),
-                          SizedBox(width: 26),
+                          const SizedBox(width: 26),
                           GestureDetector(
                             onTap: () {
                               setState(() {
@@ -216,7 +247,7 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                               decoration: BoxDecoration(
                                   border: Border(
                                       bottom: option
-                                          ? BorderSide(
+                                          ? const BorderSide(
                                               color: kSecondaryTextColor,
                                               width: 1)
                                           : BorderSide.none)),
@@ -245,7 +276,7 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                                       )
                                     ],
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 8,
                                   ),
                                 ],
@@ -259,25 +290,30 @@ class _OthersProfilePageState extends State<OthersProfilePage> {
                       padding: const EdgeInsets.only(top: 19.5, bottom: 80),
                       child: option
                           ? ProfileReviewsView(
-                              reviews: profile!.saved,
+                              saved: profile!.saved,
                               count: profile!.saved.length,
+                              showingLength: savedNum,
                               forSaved: true)
                           : ProfileReviewsView(
-                              reviews: otherReviews ?? [],
+                              reviews: otherReviews == null
+                                  ? []
+                                  : otherReviews!
+                                      .map((e) => Review.fromDoc(e))
+                                      .toList(),
                               count: otherReviews == null
                                   ? 0
                                   : otherReviews!.length,
                               forSaved: false,
+                              showingLength: reviewNum,
+                              others: true,
                             ),
                     ),
                   ],
                 ));
           } else {
-            return Scaffold(
+            return const Scaffold(
               body: Center(
-                child: CircularProgressIndicator(
-                  backgroundColor: Colors.white,
-                ),
+                child: LoadingWidget(),
               ),
             );
           }

@@ -3,7 +3,7 @@ import 'package:hangeureut/models/search_model.dart';
 
 class SearchFilterState extends Equatable {
   final Filter filter;
-  SearchFilterState({required this.filter});
+  const SearchFilterState({required this.filter});
 
   factory SearchFilterState.initial() {
     return SearchFilterState(filter: Filter(mainFilter: MainFilter.none));

@@ -8,7 +8,7 @@ class FriendsNews extends Equatable {
   final int userIcon;
   final String cId;
 
-  FriendsNews(
+  const FriendsNews(
       {required this.userId,
       required this.userName,
       required this.userIcon,
@@ -27,7 +27,7 @@ class ReviewNews extends Equatable {
   final String resName;
   final String cId;
 
-  ReviewNews(
+  const ReviewNews(
       {required this.userId,
       required this.userName,
       required this.userIcon,
@@ -45,7 +45,7 @@ class HangerutNews extends Equatable {
   final String content;
   final String navigate;
 
-  HangerutNews(
+  const HangerutNews(
       {required this.title, required this.content, required this.navigate});
 
   @override
@@ -59,7 +59,8 @@ class News extends Equatable {
   final dynamic content;
   final bool watched;
 
-  News({required this.type, required this.content, required this.watched});
+  const News(
+      {required this.type, required this.content, required this.watched});
 
   @override
   // TODO: implement props

@@ -90,11 +90,11 @@ class ModifyTasteState extends State<ModifyTaste> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 84,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 33.0),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 33.0),
                   child: Text(
                     "입맛 프로필",
                     style: TextStyle(
@@ -109,17 +109,17 @@ class ModifyTasteState extends State<ModifyTaste> {
                     color: kBorderGreenColor.withOpacity(0.5),
                   ),
                 ),
-                SizedBox(height: 10.5),
+                const SizedBox(height: 10.5),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 33.0),
                   child: subTitleRow(
                       "images/icons/favorite.png", "입맛 키워드", "*2개 이상"),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 14,
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 29),
+                  padding: const EdgeInsets.symmetric(horizontal: 29),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -129,7 +129,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${_keyWordList[0]}.png",
+                                  "$tasteProfileIconPath/${_keyWordList[0]}.png",
                               text: "애기입맛",
                               onTap: () {
                                 setState(() {
@@ -141,7 +141,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${_keyWordList[1]}.png",
+                                  "$tasteProfileIconPath/${_keyWordList[1]}.png",
                               text: "할매입맛",
                               onTap: () {
                                 setState(() {
@@ -153,7 +153,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${_keyWordList[2]}.png",
+                                  "$tasteProfileIconPath/${_keyWordList[2]}.png",
                               text: "아재입맛",
                               onTap: () {
                                 setState(() {
@@ -170,7 +170,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${_keyWordList[3]}.png",
+                                  "$tasteProfileIconPath/${_keyWordList[3]}.png",
                               text: "빵순이",
                               onTap: () {
                                 setState(() {
@@ -182,7 +182,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${_keyWordList[4]}.png",
+                                  "$tasteProfileIconPath/${_keyWordList[4]}.png",
                               text: "밥순이",
                               onTap: () {
                                 setState(() {
@@ -194,7 +194,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${_keyWordList[5]}.png",
+                                  "$tasteProfileIconPath/${_keyWordList[5]}.png",
                               text: "눈으로 먹어요",
                               onTap: () {
                                 setState(() {
@@ -211,7 +211,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${_keyWordList[6]}.png",
+                                  "$tasteProfileIconPath/${_keyWordList[6]}.png",
                               text: "날 것 좋아",
                               onTap: () {
                                 setState(() {
@@ -223,7 +223,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${_keyWordList[7]}.png",
+                                  "$tasteProfileIconPath/${_keyWordList[7]}.png",
                               text: "고기 좋아",
                               onTap: () {
                                 setState(() {
@@ -235,7 +235,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${_keyWordList[8]}.png",
+                                  "$tasteProfileIconPath/${_keyWordList[8]}.png",
                               text: "건강 챙겨",
                               onTap: () {
                                 setState(() {
@@ -252,7 +252,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${_keyWordList[9]}.png",
+                                  "$tasteProfileIconPath/${_keyWordList[9]}.png",
                               text: "맵찔이",
                               onTap: () {
                                 setState(() {
@@ -264,7 +264,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${_keyWordList[10]}.png",
+                                  "$tasteProfileIconPath/${_keyWordList[10]}.png",
                               text: "맵고수",
                               onTap: () {
                                 setState(() {
@@ -276,7 +276,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${_keyWordList[11]}.png",
+                                  "$tasteProfileIconPath/${_keyWordList[11]}.png",
                               text: "달달구리 좋아",
                               onTap: () {
                                 setState(() {
@@ -290,7 +290,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                     ],
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 56,
                 ),
                 Padding(
@@ -298,11 +298,11 @@ class ModifyTasteState extends State<ModifyTaste> {
                   child: subTitleRow(
                       "images/icons/favorite.png", "좋아하는 주종", "*1개 이상"),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 14,
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 29),
+                  padding: const EdgeInsets.symmetric(horizontal: 29),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -311,7 +311,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedAlcoholButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${alcoholTypeList[0]}.png",
+                                  "$tasteProfileIconPath/${alcoholTypeList[0]}.png",
                               text: "소주",
                               onTap: () {
                                 setState(() {
@@ -323,7 +323,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedAlcoholButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${alcoholTypeList[1]}.png",
+                                  "$tasteProfileIconPath/${alcoholTypeList[1]}.png",
                               text: "맥주",
                               onTap: () {
                                 setState(() {
@@ -335,7 +335,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedAlcoholButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${alcoholTypeList[2]}.png",
+                                  "$tasteProfileIconPath/${alcoholTypeList[2]}.png",
                               text: "양주",
                               onTap: () {
                                 setState(() {
@@ -351,7 +351,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedAlcoholButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${alcoholTypeList[3]}.png",
+                                  "$tasteProfileIconPath/${alcoholTypeList[3]}.png",
                               text: "전통주",
                               onTap: () {
                                 setState(() {
@@ -363,7 +363,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedAlcoholButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${alcoholTypeList[4]}.png",
+                                  "$tasteProfileIconPath/${alcoholTypeList[4]}.png",
                               text: "와인",
                               onTap: () {
                                 setState(() {
@@ -375,7 +375,7 @@ class ModifyTasteState extends State<ModifyTaste> {
                           RoundedAlcoholButton(
                               height: 39,
                               iconPath:
-                                  "${tasteProfileIconPath}/${alcoholTypeList[5]}.png",
+                                  "$tasteProfileIconPath/${alcoholTypeList[5]}.png",
                               text: "칵테일",
                               onTap: () {
                                 setState(() {
@@ -408,12 +408,12 @@ Widget subTitleRow(iconPath, text, subText) {
             iconPath,
             height: 22,
           ),
-          SizedBox(
+          const SizedBox(
             width: 5,
           ),
           Text(
             text,
-            style: TextStyle(
+            style: const TextStyle(
                 fontFamily: 'Suit', fontWeight: FontWeight.w400, fontSize: 14),
           ),
         ],
@@ -422,7 +422,7 @@ Widget subTitleRow(iconPath, text, subText) {
         padding: const EdgeInsets.only(top: 5.0),
         child: Text(
           subText,
-          style: TextStyle(
+          style: const TextStyle(
               fontFamily: 'Suit',
               fontWeight: FontWeight.w400,
               fontSize: 8.5,
@@ -474,7 +474,7 @@ class RoundedButton extends StatelessWidget {
                     color: kBasicColor.withOpacity(0.3),
                     blurRadius: 3,
                     spreadRadius: 0,
-                    offset: Offset(
+                    offset: const Offset(
                       0,
                       1,
                     )),
@@ -489,7 +489,7 @@ class RoundedButton extends StatelessWidget {
                     iconPath,
                     height: 18,
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 5,
                   ),
                   Text(
@@ -531,7 +531,7 @@ class RoundedAlcoholButton extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4, vertical: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
           child: Container(
             height: height,
             decoration: BoxDecoration(
@@ -541,7 +541,7 @@ class RoundedAlcoholButton extends StatelessWidget {
                     color: kBasicColor.withOpacity(0.3),
                     blurRadius: 3,
                     spreadRadius: 0,
-                    offset: Offset(
+                    offset: const Offset(
                       0,
                       1,
                     )),
@@ -556,7 +556,7 @@ class RoundedAlcoholButton extends StatelessWidget {
                     iconPath,
                     height: 15,
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 5,
                   ),
                   Text(

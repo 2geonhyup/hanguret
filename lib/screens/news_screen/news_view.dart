@@ -40,7 +40,7 @@ class NewsInfoBox extends StatelessWidget {
             child: ProfileIconBox(
                 content: icon == -1 ? profileIcons[0] : profileIcons[icon]),
           ),
-          SizedBox(
+          const SizedBox(
             width: 23,
           ),
           Column(
@@ -58,14 +58,14 @@ class NewsInfoBox extends StatelessWidget {
                   children: [
                     Text(
                       name,
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontFamily: 'Suit',
                           fontWeight: FontWeight.w900,
                           fontSize: 18,
                           color: kSecondaryTextColor,
                           height: 1),
                     ),
-                    Text(
+                    const Text(
                       "의 식탁",
                       style: TextStyle(
                           fontFamily: 'Suit',
@@ -74,7 +74,7 @@ class NewsInfoBox extends StatelessWidget {
                           color: kSecondaryTextColor,
                           height: 1),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 7,
                     ),
                     zzim
@@ -89,7 +89,7 @@ class NewsInfoBox extends StatelessWidget {
                                     color: kSecondaryTextColor,
                                     width: 0.5,
                                   )),
-                              child: Center(
+                              child: const Center(
                                   child: Text(
                                 "찜하기",
                                 style: TextStyle(
@@ -101,18 +101,18 @@ class NewsInfoBox extends StatelessWidget {
                               )),
                             ),
                           )
-                        : SizedBox.shrink()
+                        : const SizedBox.shrink()
                   ],
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 8,
               ),
               Row(
                 children: [
                   Text(
                     "$date  | ",
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontFamily: 'Suit',
                         fontWeight: FontWeight.w400,
                         fontSize: 12,
@@ -123,12 +123,13 @@ class NewsInfoBox extends StatelessWidget {
                     behavior: HitTestBehavior.translucent,
                     onTap: () {
                       pushNewScreen(context,
-                          screen: RestaurantDetailPage(
-                              resId: resId, option: false));
+                          screen:
+                              RestaurantDetailPage(resId: resId, option: true),
+                          withNavBar: false);
                     },
                     child: Text(
                       "$resName ",
-                      style: TextStyle(
+                      style: const TextStyle(
                           fontFamily: 'Suit',
                           fontWeight: FontWeight.w900,
                           fontSize: 12,

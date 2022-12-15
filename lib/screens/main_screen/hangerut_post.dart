@@ -6,12 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:hangeureut/restaurants.dart';
 import 'package:hangeureut/screens/main_screen/recommend_place_page.dart';
 import 'package:hangeureut/screens/profile_screen/others_profile_page.dart';
+import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_page.dart';
 import 'package:hangeureut/widgets/profile_icon_box.dart';
+import 'package:location/location.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
 import '../../constants.dart';
 import '../../providers/profile/profile_state.dart';
+import '../../providers/restaurants/restaurants_state.dart';
 import 'custom_contents_page.dart';
 import 'dart:math';
 
@@ -60,8 +63,6 @@ class HangerutPostWidget extends StatelessWidget {
               const SizedBox(
                 height: 88,
               ),
-              //UserContents(userContents: contents["bestUsers"] ?? {}),
-              //나중에 추가하기
             ]
           : [],
     );
@@ -84,7 +85,7 @@ class _CustomContentsState extends State<CustomContents> {
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            SizedBox(
+            const SizedBox(
               width: 37,
             ),
             Text(
@@ -119,7 +120,7 @@ class _CustomContentsState extends State<CustomContents> {
             },
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         DotsIndicator(
@@ -146,14 +147,16 @@ class _CustomContentsState extends State<CustomContents> {
           pushNewScreen(
             context,
             screen: CustomContentsPage(
-              titleImage: targetContents["titleImage"],
-              images: targetContents["images"],
-              title: targetContents["title"],
-              subTitle: targetContents["subTitle"],
-              icon: targetContents["icon"],
-              tag: targetContents["tag"],
-              allContents: allContents,
-            ),
+                titleImage: targetContents["titleImage"],
+                images: targetContents["images"],
+                title: targetContents["title"],
+                subTitle: targetContents["subTitle"],
+                icon: targetContents["icon"],
+                tag: targetContents["tag"],
+                allContents: allContents,
+                resIds: targetContents.containsKey("resIds")
+                    ? targetContents["resIds"]
+                    : []),
           );
         },
         child: Stack(
@@ -163,22 +166,37 @@ class _CustomContentsState extends State<CustomContents> {
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 324),
                 child: ClipRRect(
-                  child: Image.network(targetContents["titleImage"],
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, _, __) => Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.1),
-                            ),
-                          ),
-                      loadingBuilder: (context, widget, __) => Container(
-                            decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.1)),
-                            child: widget,
-                          )),
+                  child: CachedNetworkImage(
+                    imageUrl: targetContents["titleImage"],
+                    fit: BoxFit.cover,
+                    progressIndicatorBuilder:
+                        (context, url, downloadProgress) => Container(
+                      color: Colors.black.withOpacity(0.1),
+                    ),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.error),
+                  ),
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
             ),
+            Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 192,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.black.withOpacity(0),
+                          Colors.black.withOpacity(0.23)
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      )),
+                )),
             Positioned(
               bottom: 27,
               left: 24,
@@ -187,7 +205,7 @@ class _CustomContentsState extends State<CustomContents> {
                 children: [
                   Text(
                     targetContents["subTitle"],
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontWeight: FontWeight.w400,
                         //height: 1,
                         fontSize: 14,
@@ -196,7 +214,7 @@ class _CustomContentsState extends State<CustomContents> {
                   ),
                   Text(
                     targetContents["title"],
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontWeight: FontWeight.w900,
                         //height: 1,
                         fontSize: 30,
@@ -255,12 +273,26 @@ class _UnivContentsState extends State<UnivContents> {
 
   int userUniv = 1;
   int num = 0;
+  Map rankMap = {};
+  List imageList = [];
 
   @override
   void initState() {
     // TODO: implement initState
     userUniv =
         context.read<ProfileState>().user.onboarding["mainLocation"] ?? 1;
+
+    rankMap = context.read<RestaurantsState>().ranking;
+    for (var i in ["Yonsei", "Ewha", "Sogang"]) {
+      imageList.add(CachedNetworkImage(
+        imageUrl: rankMap[i][1]["imgUrl"],
+        fit: BoxFit.cover,
+        progressIndicatorBuilder: (context, url, downloadProgress) => Container(
+          color: Colors.black.withOpacity(0.1),
+        ),
+        errorWidget: (context, url, error) => const Icon(Icons.error),
+      ));
+    }
 
     super.initState();
   }
@@ -271,8 +303,6 @@ class _UnivContentsState extends State<UnivContents> {
 
     if (userUniv == 2) univList = [2, 3, 1];
     if (userUniv == 3) univList = [3, 1, 2];
-
-    Map contentsMap = {};
 
     //swipe시 univNum바뀜
     return Column(
@@ -288,13 +318,13 @@ class _UnivContentsState extends State<UnivContents> {
               });
             },
             itemBuilder: (BuildContext context, int index) {
-              String univName = univList[index] == 1
-                  ? "yonsei"
-                  : userUniv == 2
-                      ? "ehwa"
-                      : "sogang";
-              if (widget.contents["univContents"] != null) {
-                contentsMap = widget.contents["univContents"][univName];
+              Map? res;
+              if (univList[index] == 1) {
+                res = rankMap["Yonsei"][1];
+              } else if (univList[index] == 2) {
+                res = rankMap["Ewha"][1];
+              } else {
+                res = rankMap["Sogang"][1];
               }
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 37.0),
@@ -304,7 +334,8 @@ class _UnivContentsState extends State<UnivContents> {
                     const SizedBox(
                       height: 25,
                     ),
-                    univImage(context, contentsMap, univList[index]),
+                    univImage(context, res, univList[index],
+                        imageList[univList[index] - 1]),
                     const SizedBox(
                       height: 14,
                     ),
@@ -331,12 +362,14 @@ class _UnivContentsState extends State<UnivContents> {
     );
   }
 
-  Widget univImage(context, contentsMap, univNum) {
-    return contentsMap != {} && contentsMap["imgUrl"] != null
+  Widget univImage(context, res, univNum, Widget image) {
+    return res != null
         ? GestureDetector(
             onTap: () {
               pushNewScreen(context,
-                  screen: RecommendPlacePage(univIndex: univNum));
+                  screen: RestaurantDetailPage(
+                      resId: res["resId"].toString(), option: true),
+                  withNavBar: false);
             },
             child: Stack(
               children: [
@@ -346,23 +379,28 @@ class _UnivContentsState extends State<UnivContents> {
                     child: Container(
                       constraints: const BoxConstraints(maxWidth: 324),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Image.network(contentsMap["imgUrl"],
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, _, __) => Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.1),
-                                  ),
-                                ),
-                            loadingBuilder: (context, widget, __) => Container(
-                                  decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.1)),
-                                  child: widget,
-                                )),
-                      ),
+                          borderRadius: BorderRadius.circular(20),
+                          child: image),
                     ),
                   ),
                 ),
+                Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      height: 192,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.black.withOpacity(0),
+                              Colors.black.withOpacity(0.23)
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          )),
+                    )),
                 Positioned(
                   left: 23,
                   top: 17,
@@ -374,7 +412,7 @@ class _UnivContentsState extends State<UnivContents> {
                         borderRadius: BorderRadius.circular(19.5)),
                     child: Center(
                         child: Text(
-                      "${resFilterTextIconMap[contentsMap["category"]][contentsMap["tag"]]} ${contentsMap["tag"]}",
+                      "${resFilterTextsSh[res["category1"]][res["tag1"] + 1]} ${resFilterIcons[res["category1"]][res["tag1"] + 1]}",
                       style: _regularStyle.copyWith(
                           fontSize: 13, fontWeight: FontWeight.w300),
                     )),
@@ -387,13 +425,13 @@ class _UnivContentsState extends State<UnivContents> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        contentsMap["detail"],
+                        res["detail"],
                         style: _regularStyle.copyWith(
                             color: Colors.white, fontSize: 14),
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        contentsMap["name"],
+                        res["name"],
                         style: _regularStyle.copyWith(
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
@@ -428,7 +466,10 @@ class _UnivContentsState extends State<UnivContents> {
     String univName = getUniv(index);
     return GestureDetector(
       onTap: () {
-        pushNewScreen(context, screen: RecommendPlacePage(univIndex: index));
+        pushNewScreen(context,
+            screen: RecommendPlacePage(
+              univIndex: index,
+            ));
       },
       child: Container(
         clipBehavior: Clip.hardEdge,
@@ -556,7 +597,8 @@ class UserContents extends StatelessWidget {
                         (context, url, downloadProgress) => Container(
                       color: Colors.black.withOpacity(0.1),
                     ),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.error),
                   ),
                 ),
                 Positioned(

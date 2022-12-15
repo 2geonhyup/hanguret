@@ -4,19 +4,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_state_notifier/flutter_state_notifier.dart';
-import 'package:hangeureut/models/custom_error.dart';
 import 'package:hangeureut/providers/auth/auth_provider.dart';
 import 'package:hangeureut/providers/auth/auth_state.dart';
 import 'package:hangeureut/providers/contents/content_provider.dart';
 import 'package:hangeureut/providers/contents/content_state.dart';
-import 'package:hangeureut/providers/distance/distance_provider.dart';
-import 'package:hangeureut/providers/distance/distance_state.dart';
 import 'package:hangeureut/providers/filter/filter_provider.dart';
 import 'package:hangeureut/providers/filter/filter_state.dart';
 import 'package:hangeureut/providers/friend/recommend_friend_provider.dart';
 import 'package:hangeureut/providers/friend/recommend_friend_state.dart';
-import 'package:hangeureut/providers/location/location_provider.dart';
-import 'package:hangeureut/providers/location/location_state.dart';
 import 'package:hangeureut/providers/navbar/navbar_provider.dart';
 import 'package:hangeureut/providers/navbar/navbar_state.dart';
 import 'package:hangeureut/providers/news/news_provider.dart';
@@ -27,12 +22,13 @@ import 'package:hangeureut/providers/restaurants/restaurants_provider.dart';
 import 'package:hangeureut/providers/restaurants/restaurants_state.dart';
 import 'package:hangeureut/providers/result/result_provider.dart';
 import 'package:hangeureut/providers/result/result_state.dart';
+import 'package:hangeureut/providers/reviews/reviews_provider.dart';
+import 'package:hangeureut/providers/reviews/reviews_state.dart';
 import 'package:hangeureut/providers/signup/signup_provider.dart';
 import 'package:hangeureut/providers/signup/signup_state.dart';
 import 'package:hangeureut/repositories/auth_repository.dart';
 import 'package:hangeureut/repositories/contents_repository.dart';
 import 'package:hangeureut/repositories/friend_repository.dart';
-import 'package:hangeureut/repositories/location_repository.dart';
 import 'package:hangeureut/repositories/news_repository.dart';
 import 'package:hangeureut/repositories/profile_repository.dart';
 import 'package:hangeureut/repositories/restaurant_repository.dart';
@@ -45,20 +41,15 @@ import 'package:hangeureut/screens/on_boarding_screen/on_boarding1_page.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding2_page.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding3_page.dart';
 import 'package:hangeureut/screens/profile_screen/modify_loction.dart';
-import 'package:hangeureut/screens/result_screen/search_result.dart';
-import 'package:hangeureut/screens/review_screen/review_page.dart';
 
 import 'package:hangeureut/screens/splash_screen/splash_page.dart';
-import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:kakao_flutter_sdk_auth/kakao_flutter_sdk_auth.dart';
-import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 
 import 'constants.dart';
 import 'firebase_options.dart';
 import 'models/news_model.dart';
 import 'screens/start_screen/start_page.dart';
-import 'package:location/location.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,7 +61,7 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  runApp(Hangeureut());
+  runApp(const Hangeureut());
 }
 
 class Hangeureut extends StatelessWidget {
@@ -110,9 +101,8 @@ class Hangeureut extends StatelessWidget {
         Provider<ContentsRepository>(
             create: (context) => ContentsRepository(
                 firebaseFirestore: FirebaseFirestore.instance)),
-        Provider<LocationRepository>(
-            create: (context) =>
-                LocationRepository(location: Location.instance)),
+        // Provider<LocationRepository>(create: (context) => LocationRepository()),
+
         StreamProvider<fbAuth.User?>(
             create: (context) => context.read<AuthRepository>().user,
             initialData: null),
@@ -152,27 +142,28 @@ class Hangeureut extends StatelessWidget {
         StateNotifierProvider<ContentProvider, ContentState>(
           create: (context) => ContentProvider(),
         ),
-        StateNotifierProvider<DistanceProvider, DistanceState>(
-          create: (context) => DistanceProvider(),
+        StateNotifierProvider<ReviewProvider, ReviewState>(
+          create: (context) => ReviewProvider(),
         ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: StartPage(),
+        home: const StartPage(),
         routes: {
-          StartPage.routeName: (context) => StartPage(),
+          StartPage.routeName: (context) => const StartPage(),
           OnBoarding1Page.routeName: (context) => OnBoarding1Page(),
-          OnBoarding2Page.routeName: (context) => OnBoarding2Page(),
-          OnBoarding3Page.routeName: (context) => OnBoarding3Page(),
-          MainScreenPage.routeName: (context) => MainScreenPage(),
+          OnBoarding2Page.routeName: (context) => const OnBoarding2Page(),
+          OnBoarding3Page.routeName: (context) => const OnBoarding3Page(),
+          MainScreenPage.routeName: (context) => const MainScreenPage(),
           BasicScreenPage.routeName: (context) => BasicScreenPage(),
-          SplashPage.routeName: (context) => SplashPage(),
-          FriendRecommendPage.routeName: (context) => FriendRecommendPage(),
-          FriendsPage.routeName: (context) => FriendsPage(),
-          ModifyLocation.routeName: (context) => ModifyLocation(),
+          SplashPage.routeName: (context) => const SplashPage(),
+          FriendRecommendPage.routeName: (context) =>
+              const FriendRecommendPage(),
+          FriendsPage.routeName: (context) => const FriendsPage(),
+          ModifyLocation.routeName: (context) => const ModifyLocation(),
         },
         theme: ThemeData(
-            textTheme: TextTheme(
+            textTheme: const TextTheme(
               bodyText1: TextStyle(fontFamily: 'Suit'),
               bodyText2: TextStyle(fontFamily: 'Suit'),
             ),

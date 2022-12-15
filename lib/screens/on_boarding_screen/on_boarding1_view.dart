@@ -26,8 +26,8 @@ class _NickNameSettingState extends State<NickNameSetting> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 33.0),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 33.0),
           child: Text(
             "닉네임 설정",
             style: TextStyle(
@@ -42,7 +42,7 @@ class _NickNameSettingState extends State<NickNameSetting> {
             color: kBorderGreenColor.withOpacity(0.5),
           ),
         ),
-        SizedBox(height: 11),
+        const SizedBox(height: 11),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 33.0),
           child: Container(
@@ -50,15 +50,15 @@ class _NickNameSettingState extends State<NickNameSetting> {
             child: Center(
                 child: Text(
               "${widget.name}",
-              style: TextStyle(color: Colors.white, fontSize: 15),
+              style: const TextStyle(color: Colors.white, fontSize: 15),
             )),
             decoration: BoxDecoration(
-              color: change ? Color(0xffc7c7c0) : kBasicColor,
+              color: change ? const Color(0xffc7c7c0) : kBasicColor,
               borderRadius: BorderRadius.circular(12),
             ),
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 33.0),
           child: Focus(

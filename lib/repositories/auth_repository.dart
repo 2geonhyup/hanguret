@@ -81,7 +81,8 @@ class AuthRepository {
         // userRef: user 콜렉션 경로
         final DocumentSnapshot userDoc =
             await usersRef.doc(signedInUser.uid).get();
-        print("authrepooooo$userDoc");
+        // print("authrepooooo$userDoc");
+
         if (!userDoc.exists) {
           await usersRef.doc(signedInUser.uid).set({
             'name': signedInUser.displayName!.substring(1),
@@ -108,8 +109,8 @@ class AuthRepository {
   Future<void> delUser(
       {required List followings, required List followers}) async {
     try {
-      await loginOrSignup();
       fbAuth.User? user = fbAuth.FirebaseAuth.instance.currentUser;
+      print(user);
       if (user == null) return;
       for (var friend in followings) {
         await usersRef
