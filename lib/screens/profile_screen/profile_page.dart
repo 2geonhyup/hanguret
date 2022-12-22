@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
-import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/providers/reviews/reviews_provider.dart';
 import 'package:hangeureut/providers/reviews/reviews_state.dart';
-import 'package:hangeureut/repositories/restaurant_repository.dart';
 import 'package:hangeureut/screens/profile_screen/profile_reviews_view.dart';
 import 'package:hangeureut/screens/profile_screen/profile_view.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';

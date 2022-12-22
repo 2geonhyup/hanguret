@@ -6,14 +6,11 @@ import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/news_screen/news_page.dart';
 import 'package:hangeureut/screens/notice_screen/notice_page.dart';
 import 'package:hangeureut/screens/profile_screen/profile_page.dart';
-import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_page.dart';
 import 'package:hangeureut/screens/review_screen/search_for_review_page.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
-import '../../widgets/floating_button.dart';
 import '../../widgets/nav_custom_painter.dart';
-import 'basic_screen_page.dart';
 
 List<Widget> buildScreens() {
   return [

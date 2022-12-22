@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
-import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
-import 'package:hangeureut/screens/profile_screen/profile_page.dart';
-import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 
 class BasicBottomNavigationBar extends StatelessWidget {
   BasicBottomNavigationBar({

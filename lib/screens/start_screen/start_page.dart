@@ -1,23 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:flutter/material.dart';
-import 'package:hangeureut/providers/auth/auth_provider.dart';
-import 'package:hangeureut/providers/auth/auth_state.dart';
-import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/providers/signup/signup_state.dart';
-import 'package:hangeureut/repositories/auth_repository.dart';
-import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
-import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
 import 'package:hangeureut/screens/splash_screen/splash_page.dart';
-import 'package:hangeureut/screens/start_screen/start_view_model.dart';
-import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:provider/provider.dart';
 
 import '../../constants.dart';
 import '../../models/custom_error.dart';
-import '../../models/user_model.dart';
 import '../../providers/signup/signup_provider.dart';
 import '../../widgets/error_dialog.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 
 class StartPage extends StatefulWidget {
   const StartPage({Key? key}) : super(key: key);
@@ -42,7 +32,7 @@ class _StartPageState extends State<StartPage> {
     fbAuth.User? user = fbAuth.FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      _loggedIn = false;
+      _loggedIn = true;
     }
 
     Future.delayed(const Duration(milliseconds: 600), () {

@@ -2,11 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/models/custom_error.dart';
 import 'package:hangeureut/models/news_model.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
-import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
 String _url = 'ec2-3-35-52-247.ap-northeast-2.compute.amazonaws.com:3001';

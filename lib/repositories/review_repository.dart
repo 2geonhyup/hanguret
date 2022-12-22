@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 import '../models/custom_error.dart';
 
@@ -80,7 +80,7 @@ class ReviewRepository {
           "resName": resName,
         });
         responseMap = jsonDecode(response.body) as Map;
-        // print(responseMap);
+
         responseMap["icon"] = int.parse(responseMap["icon"]);
         var val = DateTime.parse(responseMap["date"]);
         responseMap["date"] = "${val.year}년 ${val.month}월 ${val.day}일";

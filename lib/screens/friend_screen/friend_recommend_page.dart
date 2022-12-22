@@ -3,10 +3,8 @@ import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/models/friend.dart';
 import 'package:hangeureut/providers/friend/recommend_friend_state.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
-import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
 import 'package:hangeureut/widgets/profile_icon_box.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
-import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/custom_error.dart';

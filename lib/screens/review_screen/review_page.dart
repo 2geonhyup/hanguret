@@ -2,32 +2,23 @@
 
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery_saver/gallery_saver.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/models/custom_error.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/restaurants.dart';
-import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
-import 'package:hangeureut/screens/main_screen/main_screen_page.dart';
-import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_page.dart';
 import 'package:hangeureut/widgets/error_dialog.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:image_crop/image_crop.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/user_model.dart';
 import '../../providers/reviews/reviews_provider.dart';
-import '../../repositories/review_repository.dart';
 import '../../widgets/bottom_navigation_bar.dart';
 import '../../widgets/custom_round_rect_slider_thumb_shape.dart';
 import '../../widgets/res_title.dart';
-import '../profile_screen/profile_page.dart';
 
 class ReviewPage extends StatefulWidget {
   ReviewPage(
@@ -122,7 +113,6 @@ class _ReviewPageState extends State<ReviewPage> {
                           try {
                             await _openImage();
                           } catch (e) {
-                            print(e.toString());
                             errorDialog(
                                 context,
                                 CustomError(
@@ -613,8 +603,8 @@ class _ReviewPageState extends State<ReviewPage> {
                           setState(() => _enabled = false);
                           try {
                             await context.read<ReviewProvider>().reviewComplete(
-                                userId: "kakao:2204160870",
-                                userName: "건협",
+                                userId: user.id,
+                                userName: user.name,
                                 resId: widget.res["resId"].toString(),
                                 score: widget.score,
                                 imgFile: _lastCropped ?? _sample,
@@ -626,7 +616,6 @@ class _ReviewPageState extends State<ReviewPage> {
                                 resName: widget.res["name"]);
 
                             Navigator.pop(context);
-
                             setState(() => _enabled = true);
                           } on CustomError catch (e) {
                             errorDialog(context, e);

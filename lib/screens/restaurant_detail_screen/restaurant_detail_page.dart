@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hangeureut/models/custom_error.dart';
@@ -5,7 +6,6 @@ import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/repositories/restaurant_repository.dart';
 import 'package:hangeureut/restaurants.dart';
-import 'package:hangeureut/screens/basic_screen/basic_screen_page.dart';
 import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
@@ -20,10 +20,7 @@ import '../../repositories/location_repository.dart';
 import '../../widgets/custom_round_rect_slider_thumb_shape.dart';
 import '../../widgets/res_title.dart';
 import '../../widgets/review_box.dart';
-import '../profile_screen/others_profile_page.dart';
 import '../review_screen/review_page.dart';
-import 'dart:math' as math;
-import 'package:collection/collection.dart';
 // 레이아웃 잡은 것 참고
 
 class RestaurantDetailPage extends StatefulWidget {
@@ -93,9 +90,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
           .read<RestaurantRepository>()
           .getRestaurantsDetail(resId: widget.resId);
       setState(() {});
-    } on CustomError catch (e) {
-      print(e);
-    }
+    } on CustomError catch (e) {}
   }
 
   Future<void> _getReviews() async {

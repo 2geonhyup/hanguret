@@ -352,7 +352,6 @@ class reviewTile extends StatelessWidget {
       height: height,
       child: GestureDetector(
         onTap: () {
-          print(index);
           reviewClicked(index);
         },
         child: Image.network(

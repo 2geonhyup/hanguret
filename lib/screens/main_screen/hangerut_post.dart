@@ -2,13 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
-
 import 'package:hangeureut/restaurants.dart';
 import 'package:hangeureut/screens/main_screen/recommend_place_page.dart';
 import 'package:hangeureut/screens/profile_screen/others_profile_page.dart';
 import 'package:hangeureut/screens/restaurant_detail_screen/restaurant_detail_page.dart';
 import 'package:hangeureut/widgets/profile_icon_box.dart';
-import 'package:location/location.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
@@ -16,7 +14,6 @@ import '../../constants.dart';
 import '../../providers/profile/profile_state.dart';
 import '../../providers/restaurants/restaurants_state.dart';
 import 'custom_contents_page.dart';
-import 'dart:math';
 
 TextStyle _eBoldStyle = const TextStyle(
     fontFamily: 'Suit',

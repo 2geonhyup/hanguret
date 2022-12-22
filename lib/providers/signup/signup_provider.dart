@@ -1,7 +1,5 @@
 // import 'package:flutter/foundation.dart';
-import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:state_notifier/state_notifier.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 
 import '../../models/custom_error.dart';
 import '../../repositories/auth_repository.dart';

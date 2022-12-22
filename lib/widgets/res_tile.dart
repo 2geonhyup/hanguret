@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -127,7 +126,6 @@ class _ResTileState extends State<ResTile> {
                     try {
                       await _launchUrl(_url);
                     } catch (e) {
-                      print(e);
                       final ec = const CustomError(
                           code: '', message: '카카오맵을 열 수 없습니다');
                       errorDialog(context, ec);

@@ -1,4 +1,3 @@
-import 'package:hangeureut/repositories/location_repository.dart';
 import 'package:location/location.dart';
 import 'package:state_notifier/state_notifier.dart';
 
@@ -15,7 +14,6 @@ class LocationProvider extends StateNotifier<LocationState> with LocatorMixin {
         locationStatus: LocationStatus.known,
         locationData: locationData,
       );
-      //print("user의 인증정보 변화");
     } else {
       state = state.copyWith(locationStatus: LocationStatus.unknown);
     }

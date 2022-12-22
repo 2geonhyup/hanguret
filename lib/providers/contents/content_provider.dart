@@ -1,5 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
-import 'package:hangeureut/repositories/auth_repository.dart';
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../repositories/contents_repository.dart';

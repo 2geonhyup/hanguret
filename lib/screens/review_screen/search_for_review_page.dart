@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/restaurants/restaurants_provider.dart';
-import 'package:hangeureut/providers/restaurants/restaurants_state.dart';
 import 'package:hangeureut/repositories/restaurant_repository.dart';
-import 'package:hangeureut/restaurants.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
@@ -69,9 +67,7 @@ class _SearchForReviewPageState extends State<SearchForReviewPage> {
   }
 
   Future<void> getReco() async {
-    // near =
     popular = context.read<RestaurantsProvider>().getResByReviewCnt();
-    //print(popular);
   }
 
   @override

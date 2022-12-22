@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:hangeureut/repositories/auth_repository.dart';
-import 'package:hangeureut/repositories/friend_repository.dart';
 import 'package:hangeureut/repositories/restaurant_repository.dart';
 import 'package:state_notifier/state_notifier.dart';
 
@@ -296,7 +295,6 @@ class ProfileProvider extends StateNotifier<ProfileState> with LocatorMixin {
         .map((f) => jsonDecode(f) as Map)
         .toList();
 
-    //print(semiResult);
     List preSearchedId = semiResult.map((e) => e["id"]).toList();
 
     try {

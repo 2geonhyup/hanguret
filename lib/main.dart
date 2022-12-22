@@ -41,7 +41,6 @@ import 'package:hangeureut/screens/on_boarding_screen/on_boarding1_page.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding2_page.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding3_page.dart';
 import 'package:hangeureut/screens/profile_screen/modify_loction.dart';
-
 import 'package:hangeureut/screens/splash_screen/splash_page.dart';
 import 'package:kakao_flutter_sdk_auth/kakao_flutter_sdk_auth.dart';
 import 'package:provider/provider.dart';

@@ -9,7 +9,6 @@ import '../../models/custom_error.dart';
 import '../../providers/profile/profile_provider.dart';
 import '../../widgets/error_dialog.dart';
 import 'on_boarding1_view.dart';
-import 'on_boarding2_page.dart';
 
 class OnBoarding1Page extends StatefulWidget {
   static const String routeName = '/onboarding1';

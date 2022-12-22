@@ -2,18 +2,10 @@ import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/restaurants/restaurants_state.dart';
-import 'package:hangeureut/providers/result/result_state.dart';
-import 'package:hangeureut/repositories/restaurant_repository.dart';
-import 'package:location/location.dart';
-import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../models/custom_error.dart';
-import '../../restaurants.dart';
-import '../../widgets/error_dialog.dart';
 import '../../widgets/res_tile.dart';
-import '../restaurant_detail_screen/restaurant_detail_page.dart';
 
 Future<void> _launchUrl(url) async {
   if (!await launchUrl(url)) {

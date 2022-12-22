@@ -1,18 +1,14 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/news/news_state.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
-import 'package:hangeureut/repositories/news_repository.dart';
 import 'package:hangeureut/repositories/restaurant_repository.dart';
 import 'package:hangeureut/screens/profile_screen/others_profile_page.dart';
 import 'package:hangeureut/widgets/click_dialog.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 
 import '../../models/news_model.dart';
 

@@ -1,8 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../models/custom_error.dart';
 import '../../models/review_model.dart';
-import '../../models/user_model.dart';
 
 enum ReviewStatus {
   none,

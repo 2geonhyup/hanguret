@@ -1,10 +1,8 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/models/custom_error.dart';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:http/http.dart' as http;
 
 String _url = 'ec2-3-35-52-247.ap-northeast-2.compute.amazonaws.com:3001';
@@ -20,7 +18,6 @@ class RestaurantRepository {
       Uri _uri = Uri.http(_url, '/restaurants/popular');
 
       var response = await http.get(_uri);
-      //print(response.body);
       allRes =
           (jsonDecode(response.body) as List).map((e) => e as Map).toList();
     } catch (e) {
@@ -55,7 +52,7 @@ class RestaurantRepository {
       Uri _uri = Uri.http(_url, '/reviews/restaurant/id/$resId');
 
       var response = await http.get(_uri);
-      //print("reviewrepo${response.body}");
+
       List body = (jsonDecode(response.body) as List).map((e) {
         final eMap = e as Map;
         var date = eMap["date"];
@@ -63,8 +60,7 @@ class RestaurantRepository {
         eMap["date"] = "${val.year}년 ${val.month}월 ${val.day}일";
         return eMap;
       }).toList();
-      //print("body$body");
-      return body.reversed.toList();
+      return body.toList();
     } catch (e) {
       throw CustomError(
           code: "알림", message: "리뷰 정보 받기 오류", plugin: e.toString());

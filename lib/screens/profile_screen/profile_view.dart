@@ -3,19 +3,15 @@ import 'package:hangeureut/constants.dart';
 import 'package:hangeureut/providers/profile/profile_provider.dart';
 import 'package:hangeureut/providers/signup/signup_provider.dart';
 import 'package:hangeureut/screens/profile_screen/modify_taste.dart';
-import 'package:hangeureut/screens/profile_screen/review_detail_page.dart';
-import 'package:hangeureut/screens/start_screen/start_page.dart';
 import 'package:hangeureut/widgets/click_dialog.dart';
 import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/custom_error.dart';
-import '../../models/review_model.dart';
 import '../../providers/profile/profile_state.dart';
 import '../../widgets/profile_icon_box.dart';
 import '../friend_screen/friend_recommend_page.dart';
-import '../restaurant_detail_screen/restaurant_detail_page.dart';
 import 'others_profile_page.dart';
 
 enum ModifyingField { none, favorite, hate, alcohol, spicy }
@@ -303,7 +299,7 @@ class ProfileCard extends StatelessWidget {
                               onModifyClicked();
                             },
                             child: Container(
-                              width: 154,
+                              width: 180,
                               height: 28,
                               decoration: BoxDecoration(
                                   color: const Color(0xffe5e5e5),
@@ -320,29 +316,6 @@ class ProfileCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        width: 55,
-                        height: 28,
-                        decoration: BoxDecoration(
-                            color: const Color(0xfff2f2f2),
-                            borderRadius: BorderRadius.circular(6)),
-                        child: const Center(
-                          child: Text(
-                            "공유",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: 'Suit',
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400),
-                          ),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
           const SizedBox(

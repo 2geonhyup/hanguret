@@ -2,18 +2,13 @@
 import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
 import 'package:flutter/material.dart';
 import 'package:hangeureut/constants.dart';
-import 'package:hangeureut/providers/friend/recommend_friend_provider.dart';
-import 'package:hangeureut/providers/news/news_provider.dart';
 import 'package:hangeureut/providers/profile/profile_state.dart';
 import 'package:hangeureut/screens/on_boarding_screen/on_boarding1_page.dart';
-import 'package:hangeureut/screens/start_screen/start_page.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/custom_error.dart';
 import '../../providers/profile/profile_provider.dart';
 import '../../providers/restaurants/restaurants_provider.dart';
-import '../../providers/signup/signup_provider.dart';
-import '../../widgets/error_dialog.dart';
 import '../basic_screen/basic_screen_page.dart';
 
 class SplashPage extends StatefulWidget {

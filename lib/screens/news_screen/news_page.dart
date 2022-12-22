@@ -8,8 +8,8 @@ import 'package:hangeureut/widgets/error_dialog.dart';
 import 'package:hangeureut/widgets/loading_widget.dart';
 import 'package:hangeureut/widgets/review_box.dart';
 import 'package:provider/provider.dart';
+
 import '../../providers/profile/profile_state.dart';
-import '../../repositories/restaurant_repository.dart';
 import 'news_view.dart';
 
 class NewsPage extends StatefulWidget {
